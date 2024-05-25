@@ -16,7 +16,7 @@ import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
 @Service
-public class AuthenticationService implements UserDetailsService{
+public class AuthenticationService{
     
     // xử lý logic 
     @Autowired
@@ -34,6 +34,8 @@ public class AuthenticationService implements UserDetailsService{
         Account account = new Account();
 
         account.setPhone(registerRequest.getPhone());   
+        account.setEmail(registerRequest.getEmail());
+        account.setName(registerRequest.getName());
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
         // nhờ repository save xuống db

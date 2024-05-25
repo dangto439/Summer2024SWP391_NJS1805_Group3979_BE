@@ -19,7 +19,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account implements UserDetails{
+public class Account{
 
 
     @Id
@@ -27,5 +27,7 @@ public class Account implements UserDetails{
     private long id;
 
     private String phone;
+    private String email;
+    private String name;
     private String password;
 }
