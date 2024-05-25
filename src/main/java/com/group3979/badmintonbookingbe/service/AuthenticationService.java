@@ -28,6 +28,10 @@ public class AuthenticationService implements UserDetailsService{
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Override
+    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
+        return this.authenticationRepository.findAccountByPhone(phone);
+    }
     public Account register(RegisterRequest registerRequest) {
         //registerRequest:  thông tin người dùng  yêu cầu:
         // solve register logic
@@ -38,5 +42,10 @@ public class AuthenticationService implements UserDetailsService{
 
         // nhờ repository save xuống db
         return authenticationRepository.save(account);
+    }
+    public Account login(LoginRequest loginRequest) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getPhone(), loginRequest.getPassword()));
+        return authenticationRepository.findAccountByPhone(loginRequest.getPhone());
     }
 }

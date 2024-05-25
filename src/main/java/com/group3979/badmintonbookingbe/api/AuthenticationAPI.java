@@ -29,4 +29,9 @@ public class AuthenticationAPI {
         Account account = authenticationService.register(registerRequest);
         return ResponseEntity.ok(account);
     }
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody LoginRequest loginRequest) {
+        Account account = authenticationService.login(loginRequest);
+        return ResponseEntity.ok(account);
+    }
 }
