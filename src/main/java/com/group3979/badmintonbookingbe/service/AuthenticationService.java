@@ -16,7 +16,7 @@ import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
 @Service
-public class AuthenticationService{
+public class AuthenticationService implements UserDetailsService{
     
     // xử lý logic 
     @Autowired
@@ -28,6 +28,10 @@ public class AuthenticationService{
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Override
+    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
+        return this.authenticationRepository.findAccountByPhone(phone);
+    }
     public Account register(RegisterRequest registerRequest) {
         //registerRequest:  thông tin người dùng  yêu cầu:
         // solve register logic
@@ -40,5 +44,10 @@ public class AuthenticationService{
 
         // nhờ repository save xuống db
         return authenticationRepository.save(account);
+    }
+    public Account login(LoginRequest loginRequest) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getPhone(), loginRequest.getPassword()));
+        return authenticationRepository.findAccountByPhone(loginRequest.getPhone());
     }
 }
