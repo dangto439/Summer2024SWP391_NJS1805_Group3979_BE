@@ -1,10 +1,9 @@
 package com.group3979.badmintonbookingbe.api;
 
-import java.util.List;
-
-import org.apache.catalina.connector.Request;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +17,7 @@ import com.group3979.badmintonbookingbe.service.AuthenticationService;
 
 @RestController
 @RequestMapping("api")
+@SecurityRequirement(name = "api")
 public class AuthenticationAPI {
     
     // nhận request từ front-end
@@ -34,4 +34,14 @@ public class AuthenticationAPI {
         Account account = authenticationService.login(loginRequest);
         return ResponseEntity.ok(account);
     }
+    @GetMapping("/test")
+    public ResponseEntity test() {
+        return ResponseEntity.ok("Hello World");
+    }
+    @GetMapping("/admin-only")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity testAdmin() {
+        return ResponseEntity.ok("Admin!!!!!!!!!!!!");
+    }
+   
 }
