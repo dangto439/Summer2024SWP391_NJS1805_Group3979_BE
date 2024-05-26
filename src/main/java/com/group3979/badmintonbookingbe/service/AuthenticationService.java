@@ -1,6 +1,8 @@
 package com.group3979.badmintonbookingbe.service;
 
 import java.util.List;
+
+import com.group3979.badmintonbookingbe.model.AccountReponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,8 +18,8 @@ import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
 @Service
-public class AuthenticationService implements UserDetailsService{
-    
+public class AuthenticationService implements UserDetailsService {
+
     // xử lý logic 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -27,17 +29,20 @@ public class AuthenticationService implements UserDetailsService{
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private TokenService tokenService;
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
         return this.authenticationRepository.findAccountByPhone(phone);
     }
+
     public Account register(RegisterRequest registerRequest) {
         //registerRequest:  thông tin người dùng  yêu cầu:
         // solve register logic
         Account account = new Account();
 
-        account.setPhone(registerRequest.getPhone());   
+        account.setPhone(registerRequest.getPhone());
         account.setEmail(registerRequest.getEmail());
         account.setName(registerRequest.getName());
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
@@ -45,9 +50,17 @@ public class AuthenticationService implements UserDetailsService{
         // nhờ repository save xuống db
         return authenticationRepository.save(account);
     }
+
     public Account login(LoginRequest loginRequest) {
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getPhone(), loginRequest.getPassword()));
-        return authenticationRepository.findAccountByPhone(loginRequest.getPhone());
+
+        Account account = authenticationRepository.findAccountByPhone(loginRequest.getPhone());
+        String token = tokenService.generateToken(account);
+        AccountReponse accountReponse = new AccountReponse();
+        accountReponse.setPhone(account.getPhone());
+        accountReponse.setToken(token);
+        return accountReponse;
     }
 }
