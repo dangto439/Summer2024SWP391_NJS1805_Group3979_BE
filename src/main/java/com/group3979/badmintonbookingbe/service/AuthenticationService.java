@@ -1,8 +1,10 @@
 package com.group3979.badmintonbookingbe.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.group3979.badmintonbookingbe.model.AccountReponse;
+import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,4 +65,18 @@ public class AuthenticationService implements UserDetailsService {
         accountReponse.setToken(token);
         return accountReponse;
     }
+
+
+    public Account resetpassword(String email) {
+
+        Account account = authenticationRepository.findAccountByEmail(email);
+        String token = tokenService.generateToken(account);
+        AccountReponse accountReponse = new AccountReponse();
+        //accountReponse.setPassword(account.getPhone());
+        accountReponse.setToken(token);
+        return accountReponse;
+
+    }
+
+
 }

@@ -17,7 +17,7 @@ public class ApiHandleException {
     }
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public ResponseEntity<Object> handleDuplicatePhoneException(SQLIntegrityConstraintViolationException ex) {
-        return new ResponseEntity<>("Dupicate phone number!!!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Duplicate phone number!!!", HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<Object> handleException(AuthException ex) {
