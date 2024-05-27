@@ -8,4 +8,6 @@ import com.group3979.badmintonbookingbe.entity.Account;
 @Repository
 public interface IAuthenticationRepository extends JpaRepository<Account, Long> {
     Account findAccountByPhone(String phone);
+    Account findAccountByEmail(String email);
+
 }

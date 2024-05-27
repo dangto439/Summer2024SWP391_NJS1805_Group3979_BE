@@ -1,25 +1,27 @@
 package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.EmailDetail;
+import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("api")
 @SecurityRequirement(name = "api")
+@CrossOrigin("*")
 public class AuthenticationAPI {
 
     // nhận request từ front-end
@@ -32,6 +34,8 @@ public class AuthenticationAPI {
     @PostMapping("register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
+        emailService.sendMail(account.getEmail(), account.getName());
+
         return ResponseEntity.ok(account);
     }
 
@@ -40,6 +44,17 @@ public class AuthenticationAPI {
         Account account = authenticationService.login(loginRequest);
         return ResponseEntity.ok(account);
     }
+
+    //@PutMapping("/reset-password")
+
+
+
+   @PostMapping("/forgot-password")
+    public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetpasswordrequest) {
+        emailService.sendPasswordResetMail(resetpasswordrequest.getEmail());
+        return ResponseEntity.ok("Password reset email sent successfully");
+    }
+
 
     @GetMapping("/test")
     public ResponseEntity test() {
@@ -53,12 +68,15 @@ public class AuthenticationAPI {
     }
 
     @GetMapping("/send-email")
-    public void sendMail() {
+    public void sendMail(String email, String name) {
         EmailDetail emailDetail = new EmailDetail();
-        emailDetail.setRecipient("dangto0898494156@gmail.com");
+        emailDetail.setRecipient(email);
         emailDetail.setSubject("Welcome");
         emailDetail.setMsgBody("Welcome to my website");
-        emailService.sendMailTemplate(emailDetail);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("name", name);
+        emailService.sendMailTemplate(emailDetail, variables, "emailtemplate");
     }
+
 
 }
