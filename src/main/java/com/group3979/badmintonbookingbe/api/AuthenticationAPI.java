@@ -1,8 +1,8 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.model.EmailDetail;
-import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
+import com.group3979.badmintonbookingbe.model.*;
 import com.group3979.badmintonbookingbe.service.EmailService;
+import com.group3979.badmintonbookingbe.service.TokenService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,8 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.model.LoginRequest;
-import com.group3979.badmintonbookingbe.model.RegisterRequest;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
 
 import java.util.HashMap;
@@ -31,6 +29,9 @@ public class AuthenticationAPI {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    TokenService tokenService;
+
     @PostMapping("register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
@@ -45,15 +46,42 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(account);
     }
 
-    //@PutMapping("/reset-password")
+
 
 
 
    @PostMapping("/forgot-password")
     public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetpasswordrequest) {
-        emailService.sendPasswordResetMail(resetpasswordrequest.getEmail());
+        emailService.sendPasswordResetMail(resetpasswordrequest);
         return ResponseEntity.ok("Password reset email sent successfully");
     }
+
+    //Xác nhận token và hiển thị trang đặt lại mật khẩu
+    @GetMapping("/reset-password")
+    public ResponseEntity<?> validateResetToken(@RequestParam String token) {
+        boolean isValid = tokenService.validateToken(token);
+        if (isValid) {
+            return ResponseEntity.ok("Token is valid, show reset password page");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+    }
+
+    //Endpoint POST để cập nhật mật khẩu mới
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody NewPasswordRequest newPasswordRequest) {
+        boolean isValid = tokenService.validateToken(newPasswordRequest.getToken());
+        if (isValid) {
+            Account account = tokenService.getAccountFromToken(newPasswordRequest.getToken());
+            authenticationService.updatePassword(account, newPasswordRequest.getNewPassword());
+            return ResponseEntity.ok("Password has been reset successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+    }
+
+
+    //@PutMapping("/reset-password")
 
 
     @GetMapping("/test")

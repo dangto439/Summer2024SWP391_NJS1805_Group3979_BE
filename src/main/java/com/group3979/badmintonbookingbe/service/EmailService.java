@@ -3,6 +3,7 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.Repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.EmailDetail;
+import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import ognl.Token;
@@ -69,18 +70,19 @@ public class EmailService {
         sendMailTemplate(emailDetail, variables, "emailtemplate");
     }
 
-    public void sendPasswordResetMail(String email) {
-        Account account = iAuthenticationRepository.findAccountByEmail(email);
+    public void sendPasswordResetMail(ResetPasswordRequest resetPasswordRequest) {
+        Account account = iAuthenticationRepository.findAccountByEmail(resetPasswordRequest.getEmail());
         String token = tokenService.generateToken(account);
 
         EmailDetail emailDetail = new EmailDetail();
-        emailDetail.setRecipient(email);
+        emailDetail.setRecipient(resetPasswordRequest.getEmail());
         emailDetail.setSubject("Reset password");
         emailDetail.setMsgBody("Reset password");
+        // sữa link
         emailDetail.setLink("http://localhost:5173/reset-password?token=" + token);
 
         Map<String, Object> variables = new HashMap<>();
-        //variables.put("name", name);
+        variables.put("name", resetPasswordRequest.getName());
         sendMailTemplate(emailDetail, variables, "forgotpasswordemailtemplate");
 
     }

@@ -71,4 +71,19 @@ public class TokenService {
         Claims claims = extractAllClaims(token);
         return  resolver.apply(claims);
     }
+
+    // validate token
+    public boolean validateToken(String token) {
+        return !isTokenExpired(token);
+    }
+
+    //get Account from token
+    public Account getAccountFromToken(String token) {
+        if (validateToken(token)) {
+            return extractAccount(token);
+        }
+        return null;
+    }
+
+
 }

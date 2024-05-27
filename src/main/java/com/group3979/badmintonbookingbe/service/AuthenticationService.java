@@ -67,16 +67,20 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-    public Account resetpassword(String email) {
+//    public Account resetpassword(String email) {
+//
+//        Account account = authenticationRepository.findAccountByEmail(email);
+//        String token = tokenService.generateToken(account);
+//        AccountReponse accountReponse = new AccountReponse();
+//        //accountReponse.setPassword(account.getPhone());
+//        accountReponse.setToken(token);
+//        return accountReponse;
+//
+//    }
 
-        Account account = authenticationRepository.findAccountByEmail(email);
-        String token = tokenService.generateToken(account);
-        AccountReponse accountReponse = new AccountReponse();
-        //accountReponse.setPassword(account.getPhone());
-        accountReponse.setToken(token);
-        return accountReponse;
-
+    public void updatePassword(Account account, String newPassword) {
+        account.setPassword(passwordEncoder.encode(newPassword));
+        authenticationRepository.save(account);
     }
-
 
 }
