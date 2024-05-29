@@ -37,7 +37,9 @@ public class Filter extends OncePerRequestFilter{
             "/api/login",
             "/api/register",
             "/api/forgot-password",
-            "/api/reset-password"
+            "/api/reset-password",
+            "/api/club",
+            "/api/club/{id}"
     );
     private boolean isPermitted(String uri) {
         AntPathMatcher matcher = new AntPathMatcher();
