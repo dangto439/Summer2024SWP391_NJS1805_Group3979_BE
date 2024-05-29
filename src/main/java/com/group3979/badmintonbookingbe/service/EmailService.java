@@ -79,10 +79,10 @@ public class EmailService {
         emailDetail.setSubject("Reset password");
         emailDetail.setMsgBody("Reset password");
         // sữa link
-        emailDetail.setLink("http://localhost:5173/reset-password?token=" + token);
+        emailDetail.setLink("http://datsan79.online/reset-password?token=" + token);
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("name", resetPasswordRequest.getName());
+        variables.put("name", account.getName());
         sendMailTemplate(emailDetail, variables, "forgotpasswordemailtemplate");
 
     }

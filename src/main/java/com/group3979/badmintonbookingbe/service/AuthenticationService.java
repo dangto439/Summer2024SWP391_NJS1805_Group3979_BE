@@ -43,7 +43,6 @@ public class AuthenticationService implements UserDetailsService {
         //registerRequest:  thông tin người dùng  yêu cầu:
         // solve register logic
         Account account = new Account();
-
         account.setPhone(registerRequest.getPhone());
         account.setEmail(registerRequest.getEmail());
         account.setName(registerRequest.getName());
@@ -62,21 +61,12 @@ public class AuthenticationService implements UserDetailsService {
         String token = tokenService.generateToken(account);
         AccountReponse accountReponse = new AccountReponse();
         accountReponse.setPhone(account.getPhone());
+        accountReponse.setName(account.getName());
+        accountReponse.setEmail(account.getEmail());
         accountReponse.setToken(token);
         return accountReponse;
     }
 
-
-//    public Account resetpassword(String email) {
-//
-//        Account account = authenticationRepository.findAccountByEmail(email);
-//        String token = tokenService.generateToken(account);
-//        AccountReponse accountReponse = new AccountReponse();
-//        //accountReponse.setPassword(account.getPhone());
-//        accountReponse.setToken(token);
-//        return accountReponse;
-//
-//    }
 
     public void updatePassword(Account account, String newPassword) {
         account.setPassword(passwordEncoder.encode(newPassword));
