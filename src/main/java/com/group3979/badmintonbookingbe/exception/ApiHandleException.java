@@ -23,4 +23,8 @@ public class ApiHandleException {
     public ResponseEntity<Object> handleException(AuthException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleException(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
