@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-package com.group3979.badmintonbookingbe.repository;public interface IClubReposity {
-=======
 package com.group3979.badmintonbookingbe.repository;
 
 import com.group3979.badmintonbookingbe.entity.Club;
@@ -10,5 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IClubReposity extends JpaRepository<Club, Long> {
 
->>>>>>> Stashed changes
 }

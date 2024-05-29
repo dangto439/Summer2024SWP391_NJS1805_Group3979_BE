@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-package com.group3979.badmintonbookingbe.api;public class ClubAPI {
-}
-=======
 package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.entity.Club;
@@ -41,7 +37,7 @@ public class ClubAPI {
         return clubService.createClub(club);
     }
 
-    //Update existing club
+    // Update existing club
     @PutMapping("/{id}")
     public ResponseEntity<Club> updateClub(@PathVariable Long id, @RequestBody ClubRequest club) {
         try {
@@ -65,5 +61,3 @@ public class ClubAPI {
 
     }
 }
-
->>>>>>> Stashed changes

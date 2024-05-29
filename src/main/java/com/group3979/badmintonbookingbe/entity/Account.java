@@ -18,15 +18,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Account implements UserDetails{
-
+public class Account implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(unique = true )
+    @Column(unique = true)
     private String phone;
-    @Column(unique = true )
+    @Column(unique = true)
     private String email;
     private String name;
     @Enumerated(EnumType.STRING)

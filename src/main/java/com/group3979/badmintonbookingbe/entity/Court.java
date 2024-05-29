@@ -1,15 +1,5 @@
 package com.group3979.badmintonbookingbe.entity;
 
-
-<<<<<<< Updated upstream
-import jakarta.persistence.Entity;
-import lombok.Data;
-
-@Entity
-@Data
-public class Courst {
-    private int Courstid;
-=======
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +17,6 @@ public class Court {
     private String CourtName;
 
     @ManyToOne
-    @JoinColumn (name = "club_id")
+    @JoinColumn(name = "club_id")
     private Club club;
->>>>>>> Stashed changes
 }
