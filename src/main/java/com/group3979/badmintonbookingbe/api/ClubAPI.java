@@ -1,9 +1,14 @@
 package com.group3979.badmintonbookingbe.api;
 
 
+import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
+import com.group3979.badmintonbookingbe.model.AccountReponse;
 import com.group3979.badmintonbookingbe.model.ClubRequest;
+import com.group3979.badmintonbookingbe.model.ClubResponse;
 import com.group3979.badmintonbookingbe.service.ClubService;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +18,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/club")
+@SecurityRequirement(name = "api")
 public class ClubAPI {
+    @Autowired
+    AccountUtils accountUtils;
 
     @Autowired
     private ClubService clubService;
@@ -31,10 +39,13 @@ public class ClubAPI {
         return ResponseEntity.ok(club);
     }
 
+
+
     // Create new club
     @PostMapping
-    public Club createClub(@RequestBody ClubRequest club) {
-        return clubService.createClub(club);
+    public ResponseEntity<ClubResponse> createClub(@RequestBody ClubRequest clubRequest) {
+        ClubResponse club =  clubService.createClub(clubRequest);
+        return ResponseEntity.ok(club);
     }
 
     //Update existing club

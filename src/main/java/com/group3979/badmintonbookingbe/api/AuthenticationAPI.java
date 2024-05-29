@@ -3,6 +3,7 @@ package com.group3979.badmintonbookingbe.api;
 import com.group3979.badmintonbookingbe.model.*;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import com.group3979.badmintonbookingbe.service.TokenService;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,8 @@ import java.util.Map;
 @SecurityRequirement(name = "api")
 @CrossOrigin("*")
 public class AuthenticationAPI {
-
+@Autowired
+    AccountUtils accountUtils;
     // nhận request từ front-end
     @Autowired
     private AuthenticationService authenticationService;
@@ -35,9 +37,14 @@ public class AuthenticationAPI {
     @PostMapping("register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
-        emailService.sendMail(account.getEmail(), account.getName());
+//        emailService.sendMail(account.getEmail(), account.getName());
 
         return ResponseEntity.ok(account);
+    }
+
+    @GetMapping("/test")
+    public Account test() {
+        return accountUtils.getCurrentAccount();
     }
 
     @PostMapping("/login")
@@ -84,8 +91,8 @@ public class AuthenticationAPI {
     //@PutMapping("/reset-password")
 
 
-    @GetMapping("/test")
-    public ResponseEntity test() {
+    @GetMapping("/test2")
+    public ResponseEntity test1() {
         return ResponseEntity.ok("Hello World");
     }
 
