@@ -1,12 +1,11 @@
 package com.group3979.badmintonbookingbe.service;
 
-import com.group3979.badmintonbookingbe.Repository.IAuthenticationRepository;
+import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.EmailDetail;
 import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import ognl.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;

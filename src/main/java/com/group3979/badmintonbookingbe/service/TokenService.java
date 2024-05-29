@@ -1,6 +1,6 @@
 package com.group3979.badmintonbookingbe.service;
 
-import com.group3979.badmintonbookingbe.Repository.IAuthenticationRepository;
+import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

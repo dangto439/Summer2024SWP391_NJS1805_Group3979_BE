@@ -47,7 +47,10 @@ public class AuthenticationAPI {
     }
 
 
-    @PostMapping("/forgot-password")
+
+
+
+   @PostMapping("/forgot-password")
     public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetpasswordrequest) {
         emailService.sendPasswordResetMail(resetpasswordrequest);
         return ResponseEntity.ok("Password reset email sent successfully");
@@ -71,12 +74,14 @@ public class AuthenticationAPI {
         if (isValid) {
             Account account = tokenService.getAccountFromToken(newPasswordRequest.getToken());
             authenticationService.updatePassword(account, newPasswordRequest.getNewPassword());
-
             return ResponseEntity.ok("Password has been reset successfully");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
     }
+
+
+    //@PutMapping("/reset-password")
 
 
     @GetMapping("/test")
@@ -100,6 +105,8 @@ public class AuthenticationAPI {
         variables.put("name", name);
         emailService.sendMailTemplate(emailDetail, variables, "emailtemplate");
     }
+
+
 
 
 }

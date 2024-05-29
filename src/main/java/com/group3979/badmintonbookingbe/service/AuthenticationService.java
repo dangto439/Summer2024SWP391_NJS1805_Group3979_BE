@@ -1,10 +1,8 @@
 package com.group3979.badmintonbookingbe.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.group3979.badmintonbookingbe.eNum.AccountStatus;
+import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.model.AccountReponse;
-import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.group3979.badmintonbookingbe.Repository.IAuthenticationRepository;
+import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
@@ -45,7 +43,14 @@ public class AuthenticationService implements UserDetailsService {
         Account account = new Account();
         account.setPhone(registerRequest.getPhone());
         account.setEmail(registerRequest.getEmail());
+        account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
+        account.setRole(registerRequest.getRole());
+        if(account.getRole().equals(Role.CUSTOMER)){
+            account.setAccountStatus(AccountStatus.ACTIVE);
+        }else{
+            account.setAccountStatus(AccountStatus.INACTIVE);
+        }
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
         // nhờ repository save xuống db
