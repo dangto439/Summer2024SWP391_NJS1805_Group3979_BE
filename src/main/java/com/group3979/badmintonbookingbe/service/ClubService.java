@@ -1,30 +1,29 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.model.ClubRequest;
-import com.group3979.badmintonbookingbe.repository.IClubReposity;
+import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClubService {
 
     // xử lí logic CRUD
     @Autowired
-    IClubReposity clubReposity;
+    IClubRepository clubRepository;
 
     // R - Read All
     public List<Club> getAllClubRequests() {
-        return clubReposity.findAll();
+        return clubRepository.findAll();
     }
 
     // R - Read by ID
-    public Optional<Club> getClubById(Long id) {
-        return clubReposity.findById(id);
+    public Club getClubById(Long id) {
+        return clubRepository.findByClubId(id);
     }
 
     // C - Create
@@ -33,56 +32,32 @@ public class ClubService {
         club.setClubAddress(clubRequest.getClubAddress());
         club.setClubName(clubRequest.getClubName());
         club.setHotline(clubRequest.getClubhotline());
-
-        Club createdClub = clubReposity.save(club);
-
-        if (createdClub != null) {
-            System.out.println("Club created successfully:");
-            System.out.println(createdClub);
-        } else {
-            System.out.println("Failed to create club.");
-        }
-
-        return createdClub;
+        club.setClubStatus(ClubStatus.ACTIVE);
+        return clubRepository.save(club);
     }
 
     // U - Update
-    public ResponseEntity<String> updateClub(Long id, ClubRequest clubRequest) {
-        Optional<Club> optionalClub = clubReposity.findById(id);
+    public Club updateClub(Long id, ClubRequest clubRequest) {
+        Club club = clubRepository.findByClubId(id);
 
-        if (optionalClub.isPresent()) {
-            Club club = optionalClub.get();
+        if (club != null) {
             club.setClubAddress(clubRequest.getClubAddress());
             club.setClubName(clubRequest.getClubName());
             club.setHotline(clubRequest.getClubhotline());
-
-            Club updatedClub = clubReposity.save(club);
-
-            if (updatedClub != null) {
-                System.out.println("Club updated successfully:");
-                System.out.println(updatedClub);
-                return ResponseEntity.ok("Club updated successfully");
-            } else {
-                System.out.println("Failed to update club.");
-                return ResponseEntity.ok("Failed to update club");
-            }
-        } else {
-            System.out.println("Club not found.");
-            return ResponseEntity.notFound().build();
+            return clubRepository.save(club);
         }
+         return null;
     }
 
     // D - Delete
-    public void deleteClub(Long id) {
-        Optional<Club> optionalClub = clubReposity.findById(id);
-
-        if (optionalClub.isPresent()) {
-            clubReposity.deleteById(id);
-            System.out.println("Club deleted successfully.");
-        } else {
-            System.out.println("Failed to delete club. Club not found.");
+    public boolean deleteStatusClub(Long id) {
+        Club optionalClub = clubRepository.findByClubId(id);
+        optionalClub.setClubStatus(ClubStatus.DELETED);
+        clubRepository.save(optionalClub);
+        if (optionalClub.getClubStatus() == ClubStatus.DELETED) {
+            return true;
         }
-
+        return false;
     }
 
 }

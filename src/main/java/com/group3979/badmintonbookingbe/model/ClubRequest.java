@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-package com.group3979.badmintonbookingbe.model;public class ClubRequest {
-=======
 package com.group3979.badmintonbookingbe.model;
 
 import lombok.Data;
@@ -13,5 +10,4 @@ public class ClubRequest {
     private String clubhotline;
     private int openingTime;
     private int closingTime;
->>>>>>> Stashed changes
 }

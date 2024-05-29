@@ -1,8 +1,5 @@
-<<<<<<< Updated upstream
-package com.group3979.badmintonbookingbe.api;public class ClubAPI {
-}
-=======
 package com.group3979.badmintonbookingbe.api;
+
 
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.model.ClubRequest;
@@ -30,9 +27,8 @@ public class ClubAPI {
     // Get club by id
     @GetMapping("/{id}")
     public ResponseEntity<Club> getClubById(@PathVariable Long id) {
-        return clubService.getClubById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Club club = clubService.getClubById(id);
+        return ResponseEntity.ok(club);
     }
 
     // Create new club
@@ -44,26 +40,19 @@ public class ClubAPI {
     //Update existing club
     @PutMapping("/{id}")
     public ResponseEntity<Club> updateClub(@PathVariable Long id, @RequestBody ClubRequest club) {
-        try {
-            Club updatedClub = clubService.updateClub(id, club);
+           Club updatedClub = clubService.updateClub(id, club);
             return ResponseEntity.ok(updatedClub);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     // Delete club
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClub(@PathVariable Long id) {
-        Optional<Club> optionalClub = clubService.getClubById(id);
-        if (optionalClub.isPresent()) {
-            clubService.deleteClub(id);
-            return ResponseEntity.ok("Delete successfully");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
+      boolean deleteSuccess =  clubService.deleteStatusClub(id);
+      if(deleteSuccess) {
+          return ResponseEntity.ok("Deleted Successfully");
+      }
+      return ResponseEntity.ok("Delete failed");
     }
 }
 
->>>>>>> Stashed changes
+
