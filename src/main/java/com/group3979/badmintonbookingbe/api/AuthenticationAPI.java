@@ -88,7 +88,6 @@ public class AuthenticationAPI {
     }
 
 
-    //@PutMapping("/reset-password")
 
 
     @GetMapping("/test2")
