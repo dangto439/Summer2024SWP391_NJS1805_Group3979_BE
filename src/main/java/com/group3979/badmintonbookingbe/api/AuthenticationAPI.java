@@ -15,6 +15,7 @@ import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -112,5 +113,13 @@ public class AuthenticationAPI {
         variables.put("name", name);
         emailService.sendMailTemplate(emailDetail, variables, "emailtemplate");
     }
+
+    // getStaffLists of Club-Owner
+    @GetMapping("/staff")
+    public List<Account> getStaffs() {
+        return authenticationService.getAllStaffs();
+    }
+
+
 
 }

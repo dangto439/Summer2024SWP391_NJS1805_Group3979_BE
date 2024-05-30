@@ -4,6 +4,7 @@ import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.model.AccountReponse;
 import com.group3979.badmintonbookingbe.model.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,16 +19,19 @@ import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class AuthenticationService implements UserDetailsService {
 
-    // xử lý logic 
+    // xử lý logic
+    @Autowired
+    private AccountUtils accountUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private IAuthenticationRepository authenticationRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -84,6 +88,7 @@ public class AuthenticationService implements UserDetailsService {
     // register Account for Staff (Role = "STAFF")
     public AuthenticationResponse registerStaff(RegisterRequest registerRequest) {
         Account staff = new Account();
+        Account supervisor = accountUtils.getCurrentAccount();
         staff.setPhone(registerRequest.getPhone());
         staff.setEmail(registerRequest.getEmail());
         staff.setName(registerRequest.getName());
@@ -91,6 +96,9 @@ public class AuthenticationService implements UserDetailsService {
         staff.setRole(Role.CLUB_STAFF);
         staff.setAccountStatus(AccountStatus.ACTIVE);
         staff.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        staff.setSupervisorID(supervisor.getId());
+
+
 
         staff = authenticationRepository.save(staff);
 
@@ -101,7 +109,25 @@ public class AuthenticationService implements UserDetailsService {
                 .gender(staff.getGender())
                 .role(staff.getRole())
                 .accountStatus(staff.getAccountStatus())
+                .supervisorID(staff.getSupervisorID())
                 .build();
+    }
+
+    // get Staff List của Club-Owner quản lý nó
+    public List<Account> getAllStaffs() {
+        Account supervisor = accountUtils.getCurrentAccount();
+
+        List<Account> staffsList = authenticationRepository.findAccountByRole(Role.CLUB_STAFF);
+        List<Account> staffsNeedToGet = new ArrayList<>();
+
+        for(Account staff : staffsList){
+            if(staff.getSupervisorID() != null && staff.getSupervisorID() == supervisor.getId()){
+                staffsNeedToGet.add(staff);
+            }else{
+                staff.setSupervisorID(0L);
+            }
+        }
+        return staffsNeedToGet;
     }
 
 }
