@@ -120,6 +120,11 @@ public class AuthenticationAPI {
         return authenticationService.getAllStaffs();
     }
 
-
-
+    // block Staff by Club-Owner
+    @PutMapping("/block-staff/{id}")
+    public ResponseEntity<String> blockStaff(@PathVariable Long id) {
+        boolean blockedCheck = authenticationService.blockStaff(id);
+        if (blockedCheck) return ResponseEntity.ok("Blocked staff");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not found the staff to block !!");
+    }
 }

@@ -56,7 +56,7 @@ public class AuthenticationService implements UserDetailsService {
         if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
             emailService.sendMail(account.getEmail(), account.getName());
-        }else{
+        } else {
             account.setAccountStatus(AccountStatus.INACTIVE);
         }
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
@@ -99,7 +99,6 @@ public class AuthenticationService implements UserDetailsService {
         staff.setSupervisorID(supervisor.getId());
 
 
-
         staff = authenticationRepository.save(staff);
 
         return AuthenticationResponse.builder()
@@ -113,21 +112,27 @@ public class AuthenticationService implements UserDetailsService {
                 .build();
     }
 
-    // get Staff List của Club-Owner quản lý nó
+    // view Club-Owner's staffs list
     public List<Account> getAllStaffs() {
-        Account supervisor = accountUtils.getCurrentAccount();
-
-        List<Account> staffsList = authenticationRepository.findAccountByRole(Role.CLUB_STAFF);
+        Long supervisorID = accountUtils.getCurrentAccount().getId();
         List<Account> staffsNeedToGet = new ArrayList<>();
+        staffsNeedToGet.addAll(authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID));
+        return staffsNeedToGet;
+    }
 
-        for(Account staff : staffsList){
-            if(staff.getSupervisorID() != null && staff.getSupervisorID() == supervisor.getId()){
-                staffsNeedToGet.add(staff);
-            }else{
-                staff.setSupervisorID(0L);
+    // block Staff by Club-Owner
+    public boolean blockStaff(Long idBlocked) {
+        Long supervisorID = accountUtils.getCurrentAccount().getId();
+        List<Account> staffsList = authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID);
+
+        for (Account staff : staffsList) {
+            if (staff.getId() == idBlocked) {
+                staff.setAccountStatus(AccountStatus.INACTIVE);
+                authenticationRepository.save(staff);
+                return true;
             }
         }
-        return staffsNeedToGet;
+        return false;
     }
 
 }
