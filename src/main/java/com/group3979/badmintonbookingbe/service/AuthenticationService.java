@@ -3,6 +3,7 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.model.AccountReponse;
+import com.group3979.badmintonbookingbe.model.AuthenticationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,7 +39,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public Account register(RegisterRequest registerRequest) {
-        //registerRequest:  thông tin người dùng  yêu cầu:
+        //registerRequest:  thông tin người dùng yêu cầu:
         // solve register logic
         Account account = new Account();
         account.setPhone(registerRequest.getPhone());
@@ -46,9 +47,9 @@ public class AuthenticationService implements UserDetailsService {
         account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
-        if(account.getRole().equals(Role.CUSTOMER)){
+        if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
-        }else{
+        } else {
             account.setAccountStatus(AccountStatus.INACTIVE);
         }
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
@@ -72,10 +73,32 @@ public class AuthenticationService implements UserDetailsService {
         return accountReponse;
     }
 
-
     public void updatePassword(Account account, String newPassword) {
         account.setPassword(passwordEncoder.encode(newPassword));
         authenticationRepository.save(account);
+    }
+
+    // register Account for Staff (Role = "STAFF")
+    public AuthenticationResponse registerStaff(RegisterRequest registerRequest) {
+        Account staff = new Account();
+        staff.setPhone(registerRequest.getPhone());
+        staff.setEmail(registerRequest.getEmail());
+        staff.setName(registerRequest.getName());
+        staff.setGender(registerRequest.getGender());
+        staff.setRole(Role.CLUB_STAFF);
+        staff.setAccountStatus(AccountStatus.ACTIVE);
+        staff.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+
+        staff = authenticationRepository.save(staff);
+
+        return AuthenticationResponse.builder()
+                .phone(staff.getPhone())
+                .email(staff.getEmail())
+                .name(staff.getName())
+                .gender(staff.getGender())
+                .role(staff.getRole())
+                .accountStatus(staff.getAccountStatus())
+                .build();
     }
 
 }

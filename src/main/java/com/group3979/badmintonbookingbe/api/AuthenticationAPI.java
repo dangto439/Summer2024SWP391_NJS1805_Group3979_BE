@@ -34,14 +34,21 @@ public class AuthenticationAPI {
     @Autowired
     TokenService tokenService;
 
-    @PostMapping("register")
+    @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
-//        emailService.sendMail(account.getEmail(), account.getName());
+        emailService.sendMail(account.getEmail(), account.getName());
 
         return ResponseEntity.ok(account);
     }
 
+    @PostMapping("/staff")
+    public ResponseEntity registerStaff(@RequestBody RegisterRequest registerRequest) {
+        AuthenticationResponse staff = authenticationService.registerStaff(registerRequest);
+        return ResponseEntity.ok(staff);
+    }
+
+    // test xem CurrentAccount là ai
     @GetMapping("/test")
     public Account test() {
         return accountUtils.getCurrentAccount();
@@ -52,10 +59,6 @@ public class AuthenticationAPI {
         Account account = authenticationService.login(loginRequest);
         return ResponseEntity.ok(account);
     }
-
-
-
-
 
    @PostMapping("/forgot-password")
     public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetpasswordrequest) {
@@ -87,10 +90,9 @@ public class AuthenticationAPI {
         }
     }
 
-
     //@PutMapping("/reset-password")
 
-
+    //test
     @GetMapping("/test2")
     public ResponseEntity test1() {
         return ResponseEntity.ok("Hello World");
@@ -112,8 +114,5 @@ public class AuthenticationAPI {
         variables.put("name", name);
         emailService.sendMailTemplate(emailDetail, variables, "emailtemplate");
     }
-
-
-
 
 }
