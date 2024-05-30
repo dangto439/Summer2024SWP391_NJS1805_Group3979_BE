@@ -20,8 +20,8 @@ public class Club {
     private long clubId;
     private String clubName;
     private String clubAddress;
-    private Time openTime;
-    private Time closeTime;
+    private int openTime;
+    private int closeTime;
     private String hotline;
     private ClubStatus clubStatus;
     private String description;

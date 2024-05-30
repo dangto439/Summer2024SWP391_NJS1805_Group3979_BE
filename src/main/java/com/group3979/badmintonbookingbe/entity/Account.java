@@ -1,8 +1,10 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Gender;
@@ -10,6 +12,7 @@ import com.group3979.badmintonbookingbe.eNum.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -17,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Account implements UserDetails{
 
 
@@ -38,12 +40,18 @@ public class Account implements UserDetails{
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+
+    @JsonIgnore
     @OneToMany(mappedBy = "account")
     List<Club> clubs;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        if (this.role != null) {
+            authorities.add(new SimpleGrantedAuthority(this.role.toString()));
+        }
+        return authorities;
     }
 
     @Override

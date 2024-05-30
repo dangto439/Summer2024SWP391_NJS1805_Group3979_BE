@@ -13,8 +13,9 @@ import lombok.NoArgsConstructor;
 public class Court {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private long CourtId;
-        private String CourtName;
+        private long courtId;
+        private String courtName;
+
 
         @ManyToOne
         @JoinColumn(name = "club_id")

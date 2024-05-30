@@ -34,12 +34,8 @@ public class Filter extends OncePerRequestFilter{
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**",
-            "/api/login",
             "/api/register",
-            "/api/forgot-password",
-            "/api/reset-password",
-            "/api/club",
-            "/api/club/{id}"
+            "/api/login"
     );
     private boolean isPermitted(String uri) {
         AntPathMatcher matcher = new AntPathMatcher();
@@ -58,11 +54,11 @@ public class Filter extends OncePerRequestFilter{
                 resolver.resolveException(request, response, null, new AuthException("Empty token!"));
                 return;
             }
-
             Account account;
             try {
                 // từ token tìm ra thằng đó là ai
                 account = tokenService.extractAccount(token);
+                System.out.println(account);
             } catch (ExpiredJwtException expiredJwtException) {
                 // token het han
                 resolver.resolveException(request, response, null, new AuthException("Expired Token!"));
@@ -84,7 +80,9 @@ public class Filter extends OncePerRequestFilter{
     }
 
     public String getToken(HttpServletRequest request) {
+        System.out.println(request);
         String authHeader = request.getHeader("Authorization");
+        System.out.println(authHeader);
         if (authHeader == null) return null;
         return authHeader.substring(7);
     }
