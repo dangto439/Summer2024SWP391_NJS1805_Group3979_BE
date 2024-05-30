@@ -32,6 +32,8 @@ public class AuthenticationService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
@@ -49,7 +51,8 @@ public class AuthenticationService implements UserDetailsService {
         account.setRole(registerRequest.getRole());
         if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
-        } else {
+            emailService.sendMail(account.getEmail(), account.getName());
+        }else{
             account.setAccountStatus(AccountStatus.INACTIVE);
         }
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));

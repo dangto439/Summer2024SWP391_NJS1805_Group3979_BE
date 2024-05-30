@@ -90,8 +90,6 @@ public class AuthenticationAPI {
         }
     }
 
-    //@PutMapping("/reset-password")
-
     //test
     @GetMapping("/test2")
     public ResponseEntity test1() {
