@@ -1,4 +1,4 @@
-package com.group3979.badmintonbookingbe.model;
+package com.group3979.badmintonbookingbe.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

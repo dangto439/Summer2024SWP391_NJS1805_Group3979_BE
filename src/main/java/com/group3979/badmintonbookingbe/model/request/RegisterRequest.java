@@ -1,11 +1,12 @@
-package com.group3979.badmintonbookingbe.model;
+package com.group3979.badmintonbookingbe.model.request;
 
-import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Gender;
 import com.group3979.badmintonbookingbe.eNum.Role;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class RegisterRequest {
     private String phone;
     private String email;

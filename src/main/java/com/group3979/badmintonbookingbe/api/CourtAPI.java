@@ -1,6 +1,6 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.model.CourtResponse;
+import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.service.CourtService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,8 @@ import java.util.List;
 public class CourtAPI {
     @Autowired
     CourtService courtService;
-    //Get all courts by ClubId
+
+    // Get all courts by ClubId
     @GetMapping("/courts/{clubId}")
     public ResponseEntity<List<CourtResponse>> getCourtByClubId(@PathVariable Long clubId) {
         List<CourtResponse> courts = courtService.getAllCourtsByClub(clubId);

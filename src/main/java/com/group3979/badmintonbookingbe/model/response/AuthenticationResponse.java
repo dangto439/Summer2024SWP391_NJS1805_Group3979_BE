@@ -1,4 +1,4 @@
-package com.group3979.badmintonbookingbe.model;
+package com.group3979.badmintonbookingbe.model.response;
 
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Gender;
@@ -16,5 +16,6 @@ public class AuthenticationResponse {
     private String name;
     private Role role;
     private Gender gender;
+    private Long supervisorID;
     private AccountStatus accountStatus;
 }

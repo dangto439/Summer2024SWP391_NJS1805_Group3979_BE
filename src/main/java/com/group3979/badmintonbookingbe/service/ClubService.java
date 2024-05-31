@@ -3,9 +3,9 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.model.AuthenticationResponse;
-import com.group3979.badmintonbookingbe.model.ClubRequest;
-import com.group3979.badmintonbookingbe.model.ClubResponse;
+import com.group3979.badmintonbookingbe.model.request.ClubRequest;
+import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -42,9 +42,9 @@ public class ClubService {
     }
 
     // R - Read by ID
-//    public Club getClubById(Long id) {
-//        return clubRepository.findByClubId(id);
-//    }
+    // public Club getClubById(Long id) {
+    // return clubRepository.findByClubId(id);
+    // }
 
     public ClubResponse getClubResponseById(Long id) {
         Club club = clubRepository.findByClubId(id);
@@ -81,12 +81,10 @@ public class ClubService {
         club.setClubStatus(ClubStatus.ACTIVE);
         club.setAccount(accountUtils.getCurrentAccount());
 
-
         club = clubRepository.save(club);
-        courtService.createCourtsByClub(club,clubRequest.getCapacity());
+        courtService.createCourtsByClub(club, clubRequest.getCapacity());
         return getClubResponseById(club.getClubId());
     }
-
 
     // U - Update
     public ClubResponse updateClub(Long id, ClubRequest clubRequest) {

@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Time;
 import java.util.List;
 
 @Entity
@@ -27,7 +25,6 @@ public class Club {
     private ClubStatus clubStatus;
     private String description;
 
-
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
@@ -37,8 +34,8 @@ public class Club {
     @OneToMany(mappedBy = "club")
     List<Court> courts;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "club")
-    List<ImageClub> imageClubs;
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "club")
+    // List<ImageClub> imageClubs;
 
 }
