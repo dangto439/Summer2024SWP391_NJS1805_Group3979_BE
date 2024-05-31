@@ -6,11 +6,13 @@ import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.model.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.ClubRequest;
 import com.group3979.badmintonbookingbe.model.ClubResponse;
+import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,14 +25,48 @@ public class ClubService {
     @Autowired
     AccountUtils accountUtils;
 
+    @Autowired
+    IAuthenticationRepository authenticationRepository;
+
+    @Autowired
+    CourtService courtService;
+
     // R - Read All
-    public List<Club> getAllClubRequests() {
-        return clubRepository.findAll();
+    public List<ClubResponse> getAllClubRequests() {
+        List<Club> clubs = clubRepository.findAll();
+        List<ClubResponse> clubResponses = new ArrayList<>();
+        for (Club club : clubs) {
+            clubResponses.add(getClubResponseById(club.getClubId()));
+        }
+        return clubResponses;
     }
 
     // R - Read by ID
-    public Club getClubById(Long id) {
-        return clubRepository.findByClubId(id);
+//    public Club getClubById(Long id) {
+//        return clubRepository.findByClubId(id);
+//    }
+
+    public ClubResponse getClubResponseById(Long id) {
+        Club club = clubRepository.findByClubId(id);
+        Account account = club.getAccount();
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .email(account.getEmail())
+                .role(account.getRole())
+                .phone(account.getPhone())
+                .name(account.getName())
+                .gender(account.getGender())
+                .accountStatus(account.getAccountStatus())
+                .build();
+        return ClubResponse.builder()
+                .clubName(club.getClubName())
+                .clubStatus(club.getClubStatus())
+                .clubAddress(club.getClubAddress())
+                .hotline(club.getHotline())
+                .closeTime(club.getCloseTime())
+                .openTime(club.getOpenTime())
+                .clubId(club.getClubId())
+                .description(club.getDescription())
+                .authenticationResponse(authenticationResponse).build();
     }
 
     // C - Create
@@ -45,31 +81,15 @@ public class ClubService {
         club.setClubStatus(ClubStatus.ACTIVE);
         club.setAccount(accountUtils.getCurrentAccount());
 
-        Account account = accountUtils.getCurrentAccount();
-        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
-                .email(account.getEmail())
-                .role(account.getRole())
-                .phone(account.getPhone())
-                .name(account.getName())
-                .gender(account.getGender())
-                .accountStatus(account.getAccountStatus())
-                .build();
-        club = clubRepository.save(club);
 
-        return ClubResponse.builder()
-                .clubName(club.getClubName())
-                .clubStatus(club.getClubStatus())
-                .clubAddress(club.getClubAddress())
-                .hotline(club.getHotline())
-                .closeTime(club.getCloseTime())
-                .openTime(club.getOpenTime())
-                .clubId(club.getClubId())
-                .description(club.getDescription())
-                .authenticationResponse(authenticationResponse).build();
+        club = clubRepository.save(club);
+        courtService.createCourtsByClub(club,clubRequest.getCapacity());
+        return getClubResponseById(club.getClubId());
     }
 
+
     // U - Update
-    public Club updateClub(Long id, ClubRequest clubRequest) {
+    public ClubResponse updateClub(Long id, ClubRequest clubRequest) {
         Club club = clubRepository.findByClubId(id);
 
         if (club != null) {
@@ -79,7 +99,8 @@ public class ClubService {
             club.setOpenTime(clubRequest.getOpeningTime());
             club.setCloseTime(clubRequest.getClosingTime());
             club.setDescription(clubRequest.getClubDescription());
-            return clubRepository.save(club);
+            club = clubRepository.save(club);
+            return getClubResponseById(club.getClubId());
         }
         return null;
     }
@@ -89,7 +110,7 @@ public class ClubService {
         Club club = clubRepository.findByClubId(id);
         club.setClubStatus(ClubStatus.DELETED);
         clubRepository.save(club);
-        if(club.getClubStatus() == ClubStatus.DELETED) {
+        if (club.getClubStatus() == ClubStatus.DELETED) {
             return true;
         }
         return false;

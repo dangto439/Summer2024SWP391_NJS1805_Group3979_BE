@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,13 +27,18 @@ public class Club {
     private ClubStatus clubStatus;
     private String description;
 
+
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
 
     //
+    @JsonIgnore
     @OneToMany(mappedBy = "club")
     List<Court> courts;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "club")
+    List<ImageClub> imageClubs;
 
 }
