@@ -7,7 +7,6 @@ import lombok.Data;
 public class ProfileRequest {
     private String name;
     private String phone;
-    private String email;
     private Gender gender;
     private String avatar;
 }
