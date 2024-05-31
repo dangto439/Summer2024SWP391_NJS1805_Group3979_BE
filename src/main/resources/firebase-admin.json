@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "badminton-booking-platform",
+  "private_key_id": "275f562096963a9838f6df7aaf916a8195549475",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC8H+9U4wfqyiQG\nMefGAy1DNtaRNgR91fobc02g0/efV201D40D7NVw27iYLOVb4wbG0M1thv08SY1N\ngSiYjBPwDUb3C1efUMeyy2JIbEvIC6mIiMaS4jIcSt8wVab5TRJ9h3NIuIL4ZSk4\nx7ftl0Uht89luFco+nPQ/9UnposhSfi8N40ekR/AU3lxlBH2KyXoZSqkjrdgcigP\nkyIscFSkiyueMY88Mx1OUFTStUYvKyKoiRhLeoaN96pD1wntVxby6oLy5A8ujZDz\nxwk6pluEx+icvyKadZ159ZjYV2lKt56n007o5SmoP7JO/6PemmvEWKztbEtAzgUA\nJZqV542TAgMBAAECggEAO2nykmKpa3Ov8OzuAFGch+/X0EC5Jmzf8q91wudu+zoH\nWYyxwp2Xw28BW75CKcUHrN7hIkhRziqEoAe8pIEJAvWOhhNk9wHyL/uf7LOXM3TL\ndD2OSXF61gineIJ0m6PFxTN0K3Fqm7yHSlF5O2ZdBQsiS0Pu8xg2X7mMvlsQ8c/5\n6GpNm80znXvSE5YEF/HKXa9L5QaRicok6A3q+kgIoPKWfXJ+BBvYKJChZ/92UdLE\n4YvKJfEDT3cyiY1m2XYA8b4JymOw3JD87MJaUFGRL/GBzN+7KMrKkc/OID1A3wRi\nhdS1Cj8otzarmeT15rj3U3RE4RuS7n4r83Bts96acQKBgQDsXtYozfQKWAACyi4x\nA9o4zD4AWVegjvEIW+sOtT7cn8dsHvmNLmHAVBUBc/DiIEzILVZ4sQTzaKfBOoI1\nuBhPnNNIfz8v4DblfPPO9pnO81Vu2mFmJ2IO9Q3FxAv7lFA8mlUUYYpPZCHZIQEj\nK0mNbc8M1TUB4IGBo/pX8JdxpQKBgQDLv2jJrz8EZ6pFHRgPoAsXN+MR/5bjKerQ\nqmUTiY9h/aZxJ8mEEAVn5/EKr57i16rkdWasWJiJd8DVT+GTYx8JVkByB6AVJ5P5\nPUvnlmYgczwuh775w+qgGXgwSVzOAlR3E4N8nQWSxb6TyUi9dSqmVDek07bnGLJ/\nO9uxabfs1wKBgQDc9J4/kJ7TWIXSFctuOEqzE4HV865tQZHhnYMywYzc0mOqF55y\nMmxgTHlCXW5NA6Ki8XbG5btaCnfesmHr84aOTWxYddLMX00R42dKDc2j3mX7dRrd\nUm1gzASu3V/SMkd7D03++ls/cbwOa8LTbHCaS47kUR32/jYxyOaJdDctnQKBgA2+\nks4QMVsVtynEZawgKr9dOMctC7u1Ry7eX8UqoW6F0uWNPo3XGtZAkkUbRcedrtyM\ngumbbGbRmkOJiPkNVbmmhOBsXUMwEU5d8THlNmx3+ZZV9+8XZUt5jF8Ng+ItzA7g\nVR1h5k9ZYZrMmEiXj9H6mmpXEd6TDu+AVTipnguvAoGAToQ9PktSoZ2kzvEm6YYi\n8FcXZae93B30NnOshiHf3BN07zqjBzBYgx23DpzQxmlqK37JBULownQF9+Srf7Y2\nwo/9gvScidyeQcUmeMednsuuvkGU8ABH4VHaN0MP0uk5cy5vqvyqNvYh4QaBXQFl\n+2BJKdnmVOp8FIKYEzn8tXM=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-3g8yg@badminton-booking-platform.iam.gserviceaccount.com",
+  "client_id": "117815774502376067126",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-3g8yg%40badminton-booking-platform.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
