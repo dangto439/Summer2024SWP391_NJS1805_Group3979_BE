@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import lombok.Data;
 import jakarta.persistence.*;
@@ -15,7 +16,6 @@ public class Court {
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private long courtId;
         private String courtName;
-
 
         @ManyToOne
         @JoinColumn(name = "club_id")
