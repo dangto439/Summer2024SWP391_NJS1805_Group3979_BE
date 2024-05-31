@@ -91,6 +91,11 @@ public class AuthenticationAPI {
         }
     }
 
+    @PostMapping("/login-google")
+    public ResponseEntity<AccountReponse> loginGoogle(@RequestBody LoginGoogleRequest logingoogleRequest){
+        return ResponseEntity.ok(authenticationService.loginGoogle(logingoogleRequest));
+    }
+
     //test
     @GetMapping("/test2")
     public ResponseEntity test1() {

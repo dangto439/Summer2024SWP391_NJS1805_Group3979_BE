@@ -32,6 +32,7 @@ public class Account implements UserDetails{
     private String email;
     private String name;
     private Long supervisorID;
+    private String avatar;
     @Enumerated(EnumType.STRING)
     Gender gender;
     @Enumerated(EnumType.STRING)

@@ -1,9 +1,11 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
-import com.group3979.badmintonbookingbe.model.AccountReponse;
-import com.group3979.badmintonbookingbe.model.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.model.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.model.LoginRequest;
-import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +80,36 @@ public class AuthenticationService implements UserDetailsService {
         return accountReponse;
     }
 
+    public AccountReponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
+        AccountReponse accountReponse = new AccountReponse();
+        System.out.println(loginGoogleRequest.getToken());
+        try {
+            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
+            String email = firebaseToken.getEmail();
+            Account account = authenticationRepository.findAccountByEmail(email);
+            if (account == null){
+                account = new Account();
+                account.setName(firebaseToken.getName());
+                account.setEmail(email);
+                account.setRole(Role.CUSTOMER);
+                account.setAccountStatus(AccountStatus.ACTIVE);
+                account = authenticationRepository.save(account);
+            }
+            accountReponse.setId(account.getId());
+            accountReponse.setPhone(account.getPhone());
+            accountReponse.setName(account.getName());
+            accountReponse.setEmail(account.getEmail());
+            accountReponse.setRole(account.getRole());
+            accountReponse.setSupervisorID(account.getSupervisorID());
+            accountReponse.setGender(account.getGender());
+            accountReponse.setAccountStatus(account.getAccountStatus());
+            accountReponse.setToken(tokenService.generateToken(account));
+        }catch (FirebaseAuthException e) {
+            e.printStackTrace();
+        }
+        return accountReponse;
+    }
+
     public void updatePassword(Account account, String newPassword) {
         account.setPassword(passwordEncoder.encode(newPassword));
         authenticationRepository.save(account);
@@ -134,5 +164,4 @@ public class AuthenticationService implements UserDetailsService {
         }
         return false;
     }
-
 }
