@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Court {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private long courtId;
-        private String courtName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long courtId;
+    private String courtName;
 
-
-        @ManyToOne
-        @JoinColumn(name = "club_id")
-        private Club club;
-    }
+    @ManyToOne
+    @JoinColumn(name = "club_id")
+    private Club club;
+}

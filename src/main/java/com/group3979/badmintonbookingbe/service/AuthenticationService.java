@@ -5,7 +5,14 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
+import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.model.*;
+import com.group3979.badmintonbookingbe.model.request.LoginGoogleRequest;
+import com.group3979.badmintonbookingbe.model.request.LoginRequest;
+import com.group3979.badmintonbookingbe.model.request.NewPasswordRequest;
+import com.group3979.badmintonbookingbe.model.request.RegisterRequest;
+import com.group3979.badmintonbookingbe.model.response.AccountReponse;
+import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,10 +22,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +50,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public Account register(RegisterRequest registerRequest) {
-        //registerRequest:  thông tin người dùng yêu cầu:
+        // registerRequest: thông tin người dùng yêu cầu:
         // solve register logic
         Account account = new Account();
         account.setPhone(registerRequest.getPhone());
@@ -53,31 +58,34 @@ public class AuthenticationService implements UserDetailsService {
         account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
+
         if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
-            emailService.sendMail(account.getEmail(), account.getName());
         } else {
             account.setAccountStatus(AccountStatus.INACTIVE);
         }
-        account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
+        account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         // nhờ repository save xuống db
-        return authenticationRepository.save(account);
+        account = authenticationRepository.save(account);
+        emailService.sendMail(account.getEmail(), account.getName());
+        return account;
     }
 
     public Account login(LoginRequest loginRequest) {
-
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getPhone(), loginRequest.getPassword()));
-
         Account account = authenticationRepository.findAccountByPhone(loginRequest.getPhone());
-        String token = tokenService.generateToken(account);
-        AccountReponse accountReponse = new AccountReponse();
-        accountReponse.setPhone(account.getPhone());
-        accountReponse.setName(account.getName());
-        accountReponse.setEmail(account.getEmail());
-        accountReponse.setToken(token);
-        return accountReponse;
+        if (account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
+            String token = tokenService.generateToken(account);
+            AccountReponse accountReponse = new AccountReponse();
+            accountReponse.setPhone(account.getPhone());
+            accountReponse.setName(account.getName());
+            accountReponse.setEmail(account.getEmail());
+            accountReponse.setToken(token);
+            return accountReponse;
+        }
+        return null;
     }
 
     public AccountReponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
@@ -87,7 +95,7 @@ public class AuthenticationService implements UserDetailsService {
             FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
             String email = firebaseToken.getEmail();
             Account account = authenticationRepository.findAccountByEmail(email);
-            if (account == null){
+            if (account == null) {
                 account = new Account();
                 account.setName(firebaseToken.getName());
                 account.setEmail(email);
@@ -104,15 +112,22 @@ public class AuthenticationService implements UserDetailsService {
             accountReponse.setGender(account.getGender());
             accountReponse.setAccountStatus(account.getAccountStatus());
             accountReponse.setToken(tokenService.generateToken(account));
-        }catch (FirebaseAuthException e) {
+        } catch (FirebaseAuthException e) {
             e.printStackTrace();
         }
         return accountReponse;
     }
 
-    public void updatePassword(Account account, String newPassword) {
-        account.setPassword(passwordEncoder.encode(newPassword));
-        authenticationRepository.save(account);
+    public void resetPassword(NewPasswordRequest newPasswordRequest) {
+        boolean isTokenExpired = tokenService.isTokenExpired(newPasswordRequest.getToken());
+        if (!isTokenExpired) {
+            Account account = tokenService.extractAccount(newPasswordRequest.getToken());
+            account.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
+            authenticationRepository.save(account);
+
+        } else {
+            throw new AuthException("Expired Token!");
+        }
     }
 
     // register Account for Staff (Role = "STAFF")
@@ -127,7 +142,6 @@ public class AuthenticationService implements UserDetailsService {
         staff.setAccountStatus(AccountStatus.ACTIVE);
         staff.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         staff.setSupervisorID(supervisor.getId());
-
 
         staff = authenticationRepository.save(staff);
 

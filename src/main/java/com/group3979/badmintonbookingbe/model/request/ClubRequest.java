@@ -1,4 +1,4 @@
-package com.group3979.badmintonbookingbe.model;
+package com.group3979.badmintonbookingbe.model.request;
 
 import lombok.Data;
 
@@ -8,6 +8,7 @@ public class ClubRequest {
     private String clubDescription;
     private String clubAddress;
     private String clubhotline;
+    private int capacity; // sl court
     private int openingTime;
     private int closingTime;
 }
