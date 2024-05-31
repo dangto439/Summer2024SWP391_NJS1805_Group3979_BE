@@ -15,6 +15,7 @@ import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,14 +35,21 @@ public class AuthenticationAPI {
     @Autowired
     TokenService tokenService;
 
-    @PostMapping("register")
+    @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
-//        emailService.sendMail(account.getEmail(), account.getName());
+        emailService.sendMail(account.getEmail(), account.getName());
 
         return ResponseEntity.ok(account);
     }
 
+    @PostMapping("/staff")
+    public ResponseEntity registerStaff(@RequestBody RegisterRequest registerRequest) {
+        AuthenticationResponse staff = authenticationService.registerStaff(registerRequest);
+        return ResponseEntity.ok(staff);
+    }
+
+    // test xem CurrentAccount là ai
     @GetMapping("/test")
     public Account test() {
         return accountUtils.getCurrentAccount();
@@ -52,10 +60,6 @@ public class AuthenticationAPI {
         Account account = authenticationService.login(loginRequest);
         return ResponseEntity.ok(account);
     }
-
-
-
-
 
    @PostMapping("/forgot-password")
     public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetpasswordrequest) {
@@ -87,9 +91,7 @@ public class AuthenticationAPI {
         }
     }
 
-
-
-
+    //test
     @GetMapping("/test2")
     public ResponseEntity test1() {
         return ResponseEntity.ok("Hello World");
@@ -112,7 +114,17 @@ public class AuthenticationAPI {
         emailService.sendMailTemplate(emailDetail, variables, "emailtemplate");
     }
 
+    // getStaffLists of Club-Owner
+    @GetMapping("/staff")
+    public List<Account> getStaffs() {
+        return authenticationService.getAllStaffs();
+    }
 
-
-
+    // block Staff by Club-Owner
+    @PutMapping("/block-staff/{id}")
+    public ResponseEntity<String> blockStaff(@PathVariable Long id) {
+        boolean blockedCheck = authenticationService.blockStaff(id);
+        if (blockedCheck) return ResponseEntity.ok("Blocked staff");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not found the staff to block !!");
+    }
 }

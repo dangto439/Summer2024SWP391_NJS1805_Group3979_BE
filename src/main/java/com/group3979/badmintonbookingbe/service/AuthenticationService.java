@@ -3,6 +3,8 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.model.AccountReponse;
+import com.group3979.badmintonbookingbe.model.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,16 +19,19 @@ import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.LoginRequest;
 import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class AuthenticationService implements UserDetailsService {
 
-    // xử lý logic 
+    // xử lý logic
+    @Autowired
+    private AccountUtils accountUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private IAuthenticationRepository authenticationRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -40,7 +45,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public Account register(RegisterRequest registerRequest) {
-        //registerRequest:  thông tin người dùng  yêu cầu:
+        //registerRequest:  thông tin người dùng yêu cầu:
         // solve register logic
         Account account = new Account();
         account.setPhone(registerRequest.getPhone());
@@ -48,10 +53,10 @@ public class AuthenticationService implements UserDetailsService {
         account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
-        if(account.getRole().equals(Role.CUSTOMER)){
+        if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
             emailService.sendMail(account.getEmail(), account.getName());
-        }else{
+        } else {
             account.setAccountStatus(AccountStatus.INACTIVE);
         }
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
@@ -75,10 +80,59 @@ public class AuthenticationService implements UserDetailsService {
         return accountReponse;
     }
 
-
     public void updatePassword(Account account, String newPassword) {
         account.setPassword(passwordEncoder.encode(newPassword));
         authenticationRepository.save(account);
+    }
+
+    // register Account for Staff (Role = "STAFF")
+    public AuthenticationResponse registerStaff(RegisterRequest registerRequest) {
+        Account staff = new Account();
+        Account supervisor = accountUtils.getCurrentAccount();
+        staff.setPhone(registerRequest.getPhone());
+        staff.setEmail(registerRequest.getEmail());
+        staff.setName(registerRequest.getName());
+        staff.setGender(registerRequest.getGender());
+        staff.setRole(Role.CLUB_STAFF);
+        staff.setAccountStatus(AccountStatus.ACTIVE);
+        staff.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        staff.setSupervisorID(supervisor.getId());
+
+
+        staff = authenticationRepository.save(staff);
+
+        return AuthenticationResponse.builder()
+                .phone(staff.getPhone())
+                .email(staff.getEmail())
+                .name(staff.getName())
+                .gender(staff.getGender())
+                .role(staff.getRole())
+                .accountStatus(staff.getAccountStatus())
+                .supervisorID(staff.getSupervisorID())
+                .build();
+    }
+
+    // view Club-Owner's staffs list
+    public List<Account> getAllStaffs() {
+        Long supervisorID = accountUtils.getCurrentAccount().getId();
+        List<Account> staffsNeedToGet = new ArrayList<>();
+        staffsNeedToGet.addAll(authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID));
+        return staffsNeedToGet;
+    }
+
+    // block Staff by Club-Owner
+    public boolean blockStaff(Long idBlocked) {
+        Long supervisorID = accountUtils.getCurrentAccount().getId();
+        List<Account> staffsList = authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID);
+
+        for (Account staff : staffsList) {
+            if (staff.getId() == idBlocked) {
+                staff.setAccountStatus(AccountStatus.INACTIVE);
+                authenticationRepository.save(staff);
+                return true;
+            }
+        }
+        return false;
     }
 
 }

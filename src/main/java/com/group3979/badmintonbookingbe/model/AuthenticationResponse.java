@@ -16,5 +16,6 @@ public class AuthenticationResponse {
     private String name;
     private Role role;
     private Gender gender;
+    private Long supervisorID;
     private AccountStatus accountStatus;
 }
