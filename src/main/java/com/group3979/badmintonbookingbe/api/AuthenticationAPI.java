@@ -1,21 +1,18 @@
 package com.group3979.badmintonbookingbe.api;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import com.group3979.badmintonbookingbe.model.*;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import com.group3979.badmintonbookingbe.service.TokenService;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api")
@@ -37,8 +34,6 @@ public class AuthenticationAPI {
     @PostMapping("register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
-//        emailService.sendMail(account.getEmail(), account.getName());
-
         return ResponseEntity.ok(account);
     }
 
@@ -52,44 +47,23 @@ public class AuthenticationAPI {
         Account account = authenticationService.login(loginRequest);
         return ResponseEntity.ok(account);
     }
-
-
-
-
-
+    @PostMapping("/login-google")
+    public ResponseEntity loginGoogle(@RequestBody LoginGoogleRequest loginGoogleRequest) throws FirebaseAuthException {
+        AccountReponse accountReponse = authenticationService.loginGoogle(loginGoogleRequest);
+        return ResponseEntity.ok(accountReponse);
+    }
+    //send email forgot password
    @PostMapping("/forgot-password")
-    public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetpasswordrequest) {
-        emailService.sendPasswordResetMail(resetpasswordrequest);
+    public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        emailService.sendPasswordResetMail(resetPasswordRequest);
         return ResponseEntity.ok("Password reset email sent successfully");
     }
-
-    //Xác nhận token và hiển thị trang đặt lại mật khẩu
-    @GetMapping("/reset-password")
-    public ResponseEntity<?> validateResetToken(@RequestParam String token) {
-        boolean isValid = tokenService.validateToken(token);
-        if (isValid) {
-            return ResponseEntity.ok("Token is valid, show reset password page");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-        }
-    }
-
-    //Endpoint POST để cập nhật mật khẩu mới
-    @PostMapping("/reset-password")
+    //reset password
+    @PutMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody NewPasswordRequest newPasswordRequest) {
-        boolean isValid = tokenService.validateToken(newPasswordRequest.getToken());
-        if (isValid) {
-            Account account = tokenService.getAccountFromToken(newPasswordRequest.getToken());
-            authenticationService.updatePassword(account, newPasswordRequest.getNewPassword());
-            return ResponseEntity.ok("Password has been reset successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-        }
+        authenticationService.resetPassword(newPasswordRequest);
+        return ResponseEntity.ok("Password has been reset successfully");
     }
-
-
-    //@PutMapping("/reset-password")
-
 
     @GetMapping("/test2")
     public ResponseEntity test1() {
@@ -101,19 +75,6 @@ public class AuthenticationAPI {
     public ResponseEntity testAdmin() {
         return ResponseEntity.ok("Admin!!!!!!!!!!!!");
     }
-
-    @GetMapping("/send-email")
-    public void sendMail(String email, String name) {
-        EmailDetail emailDetail = new EmailDetail();
-        emailDetail.setRecipient(email);
-        emailDetail.setSubject("Welcome");
-        emailDetail.setMsgBody("Welcome to my website");
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("name", name);
-        emailService.sendMailTemplate(emailDetail, variables, "emailtemplate");
-    }
-
-
 
 
 }

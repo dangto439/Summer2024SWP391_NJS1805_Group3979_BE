@@ -1,8 +1,12 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
-import com.group3979.badmintonbookingbe.model.AccountReponse;
+import com.group3979.badmintonbookingbe.exception.AuthException;
+import com.group3979.badmintonbookingbe.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.model.LoginRequest;
-import com.group3979.badmintonbookingbe.model.RegisterRequest;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -31,6 +33,8 @@ public class AuthenticationService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
@@ -46,36 +50,69 @@ public class AuthenticationService implements UserDetailsService {
         account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
-        if(account.getRole().equals(Role.CUSTOMER)){
+        if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
-        }else{
+        } else {
             account.setAccountStatus(AccountStatus.INACTIVE);
         }
-        account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
+        account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         // nhờ repository save xuống db
-        return authenticationRepository.save(account);
+        account = authenticationRepository.save(account);
+        emailService.sendMail(account.getEmail(), account.getName());
+        return account;
     }
 
     public Account login(LoginRequest loginRequest) {
-
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getPhone(), loginRequest.getPassword()));
-
         Account account = authenticationRepository.findAccountByPhone(loginRequest.getPhone());
-        String token = tokenService.generateToken(account);
+        if (account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
+            String token = tokenService.generateToken(account);
+            AccountReponse accountReponse = new AccountReponse();
+            accountReponse.setPhone(account.getPhone());
+            accountReponse.setName(account.getName());
+            accountReponse.setEmail(account.getEmail());
+            accountReponse.setToken(token);
+            return accountReponse;
+        }
+        return null;
+    }
+
+    public AccountReponse loginGoogle(LoginGoogleRequest loginGoogleRequest) throws FirebaseAuthException {
         AccountReponse accountReponse = new AccountReponse();
-        accountReponse.setPhone(account.getPhone());
-        accountReponse.setName(account.getName());
-        accountReponse.setEmail(account.getEmail());
-        accountReponse.setToken(token);
+
+            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
+            String email = firebaseToken.getEmail();
+            Account account = authenticationRepository.findAccountByEmail(email);
+            if (account == null) {
+                account.setName(firebaseToken.getName());
+                account.setEmail(email);
+                account.setRole(Role.CUSTOMER);
+                account.setAccountStatus(AccountStatus.ACTIVE);
+                account = authenticationRepository.save(account);
+            }
+            accountReponse.setId(account.getId());
+            accountReponse.setName(account.getName());
+            accountReponse.setEmail(account.getEmail());
+            accountReponse.setAccountStatus(account.getAccountStatus());
+            accountReponse.setRole(account.getRole());
+            accountReponse.setGender(account.getGender());
+            accountReponse.setToken(tokenService.generateToken(account));
+
         return accountReponse;
     }
 
 
-    public void updatePassword(Account account, String newPassword) {
-        account.setPassword(passwordEncoder.encode(newPassword));
-        authenticationRepository.save(account);
-    }
+    public void resetPassword(NewPasswordRequest newPasswordRequest) {
+        boolean isTokenExpired = tokenService.isTokenExpired(newPasswordRequest.getToken());
+        if (!isTokenExpired) {
+            Account account = tokenService.extractAccount(newPasswordRequest.getToken());
+            account.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
+            authenticationRepository.save(account);
 
+        } else {
+            throw new AuthException("Expired Token!");
+        }
+    }
 }
