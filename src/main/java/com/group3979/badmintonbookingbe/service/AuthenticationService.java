@@ -6,7 +6,6 @@ import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.exception.AuthException;
-import com.group3979.badmintonbookingbe.model.*;
 import com.group3979.badmintonbookingbe.model.request.LoginGoogleRequest;
 import com.group3979.badmintonbookingbe.model.request.LoginRequest;
 import com.group3979.badmintonbookingbe.model.request.NewPasswordRequest;
@@ -45,8 +44,8 @@ public class AuthenticationService implements UserDetailsService {
     private EmailService emailService;
 
     @Override
-    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
-        return this.authenticationRepository.findAccountByPhone(phone);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return this.authenticationRepository.findAccountByEmail(email);
     }
 
     public Account register(RegisterRequest registerRequest) {
@@ -74,14 +73,19 @@ public class AuthenticationService implements UserDetailsService {
 
     public Account login(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.getPhone(), loginRequest.getPassword()));
-        Account account = authenticationRepository.findAccountByPhone(loginRequest.getPhone());
+                loginRequest.getEmail(), loginRequest.getPassword()));
+        Account account = authenticationRepository.findAccountByEmail(loginRequest.getEmail());
         if (account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
-            String token = tokenService.generateToken(account);
+            String token = tokenService.generateToken(account,24*60*60*1000);
             AccountReponse accountReponse = new AccountReponse();
+            accountReponse.setId(account.getId());
             accountReponse.setPhone(account.getPhone());
             accountReponse.setName(account.getName());
             accountReponse.setEmail(account.getEmail());
+            accountReponse.setRole(account.getRole());
+            accountReponse.setSupervisorID(account.getSupervisorID());
+            accountReponse.setGender(account.getGender());
+            accountReponse.setAccountStatus(account.getAccountStatus());
             accountReponse.setToken(token);
             return accountReponse;
         }
@@ -111,7 +115,7 @@ public class AuthenticationService implements UserDetailsService {
             accountReponse.setSupervisorID(account.getSupervisorID());
             accountReponse.setGender(account.getGender());
             accountReponse.setAccountStatus(account.getAccountStatus());
-            accountReponse.setToken(tokenService.generateToken(account));
+            accountReponse.setToken(tokenService.generateToken(account,24*60*60*1000));
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
         }

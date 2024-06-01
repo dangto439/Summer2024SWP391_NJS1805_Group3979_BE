@@ -70,7 +70,7 @@ public class EmailService {
 
     public void sendPasswordResetMail(ResetPasswordRequest resetPasswordRequest) {
         Account account = iAuthenticationRepository.findAccountByEmail(resetPasswordRequest.getEmail());
-        String token = tokenService.generateToken(account);
+        String token = tokenService.generateToken(account,5*60*1000);
 
         EmailDetail emailDetail = new EmailDetail();
         emailDetail.setRecipient(resetPasswordRequest.getEmail());
