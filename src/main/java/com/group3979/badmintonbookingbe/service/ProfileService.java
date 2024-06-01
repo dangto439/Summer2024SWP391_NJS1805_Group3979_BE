@@ -1,7 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.model.ChangePasswordRequest;
+import com.group3979.badmintonbookingbe.model.request.ChangePasswordRequest;
 import com.group3979.badmintonbookingbe.model.request.ProfileRequest;
 import com.group3979.badmintonbookingbe.model.response.ProfileResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
