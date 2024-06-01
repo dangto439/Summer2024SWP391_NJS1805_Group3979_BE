@@ -2,8 +2,9 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.model.EmailDetail;
-import com.group3979.badmintonbookingbe.model.ResetPasswordRequest;
+import com.group3979.badmintonbookingbe.model.request.ResetPasswordRequest;
+import com.group3979.badmintonbookingbe.model.response.EmailDetail;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +35,11 @@ public class EmailService {
     @Autowired
     IAuthenticationRepository iAuthenticationRepository;
 
-
     public void sendMailTemplate(EmailDetail emailDetail, Map<String, Object> variables, String template) {
         try {
             Context context = new Context();
             context.setVariable("resetLink", emailDetail.getLink());
             context.setVariables(variables);
-
 
             String text = templateEngine.process(template, context);
 
@@ -71,7 +70,7 @@ public class EmailService {
 
     public void sendPasswordResetMail(ResetPasswordRequest resetPasswordRequest) {
         Account account = iAuthenticationRepository.findAccountByEmail(resetPasswordRequest.getEmail());
-        String token = tokenService.generateToken(account);
+        String token = tokenService.generateToken(account,5*60*1000);
 
         EmailDetail emailDetail = new EmailDetail();
         emailDetail.setRecipient(resetPasswordRequest.getEmail());

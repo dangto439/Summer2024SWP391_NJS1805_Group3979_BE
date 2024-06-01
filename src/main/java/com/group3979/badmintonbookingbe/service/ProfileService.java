@@ -2,8 +2,8 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.ChangePasswordRequest;
-import com.group3979.badmintonbookingbe.model.ProfileRequest;
-import com.group3979.badmintonbookingbe.model.ProfileResponse;
+import com.group3979.badmintonbookingbe.model.request.ProfileRequest;
+import com.group3979.badmintonbookingbe.model.response.ProfileResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.apache.coyote.BadRequestException;
@@ -34,7 +34,7 @@ public class ProfileService {
     }
 
     // update profile's current information
-    public ProfileResponse updateProfile(ProfileRequest profileRequest){
+    public ProfileResponse updateProfile(ProfileRequest profileRequest) {
         Account account = accountUtils.getCurrentAccount();
 
         account.setName(profileRequest.getName());

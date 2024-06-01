@@ -1,12 +1,11 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Time;
 import java.util.List;
 
 @Entity
@@ -31,8 +30,12 @@ public class Club {
     Account account;
 
     //
+    @JsonIgnore
     @OneToMany(mappedBy = "club")
     List<Court> courts;
 
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "club")
+    // List<ImageClub> imageClubs;
 
 }

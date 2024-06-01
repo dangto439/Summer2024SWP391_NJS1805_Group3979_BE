@@ -1,8 +1,8 @@
 package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.ChangePasswordRequest;
-import com.group3979.badmintonbookingbe.model.ProfileRequest;
-import com.group3979.badmintonbookingbe.model.ProfileResponse;
+import com.group3979.badmintonbookingbe.model.request.ProfileRequest;
+import com.group3979.badmintonbookingbe.model.response.ProfileResponse;
 import com.group3979.badmintonbookingbe.service.ProfileService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.coyote.BadRequestException;
@@ -39,5 +39,4 @@ public class ProfileAPI {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
-
 }
