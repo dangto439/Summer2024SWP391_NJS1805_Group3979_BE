@@ -26,7 +26,7 @@ public class TokenService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(Account account) {
+    public String generateToken(Account account, int timeexpriretoken) {
         String token =
                 // create object of JWT
                 Jwts.builder().
@@ -35,7 +35,7 @@ public class TokenService {
                         // time Create Token
                                 issuedAt(new Date(System.currentTimeMillis()))
                         // Time exprire of Token
-                        .expiration(new Date(System.currentTimeMillis()+24*60*60*1000))
+                        .expiration(new Date(System.currentTimeMillis()+timeexpriretoken))
                         //
                         .signWith(getSigninKey())
                         .compact();
@@ -53,8 +53,8 @@ public class TokenService {
 
     // get userName form CLAIM
     public Account extractAccount (String token){
-        String phone = extractClaim(token,Claims::getSubject);
-        return authenticationRepository.findAccountByPhone(phone);
+        String email = extractClaim(token,Claims::getSubject);
+        return authenticationRepository.findAccountByEmail(email);
     }
 
 
