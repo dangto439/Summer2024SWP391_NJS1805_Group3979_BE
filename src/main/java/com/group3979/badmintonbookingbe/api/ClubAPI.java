@@ -31,6 +31,12 @@ public class ClubAPI {
         return ResponseEntity.ok(clubService.getAllClubRequests());
     }
 
+    // Get all clubs of current account
+    @GetMapping("/current-clubs")
+    public ResponseEntity<List<ClubResponse>> getAllClubsCurrentAccount() {
+        return ResponseEntity.ok(clubService.getAllClubRequests());
+    }
+
     // Get club by id
     @GetMapping("/club/{id}")
     public ResponseEntity<ClubResponse> getClubById(@PathVariable Long id) {

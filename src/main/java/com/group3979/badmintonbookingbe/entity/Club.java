@@ -22,6 +22,7 @@ public class Club {
     private int openTime;
     private int closeTime;
     private String hotline;
+    @Enumerated(EnumType.STRING)
     private ClubStatus clubStatus;
     private String description;
 
