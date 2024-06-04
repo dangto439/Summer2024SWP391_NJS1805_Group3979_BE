@@ -7,7 +7,7 @@ public class ClubRequest {
     private String clubName;
     private String clubDescription;
     private String clubAddress;
-    private String clubhotline;
+    private String clubHotLine;
     private int capacity; // sl court
     private int openingTime;
     private int closingTime;

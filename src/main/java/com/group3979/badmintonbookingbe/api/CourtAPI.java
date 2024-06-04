@@ -23,4 +23,12 @@ public class CourtAPI {
         List<CourtResponse> courts = courtService.getAllCourtsByClub(clubId);
         return ResponseEntity.ok(courts);
     }
+    @PutMapping("/court/{id}")
+    public ResponseEntity<String> changeCourtStatus(@PathVariable Long id) {
+        boolean result = courtService.changeCourtStatus(id);
+        if (result) {
+            return ResponseEntity.ok("Deleted Successfully");
+        }
+        return ResponseEntity.ok("Delete failed");
+    }
 }

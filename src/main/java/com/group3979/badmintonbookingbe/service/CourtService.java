@@ -1,5 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.group3979.badmintonbookingbe.eNum.ClubStatus;
+import com.group3979.badmintonbookingbe.eNum.CourtStatus;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
@@ -27,6 +29,7 @@ public class CourtService {
             CourtResponse courtResponse = new CourtResponse();
             courtResponse.setCourtId(court.getCourtId());
             courtResponse.setCourtName(court.getCourtName());
+           courtResponse.setCourtStatus(court.getCourtStatus());
             courtResponses.add(courtResponse);
         }
         return courtResponses;
@@ -43,9 +46,20 @@ public class CourtService {
             Court court = new Court();
             court.setClub(club);
             court.setCourtName("Sân số " + i);
+            court.setCourtStatus(CourtStatus.ACTIVE);
             court = courtRepository.save(court);
             courts.add(court);
         }
         return courts;
+    }
+
+    public boolean changeCourtStatus(long id) {
+        Court court = courtRepository.findByCourtId(id);
+        if (court != null) {
+            court.setCourtStatus(CourtStatus.INACTIVE);
+            courtRepository.save(court);
+            return true;
+        }
+        return false;
     }
 }

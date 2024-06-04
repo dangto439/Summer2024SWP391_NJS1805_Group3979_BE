@@ -41,10 +41,16 @@ public class ClubService {
         return clubResponses;
     }
 
-    // R - Read by ID
-    // public Club getClubById(Long id) {
-    // return clubRepository.findByClubId(id);
-    // }
+    // R - Read ClubResponse by Current Account Id
+    public List<ClubResponse> getAllClubRequestsByCurrentAccountId() {
+        Account account = accountUtils.getCurrentAccount();
+        List<Club> clubs = clubRepository.findClubsByAccount(account);
+        List<ClubResponse> clubResponses = new ArrayList<>();
+        for (Club club : clubs) {
+            clubResponses.add(getClubResponseById(club.getClubId()));
+        }
+        return clubResponses;
+    }
 
     public ClubResponse getClubResponseById(Long id) {
         Club club = clubRepository.findByClubId(id);
@@ -74,7 +80,7 @@ public class ClubService {
         Club club = new Club();
         club.setClubAddress(clubRequest.getClubAddress());
         club.setClubName(clubRequest.getClubName());
-        club.setHotline(clubRequest.getClubhotline());
+        club.setHotline(clubRequest.getClubHotLine());
         club.setOpenTime(clubRequest.getOpeningTime());
         club.setCloseTime(clubRequest.getClosingTime());
         club.setDescription(clubRequest.getClubDescription());
@@ -82,6 +88,7 @@ public class ClubService {
         club.setAccount(accountUtils.getCurrentAccount());
 
         club = clubRepository.save(club);
+        //create courts of club by quantity court(capacity)
         courtService.createCourtsByClub(club, clubRequest.getCapacity());
         return getClubResponseById(club.getClubId());
     }
@@ -93,7 +100,7 @@ public class ClubService {
         if (club != null) {
             club.setClubAddress(clubRequest.getClubAddress());
             club.setClubName(clubRequest.getClubName());
-            club.setHotline(clubRequest.getClubhotline());
+            club.setHotline(clubRequest.getClubHotLine());
             club.setOpenTime(clubRequest.getOpeningTime());
             club.setCloseTime(clubRequest.getClosingTime());
             club.setDescription(clubRequest.getClubDescription());
@@ -106,9 +113,9 @@ public class ClubService {
     // D - Delete
     public boolean deleteStatusClub(Long id) {
         Club club = clubRepository.findByClubId(id);
-        club.setClubStatus(ClubStatus.DELETED);
-        clubRepository.save(club);
-        if (club.getClubStatus() == ClubStatus.DELETED) {
+        if (club != null) {
+            club.setClubStatus(ClubStatus.DELETED);
+            clubRepository.save(club);
             return true;
         }
         return false;
