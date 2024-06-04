@@ -35,8 +35,8 @@ public class Club {
     @OneToMany(mappedBy = "club")
     List<Court> courts;
 
-    // @JsonIgnore
-    // @OneToMany(mappedBy = "club")
-    // List<ImageClub> imageClubs;
+     @JsonIgnore
+     @OneToMany(mappedBy = "club")
+     List<ImageClub> imageClubs;
 
 }

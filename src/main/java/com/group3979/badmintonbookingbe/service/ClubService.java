@@ -80,7 +80,7 @@ public class ClubService {
         Club club = new Club();
         club.setClubAddress(clubRequest.getClubAddress());
         club.setClubName(clubRequest.getClubName());
-        club.setHotline(clubRequest.getClubhotline());
+        club.setHotline(clubRequest.getClubHotLine());
         club.setOpenTime(clubRequest.getOpeningTime());
         club.setCloseTime(clubRequest.getClosingTime());
         club.setDescription(clubRequest.getClubDescription());
@@ -100,7 +100,7 @@ public class ClubService {
         if (club != null) {
             club.setClubAddress(clubRequest.getClubAddress());
             club.setClubName(clubRequest.getClubName());
-            club.setHotline(clubRequest.getClubhotline());
+            club.setHotline(clubRequest.getClubHotLine());
             club.setOpenTime(clubRequest.getOpeningTime());
             club.setCloseTime(clubRequest.getClosingTime());
             club.setDescription(clubRequest.getClubDescription());
