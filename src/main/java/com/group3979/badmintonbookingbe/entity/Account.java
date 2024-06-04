@@ -58,7 +58,7 @@ public class Account implements UserDetails{
 
     @Override
     public String getUsername() {
-        return this.phone;
+        return this.email;
     }
 
     @Override
