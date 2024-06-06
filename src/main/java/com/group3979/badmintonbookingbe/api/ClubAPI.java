@@ -43,7 +43,7 @@ public class ClubAPI {
     // Get all clubs of current account
     @GetMapping("/current-clubs")
     public ResponseEntity<List<ClubResponse>> getAllClubsCurrentAccount() {
-        return ResponseEntity.ok(clubService.getAllClubRequests());
+        return ResponseEntity.ok(clubService.getAllClubRequestsByCurrentAccountId());
     }
 
     // Get club by id
