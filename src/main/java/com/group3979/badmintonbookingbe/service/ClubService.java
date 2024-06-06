@@ -8,7 +8,10 @@ import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
+import com.group3979.badmintonbookingbe.repository.IClubSlotRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
+import javassist.NotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,12 @@ import java.util.List;
 public class ClubService {
 
     // xử lí logic CRUD
+    @Autowired
+    ClubSlotService clubSlotService;
+
+    @Autowired
+    IClubSlotRepository clubSlotRepository;
+
     @Autowired
     IClubRepository clubRepository;
 
@@ -76,7 +85,7 @@ public class ClubService {
     }
 
     // C - Create
-    public ClubResponse createClub(ClubRequest clubRequest) {
+    public ClubResponse createClub(ClubRequest clubRequest) throws BadRequestException, NotFoundException {
         Club club = new Club();
         club.setClubAddress(clubRequest.getClubAddress());
         club.setClubName(clubRequest.getClubName());
@@ -87,7 +96,15 @@ public class ClubService {
         club.setClubStatus(ClubStatus.ACTIVE);
         club.setAccount(accountUtils.getCurrentAccount());
 
+        if (club.getOpenTime() >= club.getCloseTime() || club.getOpenTime() < 0 || club.getOpenTime() > 24 || club.getCloseTime() > 24) {
+            throw new BadRequestException("Thời gian mở cửa và đóng cửa không hợp lệ. Vui lòng kiểm tra lại.");
+        }
+
         club = clubRepository.save(club);
+
+        // create clubSlot of club by
+        clubSlotService.createClubSlot(club.getClubId(), clubRequest.getClubPrice(),
+                clubRequest.getRushHourRequest().getStartTime(), clubRequest.getRushHourRequest().getEndTime());
         //create courts of club by quantity court(capacity)
         courtService.createCourtsByClub(club, clubRequest.getCapacity());
         return getClubResponseById(club.getClubId());

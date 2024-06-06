@@ -8,7 +8,9 @@ public class ClubRequest {
     private String clubDescription;
     private String clubAddress;
     private String clubHotLine;
+    private float clubPrice;
     private int capacity; // sl court
     private int openingTime;
     private int closingTime;
+    RushHourRequest rushHourRequest;
 }

@@ -1,16 +1,11 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.model.request.LoginGoogleRequest;
-import com.group3979.badmintonbookingbe.model.request.LoginRequest;
-import com.group3979.badmintonbookingbe.model.request.NewPasswordRequest;
-import com.group3979.badmintonbookingbe.model.request.RegisterRequest;
-import com.group3979.badmintonbookingbe.model.request.ResetPasswordRequest;
+import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountReponse;
-import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.service.EmailService;
-import com.group3979.badmintonbookingbe.service.TokenService;
-import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,19 +20,12 @@ import java.util.List;
 @SecurityRequirement(name = "api")
 @CrossOrigin("*")
 public class AuthenticationAPI {
-
-    @Autowired
-    AccountUtils accountUtils;
     // nhận request từ front-end
-
     @Autowired
     private AuthenticationService authenticationService;
-
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    TokenService tokenService;
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
@@ -82,9 +70,13 @@ public class AuthenticationAPI {
     }
 
     @PostMapping("/staff")
-    public ResponseEntity registerStaff(@RequestBody RegisterRequest registerRequest) {
-        AuthenticationResponse staff = authenticationService.registerStaff(registerRequest);
-        return ResponseEntity.ok(staff);
+    public ResponseEntity registerStaff(@RequestBody StaffRegisterRequest staffRegisterRequest) {
+        try {
+            StaffResponse staff = authenticationService.registerStaff(staffRegisterRequest);
+            return ResponseEntity.ok(staff);
+        }catch(BadRequestException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // block Staff by Club-Owner

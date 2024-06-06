@@ -5,14 +5,14 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
+import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.exception.AuthException;
-import com.group3979.badmintonbookingbe.model.request.LoginGoogleRequest;
-import com.group3979.badmintonbookingbe.model.request.LoginRequest;
-import com.group3979.badmintonbookingbe.model.request.NewPasswordRequest;
-import com.group3979.badmintonbookingbe.model.request.RegisterRequest;
+import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountReponse;
-import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.model.response.StaffResponse;
+import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +30,8 @@ import java.util.List;
 public class AuthenticationService implements UserDetailsService {
 
     // xử lý logic
+    @Autowired
+    private IClubRepository clubRepository;
     @Autowired
     private AccountUtils accountUtils;
     @Autowired
@@ -135,21 +137,26 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     // register Account for Staff (Role = "STAFF")
-    public AuthenticationResponse registerStaff(RegisterRequest registerRequest) {
+    public StaffResponse registerStaff(StaffRegisterRequest staffRegisterRequest) throws BadRequestException {
         Account staff = new Account();
         Account supervisor = accountUtils.getCurrentAccount();
-        staff.setPhone(registerRequest.getPhone());
-        staff.setEmail(registerRequest.getEmail());
-        staff.setName(registerRequest.getName());
-        staff.setGender(registerRequest.getGender());
+        staff.setPhone(staffRegisterRequest.getPhone());
+        staff.setEmail(staffRegisterRequest.getEmail());
+        staff.setName(staffRegisterRequest.getName());
+        staff.setGender(staffRegisterRequest.getGender());
         staff.setRole(Role.CLUB_STAFF);
         staff.setAccountStatus(AccountStatus.ACTIVE);
-        staff.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        staff.setPassword(passwordEncoder.encode(staffRegisterRequest.getPassword()));
         staff.setSupervisorID(supervisor.getId());
+        Club club = clubRepository.findByClubId(staffRegisterRequest.getClubId());
+        if(club == null) {
+            throw new BadRequestException("Club not found!");
+        }
+        staff.setClub(club);
 
         staff = authenticationRepository.save(staff);
 
-        return AuthenticationResponse.builder()
+        return StaffResponse.builder()
                 .phone(staff.getPhone())
                 .email(staff.getEmail())
                 .name(staff.getName())
@@ -157,6 +164,7 @@ public class AuthenticationService implements UserDetailsService {
                 .role(staff.getRole())
                 .accountStatus(staff.getAccountStatus())
                 .supervisorID(staff.getSupervisorID())
+                .clubId(staff.getClub().getClubId())
                 .build();
     }
 
