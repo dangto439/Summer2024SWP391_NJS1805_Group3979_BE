@@ -50,6 +50,11 @@ public class AuthenticationService implements UserDetailsService {
         return this.authenticationRepository.findAccountByEmail(email);
     }
 
+    public List<Account> getAllAccounts() {
+        List<Account> accounts = new ArrayList<>();
+        return accounts = authenticationRepository.findAll();
+    }
+
     public Account register(RegisterRequest registerRequest) {
         // registerRequest: thông tin người dùng yêu cầu:
         // solve register logic
@@ -189,5 +194,17 @@ public class AuthenticationService implements UserDetailsService {
             }
         }
         return false;
+    }
+
+    //block or unblock Account by Admin
+    public Account blockUser(String email) {
+        Account account = authenticationRepository.findAccountByEmail(email);
+                if(account.getAccountStatus() == AccountStatus.ACTIVE) {
+                    account.setAccountStatus(AccountStatus.INACTIVE);
+                }else {
+                    account.setAccountStatus(AccountStatus.ACTIVE);
+                }
+                authenticationRepository.save(account);
+                return account;
     }
 }

@@ -27,6 +27,7 @@ public class AuthenticationAPI {
     private EmailService emailService;
 
 
+
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
         Account account = authenticationService.register(registerRequest);
@@ -57,10 +58,21 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(authenticationService.loginGoogle(logingoogleRequest));
     }
 
+    //Admin
     @GetMapping("/admin-only")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity testAdmin() {
         return ResponseEntity.ok("Admin!!!!!!!!!!!!");
+    }
+
+    @GetMapping("/get-all-account")
+    public ResponseEntity getAllAccount() {
+        return ResponseEntity.ok(authenticationService.getAllAccounts());
+    }
+
+    @PutMapping("/block/{email}")
+    public ResponseEntity blockUser(@PathVariable String email) {
+        return ResponseEntity.ok(authenticationService.blockUser(email));
     }
 
     // getStaffLists of Club-Owner

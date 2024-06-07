@@ -8,6 +8,7 @@ import com.group3979.badmintonbookingbe.model.response.EmailDetail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class EmailService {
 
     @Autowired
     IAuthenticationRepository iAuthenticationRepository;
+
+    @Value("${reset.password.url}")
+    private String resetPasswordUrl;
 
     public void sendMailTemplate(EmailDetail emailDetail, Map<String, Object> variables, String template) {
         try {
@@ -77,7 +81,7 @@ public class EmailService {
         emailDetail.setSubject("Reset password");
         emailDetail.setMsgBody("Reset password");
         // sữa link
-        emailDetail.setLink("http://datsan79.online/reset-password?token=" + token);
+        emailDetail.setLink(resetPasswordUrl + token);
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("name", account.getName());
