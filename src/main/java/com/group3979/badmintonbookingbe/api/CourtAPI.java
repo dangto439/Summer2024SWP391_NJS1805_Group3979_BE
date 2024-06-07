@@ -17,6 +17,13 @@ public class CourtAPI {
     @Autowired
     CourtService courtService;
 
+    // Create a new court
+    @PostMapping("/court/{clubId}")
+    public ResponseEntity<CourtResponse> createCourtByClubId(@PathVariable Long clubId) {
+        CourtResponse court = courtService.createCourtByClubId(clubId);
+        return ResponseEntity.ok(court);
+    }
+
     // Get all courts by ClubId
     @GetMapping("/courts/{clubId}")
     public ResponseEntity<List<CourtResponse>> getCourtByClubId(@PathVariable Long clubId) {

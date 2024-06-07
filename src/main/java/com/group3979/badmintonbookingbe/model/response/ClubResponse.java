@@ -3,6 +3,8 @@ package com.group3979.badmintonbookingbe.model.response;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import lombok.*;
 
+import java.util.List;
+
 @Setter
 @Getter
 @Builder
@@ -18,4 +20,5 @@ public class ClubResponse {
     private ClubStatus clubStatus;
     private String description;
     private AuthenticationResponse authenticationResponse;
+    private List<String> urlImages;
 }

@@ -39,7 +39,7 @@ public class CourtService {
         return courtRepository.findByCourtId(id);
     }
 
-    // create courts of a Club
+    // create courts by quantity of a Club when creating club
     public List<Court> createCourtsByClub(Club club, int quantityCourts) {
         List<Court> courts = new ArrayList<Court>();
         for (int i = 1; i <= quantityCourts; i++) {
@@ -51,6 +51,20 @@ public class CourtService {
             courts.add(court);
         }
         return courts;
+    }
+    public CourtResponse createCourtByClubId(Long Id) {
+        Club club = clubRepository.findByClubId(Id);
+        List<Court> courts = courtRepository.findByClub(club);
+        Court court = new Court();
+        court.setClub(club);
+        court.setCourtName("Sân số " + (courts.size() + 1));
+        court.setCourtStatus(CourtStatus.ACTIVE);
+        court = courtRepository.save(court);
+        CourtResponse courtResponse = new CourtResponse();
+        courtResponse.setCourtId(court.getCourtId());
+        courtResponse.setCourtName(court.getCourtName());
+        courtResponse.setCourtStatus(court.getCourtStatus());
+        return courtResponse;
     }
 
     public boolean changeCourtStatus(long id) {

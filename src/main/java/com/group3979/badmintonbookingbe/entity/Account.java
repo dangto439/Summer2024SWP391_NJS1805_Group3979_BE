@@ -42,10 +42,14 @@ public class Account implements UserDetails{
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @ManyToOne
+    @JoinColumn(name = "club_id")
+    Club club;
 
     @JsonIgnore
     @OneToMany(mappedBy = "account")
     List<Club> clubs;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

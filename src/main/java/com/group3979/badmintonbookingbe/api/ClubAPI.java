@@ -1,6 +1,5 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.request.ImageClubRequest;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
@@ -10,7 +9,8 @@ import com.group3979.badmintonbookingbe.service.CourtService;
 import com.group3979.badmintonbookingbe.service.ImageClubService;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.apache.http.protocol.HTTP;
+import javassist.NotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,9 +55,15 @@ public class ClubAPI {
 
     // Create new club
     @PostMapping("/club")
-    public ResponseEntity<ClubResponse> createClub(@RequestBody ClubRequest clubRequest) {
-        ClubResponse club = clubService.createClub(clubRequest);
-        return ResponseEntity.ok(club);
+    public ResponseEntity createClub(@RequestBody ClubRequest clubRequest) {
+        try {
+            ClubResponse club = clubService.createClub(clubRequest);
+            return ResponseEntity.ok(club);
+        }catch (BadRequestException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Update existing club
@@ -77,7 +83,7 @@ public class ClubAPI {
         return new ResponseEntity<>("Delete failed", HttpStatus.BAD_REQUEST);
     }
     //delete  image by Id
-    @DeleteMapping("/image-club/{imageId}")
+    @DeleteMapping("/club/image/{imageId}")
     public ResponseEntity<Object> deleteImageClub(@PathVariable Long imageId) {
        boolean  deleteResult =  imageClubService.deleteImageClubById(imageId);
        if(deleteResult) {
@@ -85,19 +91,19 @@ public class ClubAPI {
        }
         return new ResponseEntity<>("Delete failed", HttpStatus.BAD_REQUEST);
     }
-    //get a image by Id
-    @GetMapping("/image-club/{imageId}")
-    public ResponseEntity<ImageClubResponse> getImageClub(@PathVariable Long imageId) {
-        ImageClubResponse imageClub = imageClubService.getImageClubByImageId(imageId);
-        return ResponseEntity.ok(imageClub);
-    }
-    //get all images of a club by clubId
-    @GetMapping("/images-club/{clubId}")
-    public ResponseEntity<List<ImageClubResponse>> getImagesOfClub(@PathVariable Long clubId) {
-        List<ImageClubResponse> imageClubResponses = imageClubService.getALlImagesByClubId(clubId);
-        return ResponseEntity.ok(imageClubResponses);
-    }
-    @PostMapping("/image-club")
+//    //get a image by Id
+//    @GetMapping("/image-club/{imageId}")
+//    public ResponseEntity<ImageClubResponse> getImageClub(@PathVariable Long imageId) {
+//        ImageClubResponse imageClub = imageClubService.getImageClubByImageId(imageId);
+//        return ResponseEntity.ok(imageClub);
+//    }
+//    //get all images of a club by clubId
+//    @GetMapping("/images-club/{clubId}")
+//    public ResponseEntity<List<ImageClubResponse>> getImagesOfClub(@PathVariable Long clubId) {
+//        List<ImageClubResponse> imageClubResponses = imageClubService.getALlImagesByClubId(clubId);
+//        return ResponseEntity.ok(imageClubResponses);
+//    }
+    @PostMapping("/club/image")
     public ResponseEntity<ImageClubResponse> createImageClub(@RequestBody ImageClubRequest imageClubRequest) {
         ImageClubResponse imageClubResponse = imageClubService.createImageClub(imageClubRequest);
         return ResponseEntity.ok(imageClubResponse);

@@ -62,6 +62,17 @@ public class ImageClubService {
         imageClubResponse.setImageId(imageClub.getImageClubId());
         return imageClubResponse;
     }
+    public ImageClubResponse createImageClub(Club club, String url) {
+        ImageClub imageClub = new ImageClub();
+        imageClub.setUrlImage(url);
+        imageClub.setClub(club);
+        imageClub = imageClubRepository.save(imageClub);
+        ImageClubResponse imageClubResponse = new ImageClubResponse();
+        imageClubResponse.setClubId(imageClub.getClub().getClubId());
+        imageClubResponse.setImageUrl(imageClub.getUrlImage());
+        imageClubResponse.setImageId(imageClub.getImageClubId());
+        return imageClubResponse;
+    }
 
     public boolean deleteImageClubById(long id) {
         ImageClub imageClub = imageClubRepository.findById(id);
