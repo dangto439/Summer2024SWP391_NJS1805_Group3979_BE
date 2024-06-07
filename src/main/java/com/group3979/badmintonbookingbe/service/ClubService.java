@@ -3,12 +3,15 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
+import com.group3979.badmintonbookingbe.entity.ClubSlot;
+import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.IClubSlotRepository;
+import com.group3979.badmintonbookingbe.repository.IImageClubRespository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import javassist.NotFoundException;
 import org.apache.coyote.BadRequestException;
@@ -26,6 +29,9 @@ public class ClubService {
     ClubSlotService clubSlotService;
 
     @Autowired
+    IImageClubRespository imageClubRepository;
+
+    @Autowired
     IClubSlotRepository clubSlotRepository;
 
     @Autowired
@@ -39,12 +45,15 @@ public class ClubService {
 
     @Autowired
     CourtService courtService;
+    @Autowired
+    private ImageClubService imageClubService;
 
     // R - Read All
     public List<ClubResponse> getAllClubRequests() {
         List<Club> clubs = clubRepository.findAll();
         List<ClubResponse> clubResponses = new ArrayList<>();
         for (Club club : clubs) {
+
             clubResponses.add(getClubResponseById(club.getClubId()));
         }
         return clubResponses;
@@ -63,6 +72,10 @@ public class ClubService {
 
     public ClubResponse getClubResponseById(Long id) {
         Club club = clubRepository.findByClubId(id);
+        List<String> urlImages = new ArrayList<>();
+        for(ImageClub imageClub : imageClubRepository.findByClub(club)){
+            urlImages.add(imageClub.getUrlImage());
+        }
         Account account = club.getAccount();
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                 .email(account.getEmail())
@@ -81,11 +94,13 @@ public class ClubService {
                 .openTime(club.getOpenTime())
                 .clubId(club.getClubId())
                 .description(club.getDescription())
+                .urlImages(urlImages)
                 .authenticationResponse(authenticationResponse).build();
     }
 
     // C - Create
     public ClubResponse createClub(ClubRequest clubRequest) throws BadRequestException, NotFoundException {
+
         Club club = new Club();
         club.setClubAddress(clubRequest.getClubAddress());
         club.setClubName(clubRequest.getClubName());
@@ -101,10 +116,9 @@ public class ClubService {
         }
 
         club = clubRepository.save(club);
-
-        // create clubSlot of club by
-        clubSlotService.createClubSlot(club.getClubId(), clubRequest.getClubPrice(),
-                clubRequest.getRushHourRequest().getStartTime(), clubRequest.getRushHourRequest().getEndTime());
+        for (String url : clubRequest.getUrlImages()) {
+            imageClubService.createImageClub(club, url);
+        }
         //create courts of club by quantity court(capacity)
         courtService.createCourtsByClub(club, clubRequest.getCapacity());
         return getClubResponseById(club.getClubId());

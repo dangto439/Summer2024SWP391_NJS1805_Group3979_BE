@@ -1,8 +1,12 @@
 package com.group3979.badmintonbookingbe.model.request;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+import java.util.List;
+
+@Getter
+@Setter
 public class ClubRequest {
     private String clubName;
     private String clubDescription;
@@ -13,4 +17,5 @@ public class ClubRequest {
     private int openingTime;
     private int closingTime;
     RushHourRequest rushHourRequest;
+    private List<String> urlImages;
 }
