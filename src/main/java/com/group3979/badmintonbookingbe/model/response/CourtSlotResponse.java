@@ -10,6 +10,7 @@ import lombok.*;
 public class CourtSlotResponse {
     private Long courtSlotId;
     private float price;
-    CourtResponse courtResponse;
+    private Long slotId;
     private Long clubId;
+    CourtResponse courtResponse;
 }

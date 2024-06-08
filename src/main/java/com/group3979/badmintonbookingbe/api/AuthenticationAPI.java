@@ -2,18 +2,15 @@ package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountReponse;
-import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
-import java.util.List;
+
 
 @RestController
 @RequestMapping("api")
@@ -73,30 +70,5 @@ public class AuthenticationAPI {
     @PutMapping("/block/{email}")
     public ResponseEntity blockUser(@PathVariable String email) {
         return ResponseEntity.ok(authenticationService.blockUser(email));
-    }
-
-    // getStaffLists of Club-Owner
-    @GetMapping("/staff")
-    public List<Account> getStaffs() {
-        return authenticationService.getAllStaffs();
-    }
-
-    @PostMapping("/staff")
-    public ResponseEntity registerStaff(@RequestBody StaffRegisterRequest staffRegisterRequest) {
-        try {
-            StaffResponse staff = authenticationService.registerStaff(staffRegisterRequest);
-            return ResponseEntity.ok(staff);
-        }catch(BadRequestException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    // block Staff by Club-Owner
-    @PutMapping("/block-staff/{id}")
-    public ResponseEntity<String> blockStaff(@PathVariable Long id) {
-        boolean blockedCheck = authenticationService.blockStaff(id);
-        if (blockedCheck)
-            return ResponseEntity.ok("Blocked staff");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not found the staff to block !!");
     }
 }

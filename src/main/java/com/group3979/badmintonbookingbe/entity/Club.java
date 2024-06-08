@@ -41,9 +41,5 @@ public class Club {
 
     @JsonIgnore
     @OneToMany(mappedBy = "club")
-    List<ClubSlot> clubSlots;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "club")
     List<Account> staff;
 }
