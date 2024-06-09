@@ -3,14 +3,12 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.entity.ClubSlot;
 import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
-import com.group3979.badmintonbookingbe.repository.IClubSlotRepository;
 import com.group3979.badmintonbookingbe.repository.IImageClubRespository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import javassist.NotFoundException;
@@ -23,16 +21,9 @@ import java.util.List;
 
 @Service
 public class ClubService {
-
     // xử lí logic CRUD
     @Autowired
-    ClubSlotService clubSlotService;
-
-    @Autowired
     IImageClubRespository imageClubRepository;
-
-    @Autowired
-    IClubSlotRepository clubSlotRepository;
 
     @Autowired
     IClubRepository clubRepository;

@@ -1,24 +1,26 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClubSlot {
+public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long clubSlotId;
-    private float price;
+    private long slotId;
     private int time;
 
-    @ManyToOne
-    @JoinColumn(name = "club_id")
-    private Club club;
+    @JsonIgnore
+    @OneToMany(mappedBy = "slot")
+    List<CourtSlot> courtSlots;
 }
