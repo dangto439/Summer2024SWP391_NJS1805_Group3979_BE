@@ -36,8 +36,13 @@ public class CourtService {
         return courtResponses;
     }
 
-    public Court getCourtById(long id) {
-        return courtRepository.findByCourtId(id);
+    public CourtResponse getCourtById(long id) {
+        Court court = courtRepository.findByCourtId(id);
+        CourtResponse courtResponse = new CourtResponse();
+        courtResponse.setCourtStatus(court.getCourtStatus());
+        courtResponse.setCourtName(court.getCourtName());
+        courtResponse.setCourtId(court.getCourtId());
+        return courtResponse;
     }
 
     // create courts by quantity of a Club when creating club

@@ -31,6 +31,11 @@ public class CourtAPI {
         List<CourtResponse> courts = courtService.getAllCourtsByClub(clubId);
         return ResponseEntity.ok(courts);
     }
+    @GetMapping("/court/{courtId}")
+    public ResponseEntity<CourtResponse> getCourtById(@PathVariable Long courtId) {
+        CourtResponse court = courtService.getCourtById(courtId);
+        return ResponseEntity.ok(court);
+    }
     @PutMapping("/court/{id}")
     public ResponseEntity<String> inactiveCourtStatus(@PathVariable Long id) {
         boolean result = courtService.inactiveCourtStatus(id);
