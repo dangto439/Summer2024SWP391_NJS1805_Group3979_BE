@@ -50,6 +50,10 @@ public class Account implements UserDetails{
     @OneToMany(mappedBy = "account")
     List<Club> clubs;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "account")
+    List<Booking> bookings;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
