@@ -36,15 +36,15 @@ public class CourtAPI {
         CourtResponse court = courtService.getCourtById(courtId);
         return ResponseEntity.ok(court);
     }
-    @PutMapping("/court/{id}")
+    @PutMapping("/court/inactive/{id}")
     public ResponseEntity<String> inactiveCourtStatus(@PathVariable Long id) {
         boolean result = courtService.inactiveCourtStatus(id);
         if (result) {
-            return ResponseEntity.ok("Deleted Successfully");
+            return ResponseEntity.ok("Inactive Successfully");
         }
-        return ResponseEntity.ok("Delete failed");
+        return ResponseEntity.ok("Inactive failed");
     }
-    @PutMapping("/court/delete/{id}")
+    @PutMapping("/court/{id}")
     public ResponseEntity<CourtResponse> changeCourtStatus(@RequestBody CourtRequest courtRequest) {
         CourtResponse courtResponse = courtService.changeCourtStatus(courtRequest);
         return ResponseEntity.ok(courtResponse);
