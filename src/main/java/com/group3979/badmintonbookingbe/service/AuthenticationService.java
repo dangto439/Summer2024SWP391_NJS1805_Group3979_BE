@@ -135,15 +135,11 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public void resetPassword(NewPasswordRequest newPasswordRequest) {
-        boolean isTokenExpired = tokenService.isTokenExpired(newPasswordRequest.getToken());
-        if (!isTokenExpired) {
-            Account account = tokenService.extractAccount(newPasswordRequest.getToken());
+
+            Account account = accountUtils.getCurrentAccount();
             account.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
             authenticationRepository.save(account);
 
-        } else {
-            throw new AuthException("Expired Token!");
-        }
     }
 
     // register Account for Staff (Role = "STAFF")
