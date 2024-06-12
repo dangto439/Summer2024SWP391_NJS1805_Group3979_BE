@@ -14,6 +14,7 @@ import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,6 +46,9 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${avatar.default.url}")
+    private String avatatDefault;
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return this.authenticationRepository.findAccountByEmail(email);
@@ -64,6 +68,7 @@ public class AuthenticationService implements UserDetailsService {
         account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
+        account.setAvatar(avatatDefault);
 
         if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
