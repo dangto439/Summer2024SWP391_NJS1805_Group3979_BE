@@ -26,7 +26,10 @@ public class ApiHandleException {
     public ResponseEntity<Object> handleException(AuthException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Object> handleCustomException(CustomException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     public ResponseEntity<Object> handleException(InternalAuthenticationServiceException ex) {
         return new ResponseEntity<>("Email này chưa đăng ký tài khoản!", HttpStatus.INTERNAL_SERVER_ERROR);

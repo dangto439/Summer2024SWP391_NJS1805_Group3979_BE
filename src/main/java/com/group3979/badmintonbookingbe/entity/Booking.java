@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +36,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private ExpirationStatus expirationStatus;
 
+
     @ManyToOne
     @JoinColumn(name = "acount_id")
     Account account;
@@ -41,4 +44,8 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "club_id")
     Club club;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "booking")
+    List<BookingDetail> bookingDetails;
 }
