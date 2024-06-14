@@ -37,6 +37,8 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
+    private WalletService walletService;
+    @Autowired
     private IAuthenticationRepository authenticationRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -74,6 +76,7 @@ public class AuthenticationService implements UserDetailsService {
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         // nhờ repository save xuống db
         account = authenticationRepository.save(account);
+        walletService.createWallet(account.getEmail()); // after save account to DB, create a wallet
         emailService.sendMail(account.getEmail(), account.getName());
         return account;
     }

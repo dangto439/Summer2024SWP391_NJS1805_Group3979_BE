@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface IAuthenticationRepository extends JpaRepository<Account, Long> {
     Account findAccountByEmail(String email);
+    Account findAccountById(Long id);
     @Query("SELECT a FROM Account a WHERE a.role = :role AND a.supervisorID = :supervisorID")
     List<Account> findClubStaffBySupervisorId(@Param("role") Role role, @Param("supervisorID") Long supervisorID);
 }
