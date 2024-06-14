@@ -40,7 +40,7 @@ public class CourtSlotService {
 
                 if (start >= courtSlotRequest.getRushHourRequest().getStartTime() &&
                         start < courtSlotRequest.getRushHourRequest().getEndTime()) {
-                    courtSlot.setPrice((float) (courtSlotRequest.getPrice() * 1.2));
+                    courtSlot.setPrice(courtSlotRequest.getRushHourRequest().getRushPrice());
                 } else {
                     courtSlot.setPrice(courtSlotRequest.getPrice());
                 }
@@ -56,7 +56,7 @@ public class CourtSlotService {
 
                 CourtSlotResponse courtSlotResponse = CourtSlotResponse.builder()
                         .courtSlotId(courtSlot.getCourtSlotId())
-                        .price(courtSlot.getPrice())
+                        .price(courtSlotRequest.getRushHourRequest().getRushPrice())
                         .courtResponse(courtResponse)
                         .clubId(clubId)
                         .slotId(courtSlot.getSlot().getSlotId())
@@ -174,8 +174,8 @@ public class CourtSlotService {
                 List<CourtSlot> courtSlotList = courtSlotRepository.findByCourt(court);
                     for(CourtSlot courtSlot : courtSlotList) {
                         if(courtSlot.getSlot().getTime() >= courtSlotRequest.getRushHourRequest().getStartTime() &&
-                        courtSlot.getSlot().getTime() < club.getCloseTime()) {
-                            courtSlot.setPrice(courtSlotRequest.getPrice() * (float) 1.2);
+                        courtSlot.getSlot().getTime() < courtSlotRequest.getRushHourRequest().getEndTime()) {
+                            courtSlot.setPrice(courtSlotRequest.getRushHourRequest().getRushPrice());
                         }else{
                             courtSlot.setPrice(courtSlotRequest.getPrice());
                         }

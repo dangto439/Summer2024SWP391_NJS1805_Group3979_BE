@@ -1,7 +1,7 @@
 package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.request.*;
-import com.group3979.badmintonbookingbe.model.response.AccountReponse;
+import com.group3979.badmintonbookingbe.model.response.AccountResponse;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class AuthenticationAPI {
     }
 
     @PostMapping("/login-google")
-    public ResponseEntity<AccountReponse> loginGoogle(@RequestBody LoginGoogleRequest logingoogleRequest) {
+    public ResponseEntity<AccountResponse> loginGoogle(@RequestBody LoginGoogleRequest logingoogleRequest) {
         return ResponseEntity.ok(authenticationService.loginGoogle(logingoogleRequest));
     }
 
