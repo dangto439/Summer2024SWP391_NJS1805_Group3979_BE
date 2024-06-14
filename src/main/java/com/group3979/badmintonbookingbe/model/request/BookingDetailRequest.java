@@ -8,7 +8,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class BookingDetailRequest {
-    private Long CourtSlot;
+    private Long CourtSlotId;
     private Date playingDate;
-    private String promotionCode;
+
 }

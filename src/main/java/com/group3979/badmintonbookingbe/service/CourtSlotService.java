@@ -96,4 +96,7 @@ public class CourtSlotService {
         }
         return courtSlotResponses;
     }
+//    public float getDefaultPriceByClub(Club club){
+//
+//    }
 }

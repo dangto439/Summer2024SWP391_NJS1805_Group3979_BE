@@ -23,19 +23,20 @@ import java.util.List;
 public class ClubService {
     // xử lí logic CRUD
     @Autowired
-    IImageClubRespository imageClubRepository;
+    private IImageClubRespository imageClubRepository;
+
 
     @Autowired
-    IClubRepository clubRepository;
+    private AccountUtils accountUtils;
 
     @Autowired
-    AccountUtils accountUtils;
+    private IAuthenticationRepository authenticationRepository;
 
     @Autowired
-    IAuthenticationRepository authenticationRepository;
+    private IClubRepository clubRepository;
 
     @Autowired
-    CourtService courtService;
+    private CourtService courtService;
     @Autowired
     private ImageClubService imageClubService;
 

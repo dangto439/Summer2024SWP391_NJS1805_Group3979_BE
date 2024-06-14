@@ -39,6 +39,7 @@ public class Filter extends OncePerRequestFilter{
             "/api/forgot-password",
             "/api/reset-password",
             "/api/login-google"
+
     );
     private boolean isPermitted(String uri) {
         AntPathMatcher matcher = new AntPathMatcher();
@@ -47,7 +48,6 @@ public class Filter extends OncePerRequestFilter{
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();///login, /register
-        System.out.println(uri);
         if (isPermitted(uri)) {
             // yêu cầu truy cập 1 api => ai cũng truy cập đc
             filterChain.doFilter(request, response); // cho phép truy cập dô controller
@@ -83,9 +83,7 @@ public class Filter extends OncePerRequestFilter{
     }
 
     public String getToken(HttpServletRequest request) {
-        System.out.println(request);
         String authHeader = request.getHeader("Authorization");
-        System.out.println(authHeader);
         if (authHeader == null) return null;
         return authHeader.substring(7);
     }
