@@ -21,8 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account implements UserDetails{
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -41,6 +39,9 @@ public class Account implements UserDetails{
     AccountStatus accountStatus;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    @OneToOne(mappedBy = "account")
+    private Wallet wallet;
 
     @ManyToOne
     @JoinColumn(name = "club_id")

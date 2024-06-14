@@ -1,6 +1,5 @@
 package com.group3979.badmintonbookingbe.service;
 
-import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import com.group3979.badmintonbookingbe.eNum.CourtStatus;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Court;

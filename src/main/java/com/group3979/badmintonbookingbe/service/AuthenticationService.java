@@ -9,9 +9,11 @@ import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.model.request.*;
+
 import com.group3979.badmintonbookingbe.model.response.AccountReponse;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
+
 import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -39,6 +41,8 @@ public class AuthenticationService implements UserDetailsService {
     private AccountUtils accountUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private WalletService walletService;
     @Autowired
     private IAuthenticationRepository authenticationRepository;
     @Autowired
@@ -77,6 +81,7 @@ public class AuthenticationService implements UserDetailsService {
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         // nhờ repository save xuống db
         account = authenticationRepository.save(account);
+        walletService.createWallet(account.getEmail()); // after save account to DB, create a wallet
         emailService.sendMail(account.getEmail(), account.getName());
         return account;
     }
@@ -87,23 +92,23 @@ public class AuthenticationService implements UserDetailsService {
         Account account = authenticationRepository.findAccountByEmail(loginRequest.getEmail());
         if (account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
             String token = tokenService.generateToken(account,24*60*60*1000);
-            AccountReponse accountReponse = new AccountReponse();
-            accountReponse.setId(account.getId());
-            accountReponse.setPhone(account.getPhone());
-            accountReponse.setName(account.getName());
-            accountReponse.setEmail(account.getEmail());
-            accountReponse.setRole(account.getRole());
-            accountReponse.setSupervisorID(account.getSupervisorID());
-            accountReponse.setGender(account.getGender());
-            accountReponse.setAccountStatus(account.getAccountStatus());
-            accountReponse.setToken(token);
-            return accountReponse;
+            AccountResponse accountResponse = new AccountResponse();
+            accountResponse.setId(account.getId());
+            accountResponse.setPhone(account.getPhone());
+            accountResponse.setName(account.getName());
+            accountResponse.setEmail(account.getEmail());
+            accountResponse.setRole(account.getRole());
+            accountResponse.setSupervisorID(account.getSupervisorID());
+            accountResponse.setGender(account.getGender());
+            accountResponse.setAccountStatus(account.getAccountStatus());
+            accountResponse.setToken(token);
+            return accountResponse;
         }
         return null;
     }
 
-    public AccountReponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
-        AccountReponse accountReponse = new AccountReponse();
+    public AccountResponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
+        AccountResponse accountResponse = new AccountResponse();
         System.out.println(loginGoogleRequest.getToken());
         try {
             FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
@@ -117,19 +122,19 @@ public class AuthenticationService implements UserDetailsService {
                 account.setAccountStatus(AccountStatus.ACTIVE);
                 account = authenticationRepository.save(account);
             }
-            accountReponse.setId(account.getId());
-            accountReponse.setPhone(account.getPhone());
-            accountReponse.setName(account.getName());
-            accountReponse.setEmail(account.getEmail());
-            accountReponse.setRole(account.getRole());
-            accountReponse.setSupervisorID(account.getSupervisorID());
-            accountReponse.setGender(account.getGender());
-            accountReponse.setAccountStatus(account.getAccountStatus());
-            accountReponse.setToken(tokenService.generateToken(account,24*60*60*1000));
+            accountResponse.setId(account.getId());
+            accountResponse.setPhone(account.getPhone());
+            accountResponse.setName(account.getName());
+            accountResponse.setEmail(account.getEmail());
+            accountResponse.setRole(account.getRole());
+            accountResponse.setSupervisorID(account.getSupervisorID());
+            accountResponse.setGender(account.getGender());
+            accountResponse.setAccountStatus(account.getAccountStatus());
+            accountResponse.setToken(tokenService.generateToken(account,24*60*60*1000));
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
         }
-        return accountReponse;
+        return accountResponse;
     }
     public AuthenticationResponse getAccountReponseByEmail(String email){
         Account account = authenticationRepository.findAccountByEmail(email);

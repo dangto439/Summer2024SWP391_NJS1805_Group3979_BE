@@ -8,4 +8,5 @@ import lombok.Setter;
 public class RushHourRequest {
     private int startTime;
     private int endTime;
+    private float rushPrice;
 }
