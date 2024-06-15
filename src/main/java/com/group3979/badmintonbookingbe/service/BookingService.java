@@ -8,10 +8,7 @@ import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
-import com.group3979.badmintonbookingbe.repository.IBookingRepository;
-import com.group3979.badmintonbookingbe.repository.IClubRepository;
-import com.group3979.badmintonbookingbe.repository.ICourtRepository;
-import com.group3979.badmintonbookingbe.repository.ICourtSlotRepository;
+import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +39,9 @@ public class BookingService {
 
     @Autowired
     ICourtSlotRepository courtSlotRepository;
+
+    @Autowired
+    IDiscountRuleRepository discountRuleRepository;
 
     public BookingResponse createDailyBooking(DailyBookingRequest dailyBookingRequest) {
         Booking flexBooking = bookingRepository.findByBookingId(dailyBookingRequest.getFlexibleBookingId());
@@ -82,12 +82,13 @@ public class BookingService {
             flexibleBooking.setExpirationStatus(ExpirationStatus.UNEXPIRED);
             flexibleBooking.setBookingType(BookingType.FLEXIBLEBOOKING);
             float totalPrice;
-            float discountPrice = 0;
+            float discountPrice = (float) ( temporaryPrice *
+                    (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent()/100));
             if (promotion != null) {
                 discountPrice = promotion.getDiscount();
                 totalPrice = temporaryPrice - discountPrice;
             } else {
-                totalPrice = temporaryPrice;
+                totalPrice = temporaryPrice - discountPrice;
             }
             flexibleBooking.setTotalPrice(totalPrice);
             flexibleBooking = bookingRepository.save(flexibleBooking);

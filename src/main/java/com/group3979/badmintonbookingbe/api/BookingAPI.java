@@ -1,10 +1,11 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.entity.Booking;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
+import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
+import com.group3979.badmintonbookingbe.service.BookingDetailService;
 import com.group3979.badmintonbookingbe.service.BookingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 public class BookingAPI {
     @Autowired
     BookingService bookingService;
+
+    @Autowired
+    BookingDetailService bookingDetailService;
+
     //dat lich ngay
     @PostMapping("/daily")
     public ResponseEntity<BookingResponse> createDailyBooking(@RequestBody DailyBookingRequest dailyBookingRequest) {
@@ -36,5 +41,10 @@ public class BookingAPI {
     public ResponseEntity<BookingResponse> createFixedBooking(@RequestBody FixedBookingRequest fixedBookingRequest){
         BookingResponse fixedBooking = bookingService.createFixedBooking(fixedBookingRequest);
         return ResponseEntity.ok().body(fixedBooking);
+    }
+    @DeleteMapping("/booking-detail/{bookingDetailId}")
+    public ResponseEntity<BookingDetailResponse> cancelBookingDetail(@RequestParam long bookingDetailId){
+        BookingDetailResponse bookingDetailResponse = bookingDetailService.cancelBookingDetail(bookingDetailId);
+        return ResponseEntity.ok().body(bookingDetailResponse);
     }
 }
