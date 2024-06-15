@@ -107,4 +107,12 @@ public class PromotionService {
 
         return promotionResponse;
     }
+    public Promotion checkValidPromotion(long clubId, String promotionCode){
+        Promotion promotion = promotionRepository.findPromotionByPromotionCode(promotionCode);
+        if(promotion != null && clubId == promotion.getClub().getClubId()
+                && promotion.getPromotionStatus().equals(PromotionStatus.ACTIVE)){
+            return promotion;
+        }
+        return null;
+    }
 }

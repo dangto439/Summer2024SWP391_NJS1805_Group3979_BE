@@ -11,4 +11,5 @@ import java.util.List;
 public interface IPromotionRepository extends JpaRepository<Promotion, Long> {
     List<Promotion> findByClub(Club club);
     Promotion findByPromotionId(Long promotionId);
+    Promotion findPromotionByPromotionCode(String promotionCode);
 }

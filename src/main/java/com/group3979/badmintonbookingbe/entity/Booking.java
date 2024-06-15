@@ -48,4 +48,8 @@ public class Booking {
     @JsonIgnore
     @OneToMany(mappedBy = "booking")
     List<BookingDetail> bookingDetails;
+
+    @ManyToOne
+    @JoinColumn(name = "promotion_id")
+    Promotion promotion;
 }

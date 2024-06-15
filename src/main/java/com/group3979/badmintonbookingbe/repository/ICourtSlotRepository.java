@@ -16,8 +16,6 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
     boolean existsByCourtAndSlot_Time(Court court, int time);
 
     List<CourtSlot> findByCourt(Court court);
-
-
     CourtSlot findCourtSlotByCourtSlotId(Long id);
 
     @Query("SELECT a \n" +
@@ -43,6 +41,14 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
             "WHERE b.status != 'CANCELLED' AND b.playingDate =:playingDate )")
     CourtSlot findCourtSlotByPlayingDateAndSlot(@Param("playingDate") Date playingDate,
                                                       @Param("court") Court court, @Param("slot") Slot slot);
+    @Query("SELECT a \n" +
+            "FROM CourtSlot a \n" +
+            "WHERE a.court = :court \n" +
+            "AND a IN (SELECT b.courtSlot\n" +
+            "FROM BookingDetail b\n" +
+            "WHERE b.status != 'CANCELLED' AND b.playingDate =:playingDate )")
+    List<CourtSlot> findCourtSlotByPlayingDate(@Param("playingDate") Date playingDate,
+                                                @Param("court") Court court);
 }
 
 

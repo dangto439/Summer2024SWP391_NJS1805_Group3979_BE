@@ -5,6 +5,7 @@ import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.model.request.BookingDetailRequest;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
+import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,19 @@ public class BookingDetailService {
     @Autowired
     private ISlotRepository slotRepository;
 
-    public void createDailyBookingDetail(Booking booking, DailyBookingRequest dailyBookingRequest) {
-        float totalprice = 0;
+    @Autowired
+    PromotionService promotionService;
+
+    public BookingResponse createDailyBookingDetail(Booking booking, DailyBookingRequest dailyBookingRequest) {
+        float temporaryPrice = 0;
+        Promotion promotion =
+                promotionService.checkValidPromotion(booking.getClub().getClubId(),dailyBookingRequest.getPromotionCode());
+        System.out.println(promotion);
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
             CourtSlot courtSlot = courtSlotRepository
                     .findCourtSlotByCourtSlotId(bookingDetailRequest.getCourtSlotId());
-            totalprice += courtSlot.getPrice();
+            temporaryPrice += courtSlot.getPrice();
             bookingDetail.setBooking(booking);
             bookingDetail.setCourtSlot(courtSlot);
             bookingDetail.setPrice(courtSlot.getPrice());
@@ -50,13 +57,24 @@ public class BookingDetailService {
             bookingDetailRepository.save(bookingDetail);
 
         }
-        booking.setTotalPrice(totalprice);
-        bookingRepository.save(booking);
+        float totalPrice;
+        float discountPrice = 0;
+        if(promotion != null){
+            discountPrice = promotion.getDiscount();
+            totalPrice = temporaryPrice - discountPrice;
+        }else{
+            totalPrice = temporaryPrice;
+        }
+        booking.setTotalPrice(totalPrice);
+        booking = bookingRepository.save(booking);
+        return this.getBookingResponse(booking,temporaryPrice,discountPrice);
     }
 
-    public void createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
-        float totalprice = 0;
+    public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
+        float temporaryPrice = 0;
         int amountTime = flexibleBooking.getAmountTime();
+        Club club = flexibleBooking.getClub();
+        Promotion promotion = promotionService.checkValidPromotion(club.getClubId(),dailyBookingRequest.getPromotionCode());
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
             CourtSlot courtSlot = courtSlotRepository
@@ -68,7 +86,7 @@ public class BookingDetailService {
             bookingDetail.setPlayingDate(this.truncateTime(bookingDetailRequest.getPlayingDate()));
             bookingDetailRepository.save(bookingDetail);
             if (amountTime <= 0) {
-                totalprice += courtSlot.getPrice();
+                temporaryPrice += courtSlot.getPrice();
             }
             amountTime--;
         }
@@ -77,8 +95,17 @@ public class BookingDetailService {
         } else {
             flexibleBooking.setAmountTime(amountTime);
         }
-        flexibleBooking.setTotalPrice(totalprice);
-        bookingRepository.save(flexibleBooking);
+        float totalPrice;
+        float discountPrice = 0;
+        if(promotion != null){
+            discountPrice = promotion.getDiscount();
+            totalPrice = temporaryPrice - discountPrice;
+        }else{
+            totalPrice = temporaryPrice;
+        }
+        flexibleBooking.setTotalPrice(totalPrice);
+        flexibleBooking = bookingRepository.save(flexibleBooking);
+        return this.getBookingResponse(flexibleBooking,temporaryPrice,discountPrice);
     }
     public Date truncateTime(Date inputDate) {
         if (inputDate == null) {
@@ -97,17 +124,16 @@ public class BookingDetailService {
         return calendar.getTime();
     }
 
-    public void createFixedBookingDetail(Booking fixedBooking, FixedBookingRequest fixedBookingRequest) {
-        List<Date> playingDates = this.getAllDayOfBooking(fixedBookingRequest.getYear(),
+    public BookingResponse createFixedBookingDetail(Booking fixedBooking, FixedBookingRequest fixedBookingRequest) {
+        List<Date> playingDates = this.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth() , fixedBookingRequest.getDayOfWeeks());
-        float totalPrice = 0;
-        for(Date date:playingDates){
-            System.out.println(date.getTime());
-        }
+        Promotion promotion =
+                promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(),fixedBookingRequest.getPromotionCode());
+        float temporaryPrice = 0;
         for(Date playingDate: playingDates){
             for(Long slotId: fixedBookingRequest.getSlotIds()){
+                //select courtSlot
                 CourtSlot courtSlot = this.selectCourtSlot(fixedBookingRequest.getClubId(), slotId,playingDate);
-                //System.out.println(courtSlot);
                 if(courtSlot != null) {
                     System.out.println(courtSlot);
                     BookingDetail bookingDetail = new BookingDetail();
@@ -115,7 +141,7 @@ public class BookingDetailService {
                     bookingDetail.setCourtSlot(courtSlot);
                     bookingDetail.setPrice(courtSlot.getPrice());
                     bookingDetail.setBooking(fixedBooking);
-                    totalPrice += courtSlot.getPrice();
+                    temporaryPrice += courtSlot.getPrice();
                     bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
                     bookingDetail =  bookingDetailRepository.save(bookingDetail);
                     System.out.println(bookingDetail.getBookingDetailId());
@@ -123,8 +149,17 @@ public class BookingDetailService {
             }
 
         }
+        float totalPrice;
+        float discountPrice = 0;
+        if(promotion != null){
+            discountPrice = promotion.getDiscount();
+            totalPrice = temporaryPrice - discountPrice;
+        }else{
+            totalPrice = temporaryPrice;
+        }
         fixedBooking.setTotalPrice(totalPrice);
-        bookingRepository.save(fixedBooking);
+        fixedBooking = bookingRepository.save(fixedBooking);
+        return this.getBookingResponse(fixedBooking,temporaryPrice,discountPrice);
     }
 
     public CourtSlot selectCourtSlot(long clubId,Long slotId, Date playingDate){
@@ -134,21 +169,17 @@ public class BookingDetailService {
         for (Court court: courts){
             CourtSlot existedCourtSlot =
                     courtSlotRepository.findCourtSlotByPlayingDateAndSlot(playingDate,court,slot);
-            //System.out.println(existedCourtSlot);
             if(existedCourtSlot == null){
-                System.out.println(courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot));
                 return courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot);
             }
         }
         return null;
     }
-    public List<Date> getAllDayOfBooking(int year, int month, List<Integer> dayOfWeeks) {
+    public List<Date> getAllDaysOfBooking(int year, int month, List<Integer> dayOfWeeks) {
         List<Date> days = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, 1);
-
         int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-
         for (int day = 1; day <= daysInMonth; day++) {
             calendar.set(Calendar.DAY_OF_MONTH, day);
             for (Integer dayOfWeek : dayOfWeeks) {
@@ -164,13 +195,22 @@ public class BookingDetailService {
         }
         return days;
     }
-    public Date getCurrentDateWithoutTime() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0); // Đặt giờ về 0
-        calendar.set(Calendar.MINUTE, 0);      // Đặt phút về 0
-        calendar.set(Calendar.SECOND, 0);      // Đặt giây về 0
-        calendar.set(Calendar.MILLISECOND, 0); // Đặt mili giây về 0
-        return calendar.getTime();
+    public BookingResponse getBookingResponse(Booking booking, float temporaryPrice, float discountPrice){
+        BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
+                .bookingDate(booking.getBookingDate())
+                .bookingId(booking.getBookingId())
+                .amountTime(booking.getAmountTime())
+                .totalPrice(booking.getTotalPrice())
+                .temporaryPrice(temporaryPrice)
+                .discountPrice(discountPrice)
+                .ClubId(booking.getClub().getClubId())
+                .bookingType(booking.getBookingType())
+                .expirationStatus(booking.getExpirationStatus())
+                .customerId(booking.getAccount().getId())
+                .build();
+        return bookingResponse;
     }
+
+
 }
 

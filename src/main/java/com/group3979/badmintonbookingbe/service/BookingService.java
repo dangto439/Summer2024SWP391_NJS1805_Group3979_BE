@@ -2,16 +2,16 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
-import com.group3979.badmintonbookingbe.entity.Booking;
-import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.entity.Court;
+import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
+import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.repository.IBookingRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.ICourtRepository;
+import com.group3979.badmintonbookingbe.repository.ICourtSlotRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,35 +33,46 @@ public class BookingService {
 
     @Autowired
     private IClubRepository clubRepository;
-    @Autowired
-    private ICourtRepository courtRepository;
 
-    public Booking createDailyBooking(DailyBookingRequest dailyBookingRequest) {
+    @Autowired
+    PromotionService promotionService;
+
+    @Autowired
+    CourtSlotService courtSlotService;
+
+    @Autowired
+    ICourtSlotRepository courtSlotRepository;
+
+    public BookingResponse createDailyBooking(DailyBookingRequest dailyBookingRequest) {
         Booking flexBooking = bookingRepository.findByBookingId(dailyBookingRequest.getFlexibleBookingId());
-        Court court = courtRepository.findByCourtId(dailyBookingRequest.getBookingDetailRequests().get(0).getCourtSlotId());
-        Club club = clubRepository.findByClubId(court.getClub().getClubId());
+        CourtSlot courtSlot = courtSlotRepository.findCourtSlotByCourtSlotId(dailyBookingRequest.getBookingDetailRequests().get(0).getCourtSlotId());
+        Club club = clubRepository.findByClubId(courtSlot.getCourt().getClub().getClubId());
 
         //xem da dat lich linh hoat ch va lich linh hoat con han ko va dat dung club ch
         if (flexBooking != null && flexBooking.getBookingType().equals(BookingType.FLEXIBLEBOOKING)
                 && flexBooking.getExpirationStatus().equals(ExpirationStatus.UNEXPIRED)
                 && club.getClubId() == flexBooking.getClub().getClubId()) {
-            bookingDetailService.createFlexibleBookingDetail(flexBooking, dailyBookingRequest);
-            return flexBooking;
+            return bookingDetailService.createFlexibleBookingDetail(flexBooking, dailyBookingRequest);
+
         } else {
             Booking booking = new Booking();
             booking.setAccount(accountUtils.getCurrentAccount());
             booking.setBookingDate(new Date());
             booking.setBookingType(BookingType.DAILYBOOKING);
+            booking.setClub(club);
             booking = bookingRepository.save(booking);
-            bookingDetailService.createDailyBookingDetail(booking, dailyBookingRequest);
-            return booking;
+            return bookingDetailService.createDailyBookingDetail(booking, dailyBookingRequest);
+
         }
 
     }
 
-    public Booking createFlexibleBooking(FlexibleBookingRequest flexibleBookingRequest) {
+    public BookingResponse createFlexibleBooking(FlexibleBookingRequest flexibleBookingRequest) {
         Club club = clubRepository.findByClubId(flexibleBookingRequest.getClubId());
         if (club != null) {
+            Promotion promotion = promotionService.checkValidPromotion(club.getClubId(),
+                                                                        flexibleBookingRequest.getPromotionCode());
+            float temporaryPrice = courtSlotService.getDefaultPriceByClub(club) * flexibleBookingRequest.getAmountTime();
             Booking flexibleBooking = new Booking();
             flexibleBooking.setAccount(accountUtils.getCurrentAccount());
             flexibleBooking.setBookingDate(new Date());
@@ -70,12 +81,23 @@ public class BookingService {
             flexibleBooking.setClub(club);
             flexibleBooking.setExpirationStatus(ExpirationStatus.UNEXPIRED);
             flexibleBooking.setBookingType(BookingType.FLEXIBLEBOOKING);
-            return bookingRepository.save(flexibleBooking);
-        }else{
+            float totalPrice;
+            float discountPrice = 0;
+            if (promotion != null) {
+                discountPrice = promotion.getDiscount();
+                totalPrice = temporaryPrice - discountPrice;
+            } else {
+                totalPrice = temporaryPrice;
+            }
+            flexibleBooking.setTotalPrice(totalPrice);
+            flexibleBooking = bookingRepository.save(flexibleBooking);
+            return bookingDetailService.getBookingResponse(flexibleBooking,temporaryPrice,discountPrice);
+        } else {
             throw new CustomException("Club không tồn tại");
         }
     }
-    public Booking createFixedBooking(FixedBookingRequest fixedBookingRequest){
+
+    public BookingResponse createFixedBooking(FixedBookingRequest fixedBookingRequest) {
         Club club = clubRepository.findByClubId(fixedBookingRequest.getClubId());
         Booking fixedBooking = new Booking();
         if (club != null) {
@@ -84,11 +106,10 @@ public class BookingService {
             fixedBooking.setBookingType(BookingType.FIXEDBOOKING);
             fixedBooking.setBookingDate(new Date());
             fixedBooking = bookingRepository.save(fixedBooking);
-            bookingDetailService.createFixedBookingDetail(fixedBooking, fixedBookingRequest);
-        }else{
+            return bookingDetailService.createFixedBookingDetail(fixedBooking, fixedBookingRequest);
+        } else {
             throw new CustomException("Club không tồn tại");
         }
-        return fixedBooking;
     }
 }
 
