@@ -30,6 +30,10 @@ public class Club {
     @JoinColumn(name = "account_id")
     Account account;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "club")
+    private DiscountRule discountRule;
+
     //
     @JsonIgnore
     @OneToMany(mappedBy = "club")
@@ -47,7 +51,7 @@ public class Club {
     @OneToMany(mappedBy = "club")
     List<Booking> bookings;
 
-  @JsonIgnore
+    @JsonIgnore
     @OneToMany(mappedBy = "club")
     List<Promotion> promotions;
 }

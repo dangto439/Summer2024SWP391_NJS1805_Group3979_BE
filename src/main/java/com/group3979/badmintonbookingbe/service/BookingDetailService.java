@@ -2,9 +2,11 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingDetailStatus;
 import com.group3979.badmintonbookingbe.entity.*;
+import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.BookingDetailRequest;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
+import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,10 @@ public class BookingDetailService {
     @Autowired
     PromotionService promotionService;
 
+    @Autowired
+    IDiscountRuleRepository discountRuleRepository;
+
+    //dat lich ngay ch dat lich linh hoat
     public BookingResponse createDailyBookingDetail(Booking booking, DailyBookingRequest dailyBookingRequest) {
         float temporaryPrice = 0;
         Promotion promotion =
@@ -69,12 +75,11 @@ public class BookingDetailService {
         booking = bookingRepository.save(booking);
         return this.getBookingResponse(booking,temporaryPrice,discountPrice);
     }
-
+    //dat lich ngay sau khi da dat lich linh hoat
     public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
-        float temporaryPrice = 0;
+        float totalPrice = 0;
         int amountTime = flexibleBooking.getAmountTime();
         Club club = flexibleBooking.getClub();
-        Promotion promotion = promotionService.checkValidPromotion(club.getClubId(),dailyBookingRequest.getPromotionCode());
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
             CourtSlot courtSlot = courtSlotRepository
@@ -86,7 +91,7 @@ public class BookingDetailService {
             bookingDetail.setPlayingDate(this.truncateTime(bookingDetailRequest.getPlayingDate()));
             bookingDetailRepository.save(bookingDetail);
             if (amountTime <= 0) {
-                temporaryPrice += courtSlot.getPrice();
+                totalPrice += courtSlot.getPrice();
             }
             amountTime--;
         }
@@ -95,17 +100,9 @@ public class BookingDetailService {
         } else {
             flexibleBooking.setAmountTime(amountTime);
         }
-        float totalPrice;
-        float discountPrice = 0;
-        if(promotion != null){
-            discountPrice = promotion.getDiscount();
-            totalPrice = temporaryPrice - discountPrice;
-        }else{
-            totalPrice = temporaryPrice;
-        }
         flexibleBooking.setTotalPrice(totalPrice);
         flexibleBooking = bookingRepository.save(flexibleBooking);
-        return this.getBookingResponse(flexibleBooking,temporaryPrice,discountPrice);
+        return this.getBookingResponse(flexibleBooking,totalPrice,0);
     }
     public Date truncateTime(Date inputDate) {
         if (inputDate == null) {
@@ -123,7 +120,7 @@ public class BookingDetailService {
 
         return calendar.getTime();
     }
-
+    //dat lich co dinh
     public BookingResponse createFixedBookingDetail(Booking fixedBooking, FixedBookingRequest fixedBookingRequest) {
         List<Date> playingDates = this.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth() , fixedBookingRequest.getDayOfWeeks());
@@ -150,12 +147,13 @@ public class BookingDetailService {
 
         }
         float totalPrice;
-        float discountPrice = 0;
+        float discountPrice = (float) ( temporaryPrice *
+                (discountRuleRepository.findDiscountRuleByClub(fixedBooking.getClub()).getFixedPercent()/100));
         if(promotion != null){
-            discountPrice = promotion.getDiscount();
+            discountPrice += promotion.getDiscount();
             totalPrice = temporaryPrice - discountPrice;
         }else{
-            totalPrice = temporaryPrice;
+            totalPrice = temporaryPrice - discountPrice;
         }
         fixedBooking.setTotalPrice(totalPrice);
         fixedBooking = bookingRepository.save(fixedBooking);
@@ -210,7 +208,27 @@ public class BookingDetailService {
                 .build();
         return bookingResponse;
     }
+    public BookingDetailResponse cancelBookingDetail(long bookingDetailId){
+       BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByBookingDetailId(bookingDetailId);
+       if(bookingDetail != null){
+           bookingDetail.setStatus(BookingDetailStatus.CANCELLED);
+           bookingDetail = bookingDetailRepository.save(bookingDetail);
+           return this.getBookingDetailResponse(bookingDetail);
+       }else {
+           throw new CustomException("không tồn tại đơn đặt sân này");
+       }
 
+    }
+    public BookingDetailResponse getBookingDetailResponse(BookingDetail bookingDetail){
+        return BookingDetailResponse.builder()
+                .bookingDetailId(bookingDetail.getBookingDetailId())
+                .checkInCode(bookingDetail.getCheckInCode())
+                .price(bookingDetail.getPrice())
+                .status(bookingDetail.getStatus())
+                .CourtSlotId(bookingDetail.getCourtSlot().getCourtSlotId())
+                .playingDate(bookingDetail.getPlayingDate())
+                .bookingId(bookingDetail.getBooking().getBookingId()).build();
+    }
 
 }
 
