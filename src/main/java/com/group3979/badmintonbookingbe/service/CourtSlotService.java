@@ -141,6 +141,11 @@ public class CourtSlotService {
         return courtSlotResponses;
     }
 
+//    public float getDefaultPriceByClub(Club club){
+//
+//    }
+
+  
 //        Court court = courtRepository.findByCourtId(courtId);
 //
 //        List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);

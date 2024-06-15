@@ -1,10 +1,13 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -26,5 +29,7 @@ public class CourtSlot {
     @JoinColumn(name = "slot_id")
     private Slot slot;
 
-
+    @JsonIgnore
+    @OneToMany(mappedBy = "courtSlot")
+    List<BookingDetail> bookingDetails;
 }

@@ -6,9 +6,14 @@ import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.entity.Club;
+import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.model.request.*;
+
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
+import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.model.response.ClubResponse;
+
 import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -130,6 +135,18 @@ public class AuthenticationService implements UserDetailsService {
             e.printStackTrace();
         }
         return accountResponse;
+    }
+    public AuthenticationResponse getAccountReponseByEmail(String email){
+        Account account = authenticationRepository.findAccountByEmail(email);
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .email(account.getEmail())
+                .role(account.getRole())
+                .phone(account.getPhone())
+                .name(account.getName())
+                .gender(account.getGender())
+                .accountStatus(account.getAccountStatus())
+                .build();
+        return authenticationResponse;
     }
 
     public void resetPassword(NewPasswordRequest newPasswordRequest) {

@@ -3,6 +3,7 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.CourtStatus;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Court;
+import com.group3979.badmintonbookingbe.model.request.CourtRequest;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.ICourtRepository;
@@ -34,8 +35,13 @@ public class CourtService {
         return courtResponses;
     }
 
-    public Court getCourtById(long id) {
-        return courtRepository.findByCourtId(id);
+    public CourtResponse getCourtById(long id) {
+        Court court = courtRepository.findByCourtId(id);
+        CourtResponse courtResponse = new CourtResponse();
+        courtResponse.setCourtStatus(court.getCourtStatus());
+        courtResponse.setCourtName(court.getCourtName());
+        courtResponse.setCourtId(court.getCourtId());
+        return courtResponse;
     }
 
     // create courts by quantity of a Club when creating club
@@ -66,7 +72,7 @@ public class CourtService {
         return courtResponse;
     }
 
-    public boolean changeCourtStatus(long id) {
+    public boolean inactiveCourtStatus(long id) {
         Court court = courtRepository.findByCourtId(id);
         if (court != null) {
             court.setCourtStatus(CourtStatus.INACTIVE);
@@ -74,5 +80,15 @@ public class CourtService {
             return true;
         }
         return false;
+    }
+    public CourtResponse changeCourtStatus(CourtRequest courtRequest){
+            Court court = courtRepository.findByCourtId(courtRequest.getCourtId());
+            court.setCourtStatus(courtRequest.getCourtStatus());
+            courtRepository.save(court);
+            CourtResponse courtResponse = new CourtResponse();
+            courtResponse.setCourtId(court.getCourtId());
+            courtResponse.setCourtName(court.getCourtName());
+            courtResponse.setCourtStatus(court.getCourtStatus());
+            return courtResponse;
     }
 }
