@@ -40,6 +40,7 @@ public class Account implements UserDetails{
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "account")
     private Wallet wallet;
 

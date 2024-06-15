@@ -18,9 +18,11 @@ public class BookingResponse {
     private long bookingId;
     private Date bookingDate;
     private float totalPrice;
+    private float temporaryPrice;
+    private float discountPrice;
     private BookingType bookingType;
     private int amountTime;
     private ExpirationStatus expirationStatus;
-    private String checkInCode;
-    AuthenticationResponse authenticationResponse;
+    private long ClubId;
+    private long customerId;
 }

@@ -16,6 +16,8 @@ public class ImageClub {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long imageClubId;
     private String urlImage;
+
     @ManyToOne
+    @JoinColumn(name = "club_id")
     private Club club;
 }
