@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group3979.badmintonbookingbe.eNum.PromotionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,4 +33,8 @@ public class Promotion {
     @ManyToOne
     @JoinColumn(name = "club_id")
     private Club club;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "promotion")
+    List<Booking> bookings;
 }
