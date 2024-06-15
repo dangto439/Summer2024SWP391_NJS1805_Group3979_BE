@@ -31,11 +31,6 @@ public class Club {
     Account account;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "club")
-    private DiscountRule discountRule;
-
-    //
-    @JsonIgnore
     @OneToMany(mappedBy = "club")
     List<Court> courts;
 
