@@ -2,6 +2,7 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.AuthException;
+import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.CourtSlotRequest;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.model.response.CourtSlotResponse;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -120,7 +123,7 @@ public class CourtSlotService {
         List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
 
         for (CourtSlot courtSlot : courtSlots) {
-            if (courtSlot.getSlot().getTime() >= club.getOpenTime()  && courtSlot.getSlot().getTime() < club.getCloseTime()) {
+            if (courtSlot.getSlot().getTime() >= club.getOpenTime() && courtSlot.getSlot().getTime() < club.getCloseTime()) {
                 CourtResponse courtResponse = CourtResponse.builder()
                         .courtId(court.getCourtId())
                         .courtName(court.getCourtName())
@@ -141,12 +144,12 @@ public class CourtSlotService {
         return courtSlotResponses;
     }
 
-//    public float getDefaultPriceByClub(Club club){
-//
-//    }
+    public float getDefaultPriceByClub(Club club) {
+        return courtSlotRepository.findPriceByCourt(club.getCourts().get(0));
+    }
 
-  
-//        Court court = courtRepository.findByCourtId(courtId);
+
+    //        Court court = courtRepository.findByCourtId(courtId);
 //
 //        List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
 //        List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
@@ -175,34 +178,76 @@ public class CourtSlotService {
         Club club = clubRepository.findByClubId(clubId);
         List<Court> courtList = courtRepository.findByClub(club);
 
-            for(Court court : courtList) {
-                List<CourtSlot> courtSlotList = courtSlotRepository.findByCourt(court);
-                    for(CourtSlot courtSlot : courtSlotList) {
-                        if(courtSlot.getSlot().getTime() >= courtSlotRequest.getRushHourRequest().getStartTime() &&
+        for (Court court : courtList) {
+            List<CourtSlot> courtSlotList = courtSlotRepository.findByCourt(court);
+            for (CourtSlot courtSlot : courtSlotList) {
+                if (courtSlot.getSlot().getTime() >= courtSlotRequest.getRushHourRequest().getStartTime() &&
                         courtSlot.getSlot().getTime() < courtSlotRequest.getRushHourRequest().getEndTime()) {
-                            courtSlot.setPrice(courtSlotRequest.getRushHourRequest().getRushPrice());
-                        }else{
-                            courtSlot.setPrice(courtSlotRequest.getPrice());
-                        }
-                        courtSlot = courtSlotRepository.save(courtSlot);
+                    courtSlot.setPrice(courtSlotRequest.getRushHourRequest().getRushPrice());
+                } else {
+                    courtSlot.setPrice(courtSlotRequest.getPrice());
+                }
+                courtSlot = courtSlotRepository.save(courtSlot);
 
-                        CourtResponse courtResponse = CourtResponse.builder()
-                                .courtId(court.getCourtId())
-                                .courtStatus(court.getCourtStatus())
-                                .courtName(court.getCourtName())
-                                .build();
+                CourtResponse courtResponse = CourtResponse.builder()
+                        .courtId(court.getCourtId())
+                        .courtStatus(court.getCourtStatus())
+                        .courtName(court.getCourtName())
+                        .build();
 
-                        CourtSlotResponse courtSlotResponse = CourtSlotResponse.builder()
-                                .courtSlotId(courtSlot.getCourtSlotId())
-                                .price(courtSlot.getPrice())
-                                .courtResponse(courtResponse)
-                                .clubId(clubId)
-                                .slotId(courtSlot.getSlot().getSlotId())
-                                .build();
+                CourtSlotResponse courtSlotResponse = CourtSlotResponse.builder()
+                        .courtSlotId(courtSlot.getCourtSlotId())
+                        .price(courtSlot.getPrice())
+                        .courtResponse(courtResponse)
+                        .clubId(clubId)
+                        .slotId(courtSlot.getSlot().getSlotId())
+                        .build();
 
-                        courtSlotResponses.add(courtSlotResponse);
-                    }
+                courtSlotResponses.add(courtSlotResponse);
+            }
+        }
+        return courtSlotResponses;
+    }
+
+    public List<CourtSlotResponse> existCourtSlotInADay(Date playingDate, long courtId) {
+        Court court = courtRepository.findByCourtId(courtId);
+        if(court != null) {
+            List<CourtSlot> courtSlots =
+                    courtSlotRepository.findCourtSlotByPlayingDate(extractDate(playingDate), court);
+
+            List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
+            for (CourtSlot courtSlot : courtSlots) {
+                CourtSlotResponse courtSlotResponse = this.getCourtSlotResponse(courtSlot);
+                courtSlotResponses.add(courtSlotResponse);
             }
             return courtSlotResponses;
+        }else {
+            throw new CustomException("Sân không tồn tại");
+        }
+
+    }
+    public  Date extractDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+    public CourtSlotResponse getCourtSlotResponse(CourtSlot courtSlot) {
+        Court court = courtSlot.getCourt();
+        CourtResponse courtResponse = CourtResponse.builder()
+                .courtId(court.getCourtId())
+                .courtStatus(court.getCourtStatus())
+                .courtName(court.getCourtName())
+                .build();
+        return CourtSlotResponse.builder()
+                .courtSlotId(courtSlot.getCourtSlotId())
+                .price(courtSlot.getPrice())
+                .courtResponse(courtResponse)
+                .clubId(court.getClub().getClubId())
+                .slotId(courtSlot.getSlot().getSlotId())
+                .build();
     }
 }
