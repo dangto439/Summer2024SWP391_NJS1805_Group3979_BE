@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.config;
 
+import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.service.TokenService;
@@ -61,7 +62,12 @@ public class Filter extends OncePerRequestFilter{
             try {
                 // từ token tìm ra thằng đó là ai
                 account = tokenService.extractAccount(token);
-                System.out.println(account);
+                // neu bi block thi nem ra exception va ngung ko thuc hien bat ky request nao nua
+                if(account.getAccountStatus().equals(AccountStatus.INACTIVE)){
+                    resolver.resolveException(request, response, null, new AuthException("Tài khoản của bạn đã bị khóa, " +
+                            "vui lòng liên hệ với quản trị viên để biết thêm chi tiết."));
+                    return;
+                }
             } catch (ExpiredJwtException expiredJwtException) {
                 // token het han
                 resolver.resolveException(request, response, null, new AuthException("Expired Token!"));

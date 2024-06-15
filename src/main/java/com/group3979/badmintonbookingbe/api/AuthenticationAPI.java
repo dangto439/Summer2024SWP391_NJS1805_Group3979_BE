@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
 
-
 @RestController
 @RequestMapping("api")
 @SecurityRequirement(name = "api")
@@ -32,7 +31,7 @@ public class AuthenticationAPI {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity login(@RequestBody LoginRequest loginRequest){
         Account account = authenticationService.login(loginRequest);
         return ResponseEntity.ok(account);
     }

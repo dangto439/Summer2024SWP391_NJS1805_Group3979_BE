@@ -6,19 +6,16 @@ import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.model.request.*;
-
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
-import com.group3979.badmintonbookingbe.model.response.ClubResponse;
-
 import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +85,7 @@ public class AuthenticationService implements UserDetailsService {
         return account;
     }
 
-    public Account login(LoginRequest loginRequest) {
+    public Account login(LoginRequest loginRequest){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getPassword()));
         Account account = authenticationRepository.findAccountByEmail(loginRequest.getEmail());
@@ -103,6 +102,9 @@ public class AuthenticationService implements UserDetailsService {
             accountResponse.setAccountStatus(account.getAccountStatus());
             accountResponse.setToken(token);
             return accountResponse;
+        }else if(account.getAccountStatus().equals(AccountStatus.INACTIVE)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản của bạn đã bị khóa, vui lòng liên hệ với " +
+                    "quản trị viên để biết thêm chi tiết.");
         }
         return null;
     }
@@ -217,7 +219,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     //block or unblock Account by Admin
-    public Account blockUser(String email) {
+    public AuthenticationResponse blockUser(String email) {
         Account account = authenticationRepository.findAccountByEmail(email);
                 if(account.getAccountStatus() == AccountStatus.ACTIVE) {
                     account.setAccountStatus(AccountStatus.INACTIVE);
@@ -225,6 +227,14 @@ public class AuthenticationService implements UserDetailsService {
                     account.setAccountStatus(AccountStatus.ACTIVE);
                 }
                 authenticationRepository.save(account);
-                return account;
+                return AuthenticationResponse.builder()
+                        .phone(account.getPhone())
+                        .email(account.getEmail())
+                        .name(account.getName())
+                        .role(account.getRole())
+                        .gender(account.getGender())
+                        .supervisorID(account.getSupervisorID())
+                        .accountStatus(account.getAccountStatus())
+                        .build();
     }
 }
