@@ -196,11 +196,45 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     // view Club-Owner's staffs list
-    public List<Account> getAllStaffs() {
+    public List<StaffResponse> getAllStaffs() {
         Long supervisorID = accountUtils.getCurrentAccount().getId();
         List<Account> staffsNeedToGet = new ArrayList<>();
+        List<StaffResponse> staffResponses = new ArrayList<>();
         staffsNeedToGet.addAll(authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID));
-        return staffsNeedToGet;
+        for(Account staff : staffsNeedToGet) {
+            staffResponses.add(StaffResponse.builder()
+                    .phone(staff.getPhone())
+                    .email(staff.getEmail())
+                    .name(staff.getName())
+                    .role(staff.getRole())
+                    .gender(staff.getGender())
+                    .supervisorID(staff.getSupervisorID())
+                    .accountStatus(staff.getAccountStatus())
+                    .clubId(staff.getClub().getClubId())
+                    .build());
+        }
+        return staffResponses;
+    }
+
+    // view staffs list by ClubId
+    public List<StaffResponse> getAllStaffsByClub(Long clubId){
+        Club club = clubRepository.findByClubId(clubId);
+        List<StaffResponse> staffResponses = new ArrayList<>();
+        List<Account> staffsNeedToGet = new ArrayList<>();
+        staffsNeedToGet.addAll(authenticationRepository.findClubStaffByClub(club));
+        for(Account staff : staffsNeedToGet) {
+            staffResponses.add(StaffResponse.builder()
+                    .phone(staff.getPhone())
+                    .email(staff.getEmail())
+                    .name(staff.getName())
+                    .role(staff.getRole())
+                    .gender(staff.getGender())
+                    .supervisorID(staff.getSupervisorID())
+                    .accountStatus(staff.getAccountStatus())
+                    .clubId(clubId)
+                    .build());
+        }
+        return staffResponses;
     }
 
     // block Staff by Club-Owner
