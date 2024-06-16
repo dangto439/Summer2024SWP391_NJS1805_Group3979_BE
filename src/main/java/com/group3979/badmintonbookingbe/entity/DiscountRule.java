@@ -7,17 +7,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Setter
 @Getter
-@NoArgsConstructor
+@Setter
 @AllArgsConstructor
-public class ImageClub {
+@NoArgsConstructor
+public class DiscountRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long imageClubId;
-    private String urlImage;
+    private Long discountRuleId;
+    private double flexiblePercent;
+    private double fixedPercent;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "club_id")
     private Club club;
 }

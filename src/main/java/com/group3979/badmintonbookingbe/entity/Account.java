@@ -21,8 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account implements UserDetails{
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -42,6 +40,10 @@ public class Account implements UserDetails{
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "account")
+    private Wallet wallet;
+
     @ManyToOne
     @JoinColumn(name = "club_id")
     Club club;
@@ -49,6 +51,10 @@ public class Account implements UserDetails{
     @JsonIgnore
     @OneToMany(mappedBy = "account")
     List<Club> clubs;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "account")
+    List<Booking> bookings;
 
 
     @Override

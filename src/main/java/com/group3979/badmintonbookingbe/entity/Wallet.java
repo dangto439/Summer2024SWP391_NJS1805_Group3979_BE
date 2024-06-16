@@ -6,18 +6,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
-@Setter
 @Getter
-@NoArgsConstructor
+@Setter
 @AllArgsConstructor
-public class ImageClub {
+@NoArgsConstructor
+public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long imageClubId;
-    private String urlImage;
+    private Long walletId;
+    private BigDecimal balance;
 
-    @ManyToOne
-    @JoinColumn(name = "club_id")
-    private Club club;
+    @OneToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 }

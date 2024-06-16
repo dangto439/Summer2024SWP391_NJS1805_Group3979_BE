@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 
 @OpenAPIDefinition(info = @Info(title = "BadmintonBooking API", version = "2.0", description = "Information"))
@@ -15,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BadmintonBookingBeApplication {
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication.run(BadmintonBookingBeApplication.class, args);
     }
 

@@ -1,9 +1,12 @@
 package com.group3979.badmintonbookingbe.api;
 
+import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.request.ImageClubRequest;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.ImageClubResponse;
+import com.group3979.badmintonbookingbe.repository.ICourtRepository;
+import com.group3979.badmintonbookingbe.repository.ICourtSlotRepository;
 import com.group3979.badmintonbookingbe.service.ClubService;
 import com.group3979.badmintonbookingbe.service.CourtService;
 import com.group3979.badmintonbookingbe.service.ImageClubService;
@@ -34,6 +37,7 @@ public class ClubAPI {
 
     @Autowired
     ImageClubService imageClubService;
+
     // Get all clubs
     @GetMapping("/clubs")
     public ResponseEntity<List<ClubResponse>> getAllClubs() {
@@ -108,4 +112,5 @@ public class ClubAPI {
         ImageClubResponse imageClubResponse = imageClubService.createImageClub(imageClubRequest);
         return ResponseEntity.ok(imageClubResponse);
     }
+
 }

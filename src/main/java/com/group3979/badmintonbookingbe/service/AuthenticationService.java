@@ -6,15 +6,16 @@ import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.model.request.*;
-import com.group3979.badmintonbookingbe.model.response.AccountReponse;
+import com.group3979.badmintonbookingbe.model.response.AccountResponse;
+import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +40,8 @@ public class AuthenticationService implements UserDetailsService {
     private AccountUtils accountUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private WalletService walletService;
     @Autowired
     private IAuthenticationRepository authenticationRepository;
     @Autowired
@@ -79,33 +84,37 @@ public class AuthenticationService implements UserDetailsService {
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         // nhờ repository save xuống db
         account = authenticationRepository.save(account);
+        walletService.createWallet(account.getEmail()); // after save account to DB, create a wallet
         emailService.sendMail(account.getEmail(), account.getName());
         return account;
     }
 
-    public Account login(LoginRequest loginRequest) {
+    public Account login(LoginRequest loginRequest){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getPassword()));
         Account account = authenticationRepository.findAccountByEmail(loginRequest.getEmail());
         if (account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
             String token = tokenService.generateToken(account,24*60*60*1000);
-            AccountReponse accountReponse = new AccountReponse();
-            accountReponse.setId(account.getId());
-            accountReponse.setPhone(account.getPhone());
-            accountReponse.setName(account.getName());
-            accountReponse.setEmail(account.getEmail());
-            accountReponse.setRole(account.getRole());
-            accountReponse.setSupervisorID(account.getSupervisorID());
-            accountReponse.setGender(account.getGender());
-            accountReponse.setAccountStatus(account.getAccountStatus());
-            accountReponse.setToken(token);
-            return accountReponse;
+            AccountResponse accountResponse = new AccountResponse();
+            accountResponse.setId(account.getId());
+            accountResponse.setPhone(account.getPhone());
+            accountResponse.setName(account.getName());
+            accountResponse.setEmail(account.getEmail());
+            accountResponse.setRole(account.getRole());
+            accountResponse.setSupervisorID(account.getSupervisorID());
+            accountResponse.setGender(account.getGender());
+            accountResponse.setAccountStatus(account.getAccountStatus());
+            accountResponse.setToken(token);
+            return accountResponse;
+        }else if(account.getAccountStatus().equals(AccountStatus.INACTIVE)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản của bạn đã bị khóa, vui lòng liên hệ với " +
+                    "quản trị viên để biết thêm chi tiết.");
         }
         return null;
     }
 
-    public AccountReponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
-        AccountReponse accountReponse = new AccountReponse();
+    public AccountResponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
+        AccountResponse accountResponse = new AccountResponse();
         System.out.println(loginGoogleRequest.getToken());
         try {
             FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
@@ -119,19 +128,31 @@ public class AuthenticationService implements UserDetailsService {
                 account.setAccountStatus(AccountStatus.ACTIVE);
                 account = authenticationRepository.save(account);
             }
-            accountReponse.setId(account.getId());
-            accountReponse.setPhone(account.getPhone());
-            accountReponse.setName(account.getName());
-            accountReponse.setEmail(account.getEmail());
-            accountReponse.setRole(account.getRole());
-            accountReponse.setSupervisorID(account.getSupervisorID());
-            accountReponse.setGender(account.getGender());
-            accountReponse.setAccountStatus(account.getAccountStatus());
-            accountReponse.setToken(tokenService.generateToken(account,24*60*60*1000));
+            accountResponse.setId(account.getId());
+            accountResponse.setPhone(account.getPhone());
+            accountResponse.setName(account.getName());
+            accountResponse.setEmail(account.getEmail());
+            accountResponse.setRole(account.getRole());
+            accountResponse.setSupervisorID(account.getSupervisorID());
+            accountResponse.setGender(account.getGender());
+            accountResponse.setAccountStatus(account.getAccountStatus());
+            accountResponse.setToken(tokenService.generateToken(account,24*60*60*1000));
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
         }
-        return accountReponse;
+        return accountResponse;
+    }
+    public AuthenticationResponse getAccountReponseByEmail(String email){
+        Account account = authenticationRepository.findAccountByEmail(email);
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .email(account.getEmail())
+                .role(account.getRole())
+                .phone(account.getPhone())
+                .name(account.getName())
+                .gender(account.getGender())
+                .accountStatus(account.getAccountStatus())
+                .build();
+        return authenticationResponse;
     }
 
     public void resetPassword(NewPasswordRequest newPasswordRequest) {
@@ -175,11 +196,45 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     // view Club-Owner's staffs list
-    public List<Account> getAllStaffs() {
+    public List<StaffResponse> getAllStaffs() {
         Long supervisorID = accountUtils.getCurrentAccount().getId();
         List<Account> staffsNeedToGet = new ArrayList<>();
+        List<StaffResponse> staffResponses = new ArrayList<>();
         staffsNeedToGet.addAll(authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID));
-        return staffsNeedToGet;
+        for(Account staff : staffsNeedToGet) {
+            staffResponses.add(StaffResponse.builder()
+                    .phone(staff.getPhone())
+                    .email(staff.getEmail())
+                    .name(staff.getName())
+                    .role(staff.getRole())
+                    .gender(staff.getGender())
+                    .supervisorID(staff.getSupervisorID())
+                    .accountStatus(staff.getAccountStatus())
+                    .clubId(staff.getClub().getClubId())
+                    .build());
+        }
+        return staffResponses;
+    }
+
+    // view staffs list by ClubId
+    public List<StaffResponse> getAllStaffsByClub(Long clubId){
+        Club club = clubRepository.findByClubId(clubId);
+        List<StaffResponse> staffResponses = new ArrayList<>();
+        List<Account> staffsNeedToGet = new ArrayList<>();
+        staffsNeedToGet.addAll(authenticationRepository.findClubStaffByClub(club));
+        for(Account staff : staffsNeedToGet) {
+            staffResponses.add(StaffResponse.builder()
+                    .phone(staff.getPhone())
+                    .email(staff.getEmail())
+                    .name(staff.getName())
+                    .role(staff.getRole())
+                    .gender(staff.getGender())
+                    .supervisorID(staff.getSupervisorID())
+                    .accountStatus(staff.getAccountStatus())
+                    .clubId(clubId)
+                    .build());
+        }
+        return staffResponses;
     }
 
     // block Staff by Club-Owner
@@ -198,7 +253,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     //block or unblock Account by Admin
-    public Account blockUser(String email) {
+    public AuthenticationResponse blockUser(String email) {
         Account account = authenticationRepository.findAccountByEmail(email);
                 if(account.getAccountStatus() == AccountStatus.ACTIVE) {
                     account.setAccountStatus(AccountStatus.INACTIVE);
@@ -206,6 +261,14 @@ public class AuthenticationService implements UserDetailsService {
                     account.setAccountStatus(AccountStatus.ACTIVE);
                 }
                 authenticationRepository.save(account);
-                return account;
+                return AuthenticationResponse.builder()
+                        .phone(account.getPhone())
+                        .email(account.getEmail())
+                        .name(account.getName())
+                        .role(account.getRole())
+                        .gender(account.getGender())
+                        .supervisorID(account.getSupervisorID())
+                        .accountStatus(account.getAccountStatus())
+                        .build();
     }
 }

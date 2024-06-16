@@ -5,8 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RushHourRequest {
-    private int startTime;
-    private int endTime;
-    private float rushPrice;
+public class DiscountRuleRequest {
+    private double flexiblePercent;
+    private double fixedPercent;
 }

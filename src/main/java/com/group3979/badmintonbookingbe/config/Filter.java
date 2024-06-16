@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.config;
 
+import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.service.TokenService;
@@ -38,6 +39,7 @@ public class Filter extends OncePerRequestFilter{
             "/api/login",
             "/api/forgot-password",
             "/api/login-google"
+
     );
     private boolean isPermitted(String uri) {
         AntPathMatcher matcher = new AntPathMatcher();
@@ -46,7 +48,6 @@ public class Filter extends OncePerRequestFilter{
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();///login, /register
-        System.out.println(uri);
         if (isPermitted(uri)) {
             // yêu cầu truy cập 1 api => ai cũng truy cập đc
             filterChain.doFilter(request, response); // cho phép truy cập dô controller
@@ -60,7 +61,12 @@ public class Filter extends OncePerRequestFilter{
             try {
                 // từ token tìm ra thằng đó là ai
                 account = tokenService.extractAccount(token);
-                System.out.println(account);
+                // neu bi block thi nem ra exception va ngung ko thuc hien bat ky request nao nua
+                if(account.getAccountStatus().equals(AccountStatus.INACTIVE)){
+                    resolver.resolveException(request, response, null, new AuthException("Tài khoản của bạn đã bị khóa, " +
+                            "vui lòng liên hệ với quản trị viên để biết thêm chi tiết."));
+                    return;
+                }
             } catch (ExpiredJwtException expiredJwtException) {
                 // token het han
                 resolver.resolveException(request, response, null, new AuthException("Expired Token!"));
@@ -82,9 +88,7 @@ public class Filter extends OncePerRequestFilter{
     }
 
     public String getToken(HttpServletRequest request) {
-        System.out.println(request);
         String authHeader = request.getHeader("Authorization");
-        System.out.println(authHeader);
         if (authHeader == null) return null;
         return authHeader.substring(7);
     }
