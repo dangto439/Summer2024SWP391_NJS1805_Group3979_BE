@@ -1,6 +1,5 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.model.request.StaffRegisterRequest;
 import com.group3979.badmintonbookingbe.model.response.StaffResponse;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
@@ -23,8 +22,14 @@ public class StaffAPI {
 
     // getStaffLists of Club-Owner
     @GetMapping("/staff")
-    public List<Account> getStaffs() {
+    public List<StaffResponse> getStaffs() {
         return authenticationService.getAllStaffs();
+    }
+
+    // getStaffList of Club
+    @GetMapping("/staff/{clubId}")
+    public List<StaffResponse> getStaff(@PathVariable Long clubId) {
+        return authenticationService.getAllStaffsByClub(clubId);
     }
 
     // create Account for Staff
