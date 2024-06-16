@@ -6,7 +6,6 @@ import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.exception.AuthException;
 import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
@@ -15,6 +14,7 @@ import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -51,6 +51,9 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${avatar.default.url}")
+    private String avatatDefault;
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return this.authenticationRepository.findAccountByEmail(email);
@@ -70,6 +73,7 @@ public class AuthenticationService implements UserDetailsService {
         account.setGender(registerRequest.getGender());
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
+        account.setAvatar(avatatDefault);
 
         if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
@@ -152,15 +156,11 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public void resetPassword(NewPasswordRequest newPasswordRequest) {
-        boolean isTokenExpired = tokenService.isTokenExpired(newPasswordRequest.getToken());
-        if (!isTokenExpired) {
-            Account account = tokenService.extractAccount(newPasswordRequest.getToken());
+
+            Account account = accountUtils.getCurrentAccount();
             account.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
             authenticationRepository.save(account);
 
-        } else {
-            throw new AuthException("Expired Token!");
-        }
     }
 
     // register Account for Staff (Role = "STAFF")
