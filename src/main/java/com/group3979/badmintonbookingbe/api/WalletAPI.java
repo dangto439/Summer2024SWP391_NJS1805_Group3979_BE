@@ -1,6 +1,5 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.entity.Wallet;
 import com.group3979.badmintonbookingbe.model.response.WalletResponse;
 import com.group3979.badmintonbookingbe.service.WalletService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
