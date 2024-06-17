@@ -18,6 +18,11 @@ public class WalletAPI {
     @Autowired
     WalletService walletService;
 
+    @PostMapping("/vnpay")
+    public ResponseEntity VNPAY(@RequestParam("amount") String amount) throws Exception {
+        return ResponseEntity.ok(walletService.createUrl(amount));
+    }
+
     @GetMapping("/wallet/{accountId}")
     public WalletResponse getWalletById(@PathVariable("accountId") Long accountId) throws NotFoundException {
         WalletResponse wallet = walletService.getWalletById(accountId);
