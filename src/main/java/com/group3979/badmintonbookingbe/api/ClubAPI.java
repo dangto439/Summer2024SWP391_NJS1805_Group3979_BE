@@ -1,12 +1,9 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.request.ImageClubRequest;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.ImageClubResponse;
-import com.group3979.badmintonbookingbe.repository.ICourtRepository;
-import com.group3979.badmintonbookingbe.repository.ICourtSlotRepository;
 import com.group3979.badmintonbookingbe.service.ClubService;
 import com.group3979.badmintonbookingbe.service.CourtService;
 import com.group3979.badmintonbookingbe.service.ImageClubService;
@@ -111,6 +108,16 @@ public class ClubAPI {
     public ResponseEntity<ImageClubResponse> createImageClub(@RequestBody ImageClubRequest imageClubRequest) {
         ImageClubResponse imageClubResponse = imageClubService.createImageClub(imageClubRequest);
         return ResponseEntity.ok(imageClubResponse);
+    }
+    @GetMapping("/club/name")
+    public ResponseEntity<List<ClubResponse>> getByName( @RequestParam String name){
+        List<ClubResponse> clubResponses = clubService.searchClubByName(name);
+        return ResponseEntity.ok(clubResponses);
+    }
+    @GetMapping("/club/location")
+    public ResponseEntity<List<ClubResponse>> getByDistrictProvince(@RequestParam String district, String province){
+        List<ClubResponse> clubResponses = clubService.searchClubByDistrictProvince(district,province);
+        return ResponseEntity.ok(clubResponses);
     }
 
 }

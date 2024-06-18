@@ -11,5 +11,4 @@ import java.util.List;
 public class DailyBookingRequest {
     List<BookingDetailRequest> bookingDetailRequests;
     private String promotionCode;
-    private long flexibleBookingId;
 }

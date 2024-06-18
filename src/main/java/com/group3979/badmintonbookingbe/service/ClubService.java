@@ -4,6 +4,7 @@ import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.ImageClub;
+import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
@@ -45,7 +46,6 @@ public class ClubService {
         List<Club> clubs = clubRepository.findAll();
         List<ClubResponse> clubResponses = new ArrayList<>();
         for (Club club : clubs) {
-
             clubResponses.add(getClubResponseById(club.getClubId()));
         }
         return clubResponses;
@@ -86,6 +86,8 @@ public class ClubService {
                 .openTime(club.getOpenTime())
                 .clubId(club.getClubId())
                 .description(club.getDescription())
+                .province(club.getProvince())
+                .district(club.getDistrict())
                 .urlImages(urlImages)
                 .authenticationResponse(authenticationResponse).build();
     }
@@ -95,6 +97,8 @@ public class ClubService {
 
         Club club = new Club();
         club.setClubAddress(clubRequest.getClubAddress());
+        club.setProvince(clubRequest.getProvince());
+        club.setDistrict(clubRequest.getDistrict());
         club.setClubName(clubRequest.getClubName());
         club.setHotline(clubRequest.getClubHotLine());
         club.setOpenTime(clubRequest.getOpeningTime());
@@ -122,6 +126,8 @@ public class ClubService {
 
         if (club != null) {
             club.setClubAddress(clubRequest.getClubAddress());
+            club.setProvince(clubRequest.getProvince());
+            club.setDistrict(clubRequest.getDistrict());
             club.setClubName(clubRequest.getClubName());
             club.setHotline(clubRequest.getClubHotLine());
             club.setOpenTime(clubRequest.getOpeningTime());
@@ -143,5 +149,28 @@ public class ClubService {
         }
         return false;
     }
-
+    public List<ClubResponse> searchClubByName(String name){
+        List<Club> clubs = clubRepository.findByClubNameContainingIgnoreCase(name);
+        if(!clubs.isEmpty()){
+            List<ClubResponse> clubResponses= new ArrayList<>();
+            for(Club club: clubs){
+                clubResponses.add(this.getClubResponseById(club.getClubId()));
+            }
+            return clubResponses;
+        }else {
+            throw new CustomException("Không tìm thấy kết quả nào");
+        }
+    }
+    public List<ClubResponse> searchClubByDistrictProvince(String district, String province){
+        List<Club> clubs = clubRepository.findByDistrictAndProvinceContainingIgnoreCase(district,province);
+        if(!clubs.isEmpty()){
+            List<ClubResponse> clubResponses= new ArrayList<>();
+            for(Club club: clubs){
+                clubResponses.add(this.getClubResponseById(club.getClubId()));
+            }
+            return clubResponses;
+        }else {
+            throw new CustomException("Không tìm thấy kết quả nào");
+        }
+    }
 }
