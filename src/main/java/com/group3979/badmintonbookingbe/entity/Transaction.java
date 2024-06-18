@@ -32,4 +32,8 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "receiver_wallet_id")
     private Wallet receiverWallet;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
 }

@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,11 @@ public class Wallet {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @OneToMany(mappedBy = "wallet")
-    List<Transaction> transactions;
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiverWallet")
+    List<Transaction> transactionsOfReceiver;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "senderWallet")
+    List<Transaction> transactionsOfSender;
 }
