@@ -26,10 +26,10 @@ public class Wallet {
     private Account account;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "receiver_wallet")
-    List<Transaction> transactions;
+    @OneToMany(mappedBy = "receiverWallet")
+    List<Transaction> transactionsOfReceiver;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "sender_wallet")
-    List<Transaction> transactionsV2;
+    @OneToMany(mappedBy = "senderWallet")
+    List<Transaction> transactionsOfSender;
 }

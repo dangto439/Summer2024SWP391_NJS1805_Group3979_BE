@@ -27,11 +27,11 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "sender_wallet_id")
-    private Wallet sender_wallet;
+    private Wallet senderWallet;
 
     @ManyToOne
     @JoinColumn(name = "receiver_wallet_id")
-    private Wallet receiver_wallet;
+    private Wallet receiverWallet;
 
     @ManyToOne
     @JoinColumn(name = "booking_id")
