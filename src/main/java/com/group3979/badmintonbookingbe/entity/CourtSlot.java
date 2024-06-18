@@ -19,7 +19,7 @@ public class CourtSlot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courtSlotId;
-    private float price;
+    private double price;
 
     @ManyToOne
     @JoinColumn(name = "court_id")

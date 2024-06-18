@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 public class CourtSlotResponse {
     private Long courtSlotId;
-    private float price;
+    private double price;
     private Long slotId;
     private Long clubId;
     CourtResponse courtResponse;

@@ -49,7 +49,7 @@ public class BookingDetailService {
 
     //dat lich ngay ch dat lich linh hoat
     public BookingResponse createDailyBookingDetail(Booking booking, DailyBookingRequest dailyBookingRequest) {
-        float temporaryPrice = 0;
+        double temporaryPrice = 0;
         Promotion promotion =
                 promotionService.checkValidPromotion(booking.getClub().getClubId(), dailyBookingRequest.getPromotionCode());
         System.out.println(promotion);
@@ -66,8 +66,8 @@ public class BookingDetailService {
             bookingDetailRepository.save(bookingDetail);
 
         }
-        float totalPrice;
-        float discountPrice = 0;
+        double totalPrice;
+        double discountPrice = 0;
         if (promotion != null) {
             discountPrice = promotion.getDiscount();
             totalPrice = temporaryPrice - discountPrice;
@@ -81,7 +81,7 @@ public class BookingDetailService {
 
     //dat lich ngay sau khi da dat lich linh hoat
     public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
-        float totalPrice = 0;
+        double totalPrice = 0;
         int amountTime = flexibleBooking.getAmountTime();
         //Club club = flexibleBooking.getClub();
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
@@ -131,7 +131,7 @@ public class BookingDetailService {
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         Promotion promotion =
                 promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(), fixedBookingRequest.getPromotionCode());
-        float temporaryPrice = 0;
+        double temporaryPrice = 0;
         for (Date playingDate : playingDates) {
             for (Long slotId : fixedBookingRequest.getSlotIds()) {
                 //select courtSlot
@@ -149,8 +149,8 @@ public class BookingDetailService {
                 }
             }
         }
-        float totalPrice;
-        float discountPrice = (float) (temporaryPrice *
+        double totalPrice;
+        double discountPrice =  (temporaryPrice *
                 (discountRuleRepository.findDiscountRuleByClub(fixedBooking.getClub()).getFixedPercent() / 100));
         if (promotion != null) {
             discountPrice += promotion.getDiscount();

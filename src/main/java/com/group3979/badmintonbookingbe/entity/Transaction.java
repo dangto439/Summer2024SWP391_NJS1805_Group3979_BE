@@ -1,0 +1,33 @@
+package com.group3979.badmintonbookingbe.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
+import java.util.Date;
+
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Transaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long transactionId;
+    private String description;
+    private double amount;
+    private Date timestamp;
+    private String type;
+
+    @ManyToOne
+    @JoinColumn(name = "sender_wallet_id")
+    private Wallet senderWallet;
+
+    @ManyToOne
+    @JoinColumn(name = "receiver_wallet_id")
+    private Wallet receiverWallet;
+}

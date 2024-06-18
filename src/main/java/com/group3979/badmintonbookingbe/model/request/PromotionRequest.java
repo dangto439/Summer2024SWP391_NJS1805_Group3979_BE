@@ -11,7 +11,7 @@ import java.util.Date;
 @Setter
 public class PromotionRequest {
     private String promotionCode;
-    private float discount;
+    private double discount;
     private Date startDate;
     private Date endDate;
     private PromotionStatus status;

@@ -20,7 +20,7 @@ public class BookingDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long bookingDetailId;
     private Date playingDate;
-    private float price;
+    private double price;
     //    @Column(unique=true)
 //    private BigInteger checkinCode;
     @Enumerated(EnumType.STRING)

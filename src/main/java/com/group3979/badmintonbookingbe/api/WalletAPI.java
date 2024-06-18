@@ -36,7 +36,7 @@ public class WalletAPI {
     }
 
     @PutMapping("/wallet/{accountId}")
-    public ResponseEntity updateWallet(@PathVariable("accountId") Long accountId, @RequestParam BigDecimal newBalance) throws NotFoundException {
+    public ResponseEntity updateWallet(@PathVariable("accountId") Long accountId, @RequestParam double newBalance) throws NotFoundException {
         WalletResponse wallet = walletService.updateWallet(accountId, newBalance);
         return ResponseEntity.ok(wallet);
     }

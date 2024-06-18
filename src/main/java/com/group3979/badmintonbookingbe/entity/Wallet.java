@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,9 +18,12 @@ public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long walletId;
-    private BigDecimal balance;
+    private double balance;
 
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+
+    @OneToMany(mappedBy = "wallet")
+    List<Transaction> transactions;
 }
