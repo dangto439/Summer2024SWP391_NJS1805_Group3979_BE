@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import com.group3979.badmintonbookingbe.eNum.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +22,8 @@ public class Transaction {
     private String description;
     private double amount;
     private Date timestamp;
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TransactionType type;
 
     @ManyToOne
     @JoinColumn(name = "sender_wallet_id")
