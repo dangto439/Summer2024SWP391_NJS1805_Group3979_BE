@@ -2,6 +2,7 @@ package com.group3979.badmintonbookingbe.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import jakarta.persistence.*;
@@ -28,13 +29,15 @@ public class Booking {
     private double totalPrice;
 
     @Enumerated(EnumType.STRING)
-
     private BookingType bookingType;
 
     private int amountTime;
 
     @Enumerated(EnumType.STRING)
     private ExpirationStatus expirationStatus;
+
+    @Enumerated(EnumType.STRING)
+    private BookingStatus bookingStatus;
 
 
     @ManyToOne
