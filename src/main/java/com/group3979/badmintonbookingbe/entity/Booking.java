@@ -39,7 +39,11 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus bookingStatus;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "booking")
+    List<Transaction> transactions;
 
+    //
     @ManyToOne
     @JoinColumn(name = "acount_id")
     Account account;
