@@ -12,7 +12,7 @@ import lombok.*;
 public class PromotionResponse {
     private Long promotionId;
     private String promotionCode;
-    private float discount;
+    private double discount;
     private String startDate;
     private String endDate;
     private PromotionStatus promotionStatus;

@@ -25,7 +25,7 @@ public class Booking {
 
     private Date bookingDate;
 
-    private float totalPrice;
+    private double totalPrice;
 
     @Enumerated(EnumType.STRING)
 

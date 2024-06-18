@@ -16,7 +16,7 @@ import java.util.Date;
 public class BookingDetailResponse {
     private long bookingDetailId;
     private Date playingDate;
-    private float price;
+    private double price;
     private BookingDetailStatus status;
     private long bookingId;
     private String checkInCode;

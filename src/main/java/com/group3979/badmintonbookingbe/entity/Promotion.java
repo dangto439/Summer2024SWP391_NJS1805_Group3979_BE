@@ -24,7 +24,7 @@ public class Promotion {
     @Column(unique = true)
     private String promotionCode;
 
-    private float discount; // specific price for discount
+    private double discount; // specific price for discount
     private Date startDate;
     private Date endDate;
     @Enumerated(EnumType.STRING)

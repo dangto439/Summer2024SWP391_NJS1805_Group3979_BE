@@ -72,7 +72,7 @@ public class BookingService {
             if (existedBooking == null) {
                 Promotion promotion = promotionService.checkValidPromotion(club.getClubId(),
                         flexibleBookingRequest.getPromotionCode());
-                float temporaryPrice = courtSlotService.getDefaultPriceByClub(club) * flexibleBookingRequest.getAmountTime();
+                double temporaryPrice = courtSlotService.getDefaultPriceByClub(club) * flexibleBookingRequest.getAmountTime();
                 Booking flexibleBooking = new Booking();
                 flexibleBooking.setAccount(accountUtils.getCurrentAccount());
                 flexibleBooking.setBookingDate(new Date());
@@ -81,9 +81,9 @@ public class BookingService {
                 flexibleBooking.setClub(club);
                 flexibleBooking.setExpirationStatus(ExpirationStatus.UNEXPIRED);
                 flexibleBooking.setBookingType(BookingType.FLEXIBLEBOOKING);
-                float totalPrice;
-                float discountPrice = (float) (temporaryPrice *
-                        (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent() / 100));
+                double totalPrice;
+                double discountPrice =  temporaryPrice *
+                        (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent() / 100);
                 if (promotion != null) {
                     discountPrice = promotion.getDiscount();
                     totalPrice = temporaryPrice - discountPrice;
@@ -118,7 +118,7 @@ public class BookingService {
         }
     }
 
-    public BookingResponse getBookingResponse(Booking booking, float temporaryPrice, float discountPrice) {
+    public BookingResponse getBookingResponse(Booking booking, double temporaryPrice, double discountPrice) {
         BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
                 .bookingDate(booking.getBookingDate())
                 .bookingId(booking.getBookingId())

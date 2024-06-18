@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CourtSlotRequest {
-    private float price;
+    private double price;
     RushHourRequest rushHourRequest;
 }

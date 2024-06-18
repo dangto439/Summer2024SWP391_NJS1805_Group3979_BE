@@ -17,9 +17,9 @@ import java.util.Date;
 public class BookingResponse {
     private long bookingId;
     private Date bookingDate;
-    private float totalPrice;
-    private float temporaryPrice;
-    private float discountPrice;
+    private double totalPrice;
+    private double temporaryPrice;
+    private double discountPrice;
     private BookingType bookingType;
     private int amountTime;
     private ExpirationStatus expirationStatus;

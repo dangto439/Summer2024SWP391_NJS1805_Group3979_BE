@@ -27,8 +27,13 @@ import java.math.BigDecimal;
 @Service
 public class WalletService {
     @Autowired
-
     AccountUtils accountUtils;
+
+    @Autowired
+    IAuthenticationRepository authenticationRepository;
+
+    @Autowired
+    IWalletRepository walletRepository;
 
     public String createUrl(String amount) throws NoSuchAlgorithmException, InvalidKeyException, Exception{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -111,11 +116,6 @@ public class WalletService {
     }
 
 
-    IAuthenticationRepository authenticationRepository;
-
-    @Autowired
-    IWalletRepository walletRepository;
-
     // Create Wallet for User by Email
     public WalletResponse createWalletByEmail(String email) throws NotFoundException {
             Account user = authenticationRepository.findAccountByEmail(email);
@@ -124,7 +124,7 @@ public class WalletService {
             }
             Wallet wallet = new Wallet();
             wallet.setAccount(user);
-            wallet.setBalance(BigDecimal.ZERO);
+            wallet.setBalance(0);
 
             wallet = walletRepository.save(wallet);
 
@@ -139,7 +139,7 @@ public class WalletService {
         Account user = authenticationRepository.findAccountByEmail(email);
         Wallet wallet = new Wallet();
         wallet.setAccount(user);
-        wallet.setBalance(BigDecimal.ZERO);
+        wallet.setBalance(0);
 
         walletRepository.save(wallet);
     }
@@ -163,7 +163,7 @@ public class WalletService {
     }
 
     // Update Balance of Wallet
-    public WalletResponse updateWallet(Long accountId, BigDecimal newBalance) throws NotFoundException {
+    public WalletResponse updateWallet(Long accountId, double newBalance) throws NotFoundException {
         Account user = authenticationRepository.findAccountById(accountId);
         if(user == null){
             throw new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId);
