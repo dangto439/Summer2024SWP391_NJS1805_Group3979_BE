@@ -14,6 +14,8 @@ public class ClubResponse {
     private long clubId;
     private String clubName;
     private String clubAddress;
+    private String district;
+    private String province;
     private int openTime;
     private int closeTime;
     private String hotline;

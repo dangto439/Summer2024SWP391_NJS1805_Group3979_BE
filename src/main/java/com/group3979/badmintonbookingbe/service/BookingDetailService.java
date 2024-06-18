@@ -24,6 +24,9 @@ public class BookingDetailService {
     private IBookingDetailRepository bookingDetailRepository;
 
     @Autowired
+    BookingService bookingService;
+
+    @Autowired
     private ICourtSlotRepository courtSlotRepository;
 
     @Autowired
@@ -48,7 +51,7 @@ public class BookingDetailService {
     public BookingResponse createDailyBookingDetail(Booking booking, DailyBookingRequest dailyBookingRequest) {
         float temporaryPrice = 0;
         Promotion promotion =
-                promotionService.checkValidPromotion(booking.getClub().getClubId(),dailyBookingRequest.getPromotionCode());
+                promotionService.checkValidPromotion(booking.getClub().getClubId(), dailyBookingRequest.getPromotionCode());
         System.out.println(promotion);
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
@@ -65,21 +68,22 @@ public class BookingDetailService {
         }
         float totalPrice;
         float discountPrice = 0;
-        if(promotion != null){
+        if (promotion != null) {
             discountPrice = promotion.getDiscount();
             totalPrice = temporaryPrice - discountPrice;
-        }else{
+        } else {
             totalPrice = temporaryPrice;
         }
         booking.setTotalPrice(totalPrice);
         booking = bookingRepository.save(booking);
-        return this.getBookingResponse(booking,temporaryPrice,discountPrice);
+        return bookingService.getBookingResponse(booking, temporaryPrice, discountPrice);
     }
+
     //dat lich ngay sau khi da dat lich linh hoat
     public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
         float totalPrice = 0;
         int amountTime = flexibleBooking.getAmountTime();
-        Club club = flexibleBooking.getClub();
+        //Club club = flexibleBooking.getClub();
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
             CourtSlot courtSlot = courtSlotRepository
@@ -102,8 +106,9 @@ public class BookingDetailService {
         }
         flexibleBooking.setTotalPrice(totalPrice);
         flexibleBooking = bookingRepository.save(flexibleBooking);
-        return this.getBookingResponse(flexibleBooking,totalPrice,0);
+        return bookingService.getBookingResponse(flexibleBooking, totalPrice, 0);
     }
+    
     public Date truncateTime(Date inputDate) {
         if (inputDate == null) {
             return null;
@@ -111,7 +116,6 @@ public class BookingDetailService {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(inputDate);
-
         // Đặt giờ, phút, giây, mili giây thành 0
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
@@ -120,18 +124,19 @@ public class BookingDetailService {
 
         return calendar.getTime();
     }
+
     //dat lich co dinh
     public BookingResponse createFixedBookingDetail(Booking fixedBooking, FixedBookingRequest fixedBookingRequest) {
         List<Date> playingDates = this.getAllDaysOfBooking(fixedBookingRequest.getYear(),
-                fixedBookingRequest.getMonth() , fixedBookingRequest.getDayOfWeeks());
+                fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         Promotion promotion =
-                promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(),fixedBookingRequest.getPromotionCode());
+                promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(), fixedBookingRequest.getPromotionCode());
         float temporaryPrice = 0;
-        for(Date playingDate: playingDates){
-            for(Long slotId: fixedBookingRequest.getSlotIds()){
+        for (Date playingDate : playingDates) {
+            for (Long slotId : fixedBookingRequest.getSlotIds()) {
                 //select courtSlot
-                CourtSlot courtSlot = this.selectCourtSlot(fixedBookingRequest.getClubId(), slotId,playingDate);
-                if(courtSlot != null) {
+                CourtSlot courtSlot = this.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
+                if (courtSlot != null) {
                     System.out.println(courtSlot);
                     BookingDetail bookingDetail = new BookingDetail();
                     bookingDetail.setPlayingDate(playingDate);
@@ -140,39 +145,38 @@ public class BookingDetailService {
                     bookingDetail.setBooking(fixedBooking);
                     temporaryPrice += courtSlot.getPrice();
                     bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-                    bookingDetail =  bookingDetailRepository.save(bookingDetail);
-                    System.out.println(bookingDetail.getBookingDetailId());
+                    bookingDetailRepository.save(bookingDetail);
                 }
             }
-
         }
         float totalPrice;
-        float discountPrice = (float) ( temporaryPrice *
-                (discountRuleRepository.findDiscountRuleByClub(fixedBooking.getClub()).getFixedPercent()/100));
-        if(promotion != null){
+        float discountPrice = (float) (temporaryPrice *
+                (discountRuleRepository.findDiscountRuleByClub(fixedBooking.getClub()).getFixedPercent() / 100));
+        if (promotion != null) {
             discountPrice += promotion.getDiscount();
             totalPrice = temporaryPrice - discountPrice;
-        }else{
+        } else {
             totalPrice = temporaryPrice - discountPrice;
         }
         fixedBooking.setTotalPrice(totalPrice);
         fixedBooking = bookingRepository.save(fixedBooking);
-        return this.getBookingResponse(fixedBooking,temporaryPrice,discountPrice);
+        return bookingService.getBookingResponse(fixedBooking, temporaryPrice, discountPrice);
     }
 
-    public CourtSlot selectCourtSlot(long clubId,Long slotId, Date playingDate){
+    public CourtSlot selectCourtSlot(long clubId, Long slotId, Date playingDate) {
         Club club = clubRepository.findByClubId(clubId);
         Slot slot = slotRepository.findSlotBySlotId(slotId);
         List<Court> courts = courtRepository.findByClub(club);
-        for (Court court: courts){
+        for (Court court : courts) {
             CourtSlot existedCourtSlot =
-                    courtSlotRepository.findCourtSlotByPlayingDateAndSlot(playingDate,court,slot);
-            if(existedCourtSlot == null){
+                    courtSlotRepository.findCourtSlotByPlayingDateAndSlot(playingDate, court, slot);
+            if (existedCourtSlot == null) {
                 return courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot);
             }
         }
         return null;
     }
+
     public List<Date> getAllDaysOfBooking(int year, int month, List<Integer> dayOfWeeks) {
         List<Date> days = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -189,37 +193,23 @@ public class BookingDetailService {
                     days.add(calendar.getTime());
                 }
             }
-
         }
         return days;
     }
-    public BookingResponse getBookingResponse(Booking booking, float temporaryPrice, float discountPrice){
-        BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
-                .bookingDate(booking.getBookingDate())
-                .bookingId(booking.getBookingId())
-                .amountTime(booking.getAmountTime())
-                .totalPrice(booking.getTotalPrice())
-                .temporaryPrice(temporaryPrice)
-                .discountPrice(discountPrice)
-                .ClubId(booking.getClub().getClubId())
-                .bookingType(booking.getBookingType())
-                .expirationStatus(booking.getExpirationStatus())
-                .customerId(booking.getAccount().getId())
-                .build();
-        return bookingResponse;
-    }
-    public BookingDetailResponse cancelBookingDetail(long bookingDetailId){
-       BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByBookingDetailId(bookingDetailId);
-       if(bookingDetail != null){
-           bookingDetail.setStatus(BookingDetailStatus.CANCELLED);
-           bookingDetail = bookingDetailRepository.save(bookingDetail);
-           return this.getBookingDetailResponse(bookingDetail);
-       }else {
-           throw new CustomException("không tồn tại đơn đặt sân này");
-       }
+
+    public BookingDetailResponse cancelBookingDetail(long bookingDetailId) {
+        BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByBookingDetailId(bookingDetailId);
+        if (bookingDetail != null) {
+            bookingDetail.setStatus(BookingDetailStatus.CANCELLED);
+            bookingDetail = bookingDetailRepository.save(bookingDetail);
+            return this.getBookingDetailResponse(bookingDetail);
+        } else {
+            throw new CustomException("không tồn tại đơn đặt sân này");
+        }
 
     }
-    public BookingDetailResponse getBookingDetailResponse(BookingDetail bookingDetail){
+
+    public BookingDetailResponse getBookingDetailResponse(BookingDetail bookingDetail) {
         return BookingDetailResponse.builder()
                 .bookingDetailId(bookingDetail.getBookingDetailId())
                 .checkInCode(bookingDetail.getCheckInCode())
