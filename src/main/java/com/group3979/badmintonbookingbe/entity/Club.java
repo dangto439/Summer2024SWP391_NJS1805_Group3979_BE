@@ -33,6 +33,7 @@ public class Club {
     @JoinColumn(name = "account_id")
     Account account;
     //
+
     @OneToOne(mappedBy = "club")
     private DiscountRule discountRule;
 

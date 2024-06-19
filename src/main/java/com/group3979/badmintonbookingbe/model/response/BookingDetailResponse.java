@@ -21,4 +21,5 @@ public class BookingDetailResponse {
     private long bookingId;
     private String checkInCode;
     private long CourtSlotId;
+    private int timeSlot;
 }

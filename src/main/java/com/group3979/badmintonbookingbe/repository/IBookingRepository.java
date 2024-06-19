@@ -12,4 +12,5 @@ import java.util.List;
 public interface IBookingRepository extends JpaRepository<Booking, Long> {
     Booking findByBookingId(Long bookingId);
     List<Booking> findBookingByAccountAndClub(Account account, Club club);
+    List<Booking> findBookingByAccount(Account account);
 }

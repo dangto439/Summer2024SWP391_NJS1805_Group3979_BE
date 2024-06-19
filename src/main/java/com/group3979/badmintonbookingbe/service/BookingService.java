@@ -7,6 +7,7 @@ import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
+import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -128,8 +131,25 @@ public class BookingService {
                 .discountPrice(discountPrice)
                 .ClubId(booking.getClub().getClubId())
                 .bookingType(booking.getBookingType())
+                .ClubName(booking.getClub().getClubName())
                 .expirationStatus(booking.getExpirationStatus())
                 .customerId(booking.getAccount().getId())
+                .bookingStatus(booking.getBookingStatus())
+                .build();
+        return bookingResponse;
+    }
+    public BookingResponse getBookingResponse(Booking booking) {
+        BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
+                .bookingDate(booking.getBookingDate())
+                .bookingId(booking.getBookingId())
+                .amountTime(booking.getAmountTime())
+                .totalPrice(booking.getTotalPrice())
+                .ClubId(booking.getClub().getClubId())
+                .bookingType(booking.getBookingType())
+                .ClubName(booking.getClub().getClubName())
+                .expirationStatus(booking.getExpirationStatus())
+                .customerId(booking.getAccount().getId())
+                .bookingStatus(booking.getBookingStatus())
                 .build();
         return bookingResponse;
     }
@@ -141,6 +161,81 @@ public class BookingService {
             return flexibleBookings.get(0);
         }
         return null;
+    }
+    public List<BookingResponse> getBookingResponseCurrentAccount(){
+        List<Booking> bookings = bookingRepository.findBookingByAccount(accountUtils.getCurrentAccount());
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        if(!bookings.isEmpty()){
+            for (Booking booking:bookings){
+                bookingResponses.add(this.getBookingResponse(booking));
+            }
+            return bookingResponses;
+        }else {
+            throw new CustomException("Không tồn tại booking nào");
+        }
+    }
+    public BookingResponse getBookingById(long id){
+        Booking booking = bookingRepository.findByBookingId(id);
+        if(booking != null){
+            return this.getBookingResponse(booking);
+        }else {
+            throw new CustomException("Booking không tồn tại");
+        }
+    }
+    public List<BookingResponse> getAllBooking(){
+        List<Booking> bookings = bookingRepository.findAll();
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+            for (Booking booking:bookings){
+                bookingResponses.add(this.getBookingResponse(booking));
+            }
+            return bookingResponses;
+    }
+    public List<String> notifyFullSlot(FixedBookingRequest fixedBookingRequest) {
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+
+        List<Date> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
+                fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
+        List<String> fullyBookeds = new ArrayList<>();
+        for (Date playingDate : playingDates) {
+            for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                //select courtSlot
+                CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
+                if (courtSlot == null) {
+                    String date = df.format(playingDate);
+                    String slots = String.format("Slot %dh tại sân này vào ngày %s đã hết",slotId,date);
+                    fullyBookeds.add(slots);
+                }
+            }
+        }
+        if(fullyBookeds.isEmpty()){
+            fullyBookeds.add("Không trùng slot");
+        }
+        return fullyBookeds;
+    }
+    public double getPriceFixedBooking( FixedBookingRequest fixedBookingRequest){
+        List<Date> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
+                fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
+        Club club = clubRepository.findByClubId(fixedBookingRequest.getClubId());
+        Promotion promotion =
+                promotionService.checkValidPromotion(club.getClubId(), fixedBookingRequest.getPromotionCode());
+        double temporaryPrice = 0;
+        for (Date playingDate : playingDates) {
+            for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                //select courtSlot
+                CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
+                if (courtSlot != null) {
+                    temporaryPrice += courtSlot.getPrice();
+                }
+            }
+        }
+        double discountPrice =  (temporaryPrice *
+                (discountRuleRepository.findDiscountRuleByClub(club).getFixedPercent() / 100));
+        if (promotion != null) {
+            discountPrice += promotion.getDiscount();
+            return temporaryPrice - discountPrice;
+        } else {
+            return (temporaryPrice - discountPrice);
+        }
     }
 }
 
