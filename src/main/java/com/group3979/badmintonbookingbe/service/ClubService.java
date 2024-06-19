@@ -26,12 +26,8 @@ public class ClubService {
     @Autowired
     private IImageClubRespository imageClubRepository;
 
-
     @Autowired
     private AccountUtils accountUtils;
-
-    @Autowired
-    private IAuthenticationRepository authenticationRepository;
 
     @Autowired
     private IClubRepository clubRepository;

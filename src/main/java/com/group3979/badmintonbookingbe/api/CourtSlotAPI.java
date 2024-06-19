@@ -1,9 +1,11 @@
 package com.group3979.badmintonbookingbe.api;
 
 
+import com.group3979.badmintonbookingbe.entity.Slot;
 import com.group3979.badmintonbookingbe.model.request.CourtSlotRequest;
 import com.group3979.badmintonbookingbe.model.response.CourtSlotResponse;
 import com.group3979.badmintonbookingbe.service.CourtSlotService;
+import com.group3979.badmintonbookingbe.service.SlotService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,9 @@ import java.util.List;
 public class CourtSlotAPI {
     @Autowired
     CourtSlotService courtSlotService;
+
+    @Autowired
+    private SlotService slotService;
 
     @PostMapping("/court-slot/{clubId}")
     public ResponseEntity createCourtSlot(@PathVariable Long clubId, @RequestBody CourtSlotRequest courtSlotRequest) {
@@ -46,5 +51,10 @@ public class CourtSlotAPI {
 
         List<CourtSlotResponse> courtSlotList = courtSlotService.existCourtSlotInADay(parsedDate,courtId);
         return ResponseEntity.ok(courtSlotList);
+    }
+    @GetMapping("/club/slots")
+    public ResponseEntity<List<Slot>> getSlotByClubId(@RequestParam long clubId)  {
+        List<Slot> slots = slotService.getSlotByClubId(clubId);
+        return ResponseEntity.ok(slots);
     }
 }
