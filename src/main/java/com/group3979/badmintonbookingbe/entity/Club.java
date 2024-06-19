@@ -28,6 +28,7 @@ public class Club {
     private ClubStatus clubStatus;
     private String description;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
