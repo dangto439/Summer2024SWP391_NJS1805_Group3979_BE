@@ -8,6 +8,8 @@ import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
+import com.group3979.badmintonbookingbe.model.response.CourtResponse;
+import com.group3979.badmintonbookingbe.model.response.NameClubOwnerAndCapacityClubResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.IImageClubRespository;
@@ -40,6 +42,8 @@ public class ClubService {
     private CourtService courtService;
     @Autowired
     private ImageClubService imageClubService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     // R - Read All
     public List<ClubResponse> getAllClubRequests() {
@@ -172,5 +176,24 @@ public class ClubService {
         }else {
             throw new CustomException("Không tìm thấy kết quả nào");
         }
+    }
+
+    //Lấy tên chủ sân và tổng số lượng aân
+    public NameClubOwnerAndCapacityClubResponse GetNameClubOwner(Long id) {
+        NameClubOwnerAndCapacityClubResponse nameClubOwnerAndCapacityClubResponse = new NameClubOwnerAndCapacityClubResponse();
+        Club club = clubRepository.findByClubId(id);
+        Account account = club.getAccount();
+        nameClubOwnerAndCapacityClubResponse.setNameOwner(account.getName());
+
+        List<CourtResponse> courts= courtService.getAllCourtsByClub(id);
+        int capacity = courts.size();
+        System.out.println(capacity);
+
+        nameClubOwnerAndCapacityClubResponse.setCapacity(capacity);
+
+
+
+        return nameClubOwnerAndCapacityClubResponse;
+
     }
 }

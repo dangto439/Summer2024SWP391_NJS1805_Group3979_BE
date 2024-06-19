@@ -4,6 +4,7 @@ import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.request.ImageClubRequest;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.ImageClubResponse;
+import com.group3979.badmintonbookingbe.model.response.NameClubOwnerAndCapacityClubResponse;
 import com.group3979.badmintonbookingbe.service.ClubService;
 import com.group3979.badmintonbookingbe.service.CourtService;
 import com.group3979.badmintonbookingbe.service.ImageClubService;
@@ -118,6 +119,11 @@ public class ClubAPI {
     public ResponseEntity<List<ClubResponse>> getByDistrictProvince(@RequestParam String district, String province){
         List<ClubResponse> clubResponses = clubService.searchClubByDistrictProvince(district,province);
         return ResponseEntity.ok(clubResponses);
+    }
+    @GetMapping("/club/name-club-owner/{id}")
+    public  ResponseEntity getNameClubOWner(@PathVariable Long id) {
+        NameClubOwnerAndCapacityClubResponse NameClubOwnerAndCapacityClubResponse = clubService.GetNameClubOwner(id);
+        return ResponseEntity.ok(NameClubOwnerAndCapacityClubResponse);
     }
 
 }
