@@ -12,10 +12,9 @@ import com.group3979.badmintonbookingbe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 @Service
@@ -52,7 +51,6 @@ public class BookingDetailService {
         double temporaryPrice = 0;
         Promotion promotion =
                 promotionService.checkValidPromotion(booking.getClub().getClubId(), dailyBookingRequest.getPromotionCode());
-        System.out.println(promotion);
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
             CourtSlot courtSlot = courtSlotRepository
@@ -137,7 +135,6 @@ public class BookingDetailService {
                 //select courtSlot
                 CourtSlot courtSlot = this.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
                 if (courtSlot != null) {
-                    System.out.println(courtSlot);
                     BookingDetail bookingDetail = new BookingDetail();
                     bookingDetail.setPlayingDate(playingDate);
                     bookingDetail.setCourtSlot(courtSlot);
@@ -162,6 +159,9 @@ public class BookingDetailService {
         fixedBooking = bookingRepository.save(fixedBooking);
         return bookingService.getBookingResponse(fixedBooking, temporaryPrice, discountPrice);
     }
+
+
+
 
     public CourtSlot selectCourtSlot(long clubId, Long slotId, Date playingDate) {
         Club club = clubRepository.findByClubId(clubId);
@@ -214,10 +214,24 @@ public class BookingDetailService {
                 .bookingDetailId(bookingDetail.getBookingDetailId())
                 .checkInCode(bookingDetail.getCheckInCode())
                 .price(bookingDetail.getPrice())
+                .timeSlot(bookingDetail.getCourtSlot().getSlot().getTime())
                 .status(bookingDetail.getStatus())
                 .CourtSlotId(bookingDetail.getCourtSlot().getCourtSlotId())
                 .playingDate(bookingDetail.getPlayingDate())
                 .bookingId(bookingDetail.getBooking().getBookingId()).build();
+    }
+    public List<BookingDetailResponse> getBookingDetailByBookingId(long bookingId){
+
+        List<BookingDetailResponse> bookingDetailResponses = new ArrayList<>();
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(bookingId);
+        if(!bookingDetails.isEmpty()){
+            for (BookingDetail bookingDetail:bookingDetails){
+                bookingDetailResponses.add(this.getBookingDetailResponse(bookingDetail));
+            }
+            return bookingDetailResponses;
+        }else {
+            throw new CustomException("Không tìm thấy kết quả nào");
+        }
     }
 
 }
