@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.model.response;
 
+import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import jakarta.persistence.Column;
@@ -24,5 +25,7 @@ public class BookingResponse {
     private int amountTime;
     private ExpirationStatus expirationStatus;
     private long ClubId;
+    private String ClubName;
+    private BookingStatus bookingStatus;
     private long customerId;
 }
