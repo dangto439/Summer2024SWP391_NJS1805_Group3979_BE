@@ -44,6 +44,7 @@ public class Booking {
     List<Transaction> transactions;
 
     //
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "acount_id")
     Account account;

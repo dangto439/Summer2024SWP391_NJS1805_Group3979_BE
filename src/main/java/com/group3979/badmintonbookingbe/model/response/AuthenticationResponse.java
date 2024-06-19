@@ -11,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class AuthenticationResponse {
+    private Long accountId;
     private String phone;
     private String email;
     private String name;
