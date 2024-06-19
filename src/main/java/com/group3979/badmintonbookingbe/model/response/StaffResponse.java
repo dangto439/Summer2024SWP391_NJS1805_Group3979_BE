@@ -12,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class StaffResponse {
+    private Long staffId;
     private String phone;
     private String email;
     private String name;

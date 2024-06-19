@@ -59,9 +59,23 @@ public class AuthenticationService implements UserDetailsService {
         return this.authenticationRepository.findAccountByEmail(email);
     }
 
-    public List<Account> getAllAccounts() {
+    public List<AuthenticationResponse> getAllAccounts() {
         List<Account> accounts = new ArrayList<>();
-        return accounts = authenticationRepository.findAll();
+        List<AuthenticationResponse> authenticationResponses = new ArrayList<>();
+        accounts = authenticationRepository.findAll();
+        for(Account account : accounts) {
+            authenticationResponses.add(AuthenticationResponse.builder()
+                    .accountId(account.getId())
+                    .phone(account.getPhone())
+                    .email(account.getEmail())
+                    .name(account.getName())
+                    .role(account.getRole())
+                    .gender(account.getGender())
+                    .supervisorID(account.getSupervisorID())
+                    .accountStatus(account.getAccountStatus())
+                    .build());
+        }
+        return authenticationResponses;
     }
 
     public Account register(RegisterRequest registerRequest) {
@@ -89,12 +103,12 @@ public class AuthenticationService implements UserDetailsService {
         return account;
     }
 
-    public Account login(LoginRequest loginRequest){
+    public Account login(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getPassword()));
         Account account = authenticationRepository.findAccountByEmail(loginRequest.getEmail());
         if (account.getAccountStatus().equals(AccountStatus.ACTIVE)) {
-            String token = tokenService.generateToken(account,24*60*60*1000);
+            String token = tokenService.generateToken(account, 24 * 60 * 60 * 1000);
             AccountResponse accountResponse = new AccountResponse();
             accountResponse.setId(account.getId());
             accountResponse.setPhone(account.getPhone());
@@ -106,7 +120,7 @@ public class AuthenticationService implements UserDetailsService {
             accountResponse.setAccountStatus(account.getAccountStatus());
             accountResponse.setToken(token);
             return accountResponse;
-        }else if(account.getAccountStatus().equals(AccountStatus.INACTIVE)){
+        } else if (account.getAccountStatus().equals(AccountStatus.INACTIVE)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản của bạn đã bị khóa, vui lòng liên hệ với " +
                     "quản trị viên để biết thêm chi tiết.");
         }
@@ -136,15 +150,17 @@ public class AuthenticationService implements UserDetailsService {
             accountResponse.setSupervisorID(account.getSupervisorID());
             accountResponse.setGender(account.getGender());
             accountResponse.setAccountStatus(account.getAccountStatus());
-            accountResponse.setToken(tokenService.generateToken(account,24*60*60*1000));
+            accountResponse.setToken(tokenService.generateToken(account, 24 * 60 * 60 * 1000));
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
         }
         return accountResponse;
     }
-    public AuthenticationResponse getAccountReponseByEmail(String email){
+
+    public AuthenticationResponse getAccountReponseByEmail(String email) {
         Account account = authenticationRepository.findAccountByEmail(email);
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .accountId(account.getId())
                 .email(account.getEmail())
                 .role(account.getRole())
                 .phone(account.getPhone())
@@ -157,9 +173,9 @@ public class AuthenticationService implements UserDetailsService {
 
     public void resetPassword(NewPasswordRequest newPasswordRequest) {
 
-            Account account = accountUtils.getCurrentAccount();
-            account.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
-            authenticationRepository.save(account);
+        Account account = accountUtils.getCurrentAccount();
+        account.setPassword(passwordEncoder.encode(newPasswordRequest.getNewPassword()));
+        authenticationRepository.save(account);
 
     }
 
@@ -176,7 +192,7 @@ public class AuthenticationService implements UserDetailsService {
         staff.setPassword(passwordEncoder.encode(staffRegisterRequest.getPassword()));
         staff.setSupervisorID(supervisor.getId());
         Club club = clubRepository.findByClubId(staffRegisterRequest.getClubId());
-        if(club == null) {
+        if (club == null) {
             throw new BadRequestException("Club not found!");
         }
         staff.setClub(club);
@@ -184,6 +200,7 @@ public class AuthenticationService implements UserDetailsService {
         staff = authenticationRepository.save(staff);
 
         return StaffResponse.builder()
+                .staffId(staff.getId())
                 .phone(staff.getPhone())
                 .email(staff.getEmail())
                 .name(staff.getName())
@@ -201,8 +218,9 @@ public class AuthenticationService implements UserDetailsService {
         List<Account> staffsNeedToGet = new ArrayList<>();
         List<StaffResponse> staffResponses = new ArrayList<>();
         staffsNeedToGet.addAll(authenticationRepository.findClubStaffBySupervisorId(Role.CLUB_STAFF, supervisorID));
-        for(Account staff : staffsNeedToGet) {
+        for (Account staff : staffsNeedToGet) {
             staffResponses.add(StaffResponse.builder()
+                    .staffId(staff.getId())
                     .phone(staff.getPhone())
                     .email(staff.getEmail())
                     .name(staff.getName())
@@ -217,13 +235,14 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     // view staffs list by ClubId
-    public List<StaffResponse> getAllStaffsByClub(Long clubId){
+    public List<StaffResponse> getAllStaffsByClub(Long clubId) {
         Club club = clubRepository.findByClubId(clubId);
         List<StaffResponse> staffResponses = new ArrayList<>();
         List<Account> staffsNeedToGet = new ArrayList<>();
         staffsNeedToGet.addAll(authenticationRepository.findClubStaffByClub(club));
-        for(Account staff : staffsNeedToGet) {
+        for (Account staff : staffsNeedToGet) {
             staffResponses.add(StaffResponse.builder()
+                    .staffId(staff.getId())
                     .phone(staff.getPhone())
                     .email(staff.getEmail())
                     .name(staff.getName())
@@ -255,20 +274,21 @@ public class AuthenticationService implements UserDetailsService {
     //block or unblock Account by Admin
     public AuthenticationResponse blockUser(String email) {
         Account account = authenticationRepository.findAccountByEmail(email);
-                if(account.getAccountStatus() == AccountStatus.ACTIVE) {
-                    account.setAccountStatus(AccountStatus.INACTIVE);
-                }else {
-                    account.setAccountStatus(AccountStatus.ACTIVE);
-                }
-                authenticationRepository.save(account);
-                return AuthenticationResponse.builder()
-                        .phone(account.getPhone())
-                        .email(account.getEmail())
-                        .name(account.getName())
-                        .role(account.getRole())
-                        .gender(account.getGender())
-                        .supervisorID(account.getSupervisorID())
-                        .accountStatus(account.getAccountStatus())
-                        .build();
+        if (account.getAccountStatus() == AccountStatus.ACTIVE) {
+            account.setAccountStatus(AccountStatus.INACTIVE);
+        } else {
+            account.setAccountStatus(AccountStatus.ACTIVE);
+        }
+        authenticationRepository.save(account);
+        return AuthenticationResponse.builder()
+                .accountId(account.getId())
+                .phone(account.getPhone())
+                .email(account.getEmail())
+                .name(account.getName())
+                .role(account.getRole())
+                .gender(account.getGender())
+                .supervisorID(account.getSupervisorID())
+                .accountStatus(account.getAccountStatus())
+                .build();
     }
 }
