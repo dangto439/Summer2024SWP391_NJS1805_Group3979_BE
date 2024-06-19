@@ -155,8 +155,8 @@ public class BookingService {
     }
     public Booking getFlexibleBooking(Account account, Club club) {
         List<Booking> flexibleBookings = bookingRepository.findBookingByAccountAndClub(account, club);
-        flexibleBookings.removeIf(booking -> (!booking.getBookingType().equals(BookingType.FLEXIBLEBOOKING))
-                && booking.getExpirationStatus().equals(ExpirationStatus.UNEXPIRED));
+        flexibleBookings.removeIf(booking -> !(booking.getBookingType().equals(BookingType.FLEXIBLEBOOKING)));
+        flexibleBookings.removeIf(booking -> booking.getExpirationStatus().equals(ExpirationStatus.UNEXPIRED));
         if (!flexibleBookings.isEmpty()) {
             return flexibleBookings.get(0);
         }
