@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.entity.Account;
+import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -178,5 +179,96 @@ public class WalletService {
                 .walletId(wallet.getWalletId())
                 .balance(wallet.getBalance())
                 .build();
+    }
+
+    // Nap tien vao vi (Deposit)
+    public WalletResponse deposit(Long accountId, double amount) throws NotFoundException {
+        Account user = authenticationRepository.findAccountById(accountId);
+        if(user == null){
+            throw new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId);
+        }
+        Wallet wallet = walletRepository.findWalletByAccount(user);
+        if(wallet == null){
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản với ID: " + accountId);
+        }
+
+        // nap tien
+        double currentBalance = wallet.getBalance();
+        double newBalance = currentBalance + amount;
+        wallet.setBalance(newBalance);
+
+        wallet = walletRepository.save(wallet);
+
+        return WalletResponse.builder()
+                .walletId(wallet.getWalletId())
+                .balance(wallet.getBalance())
+                .build();
+    }
+
+    // Rut tien tu vi (Withdrawl)
+    public WalletResponse withdrawl(Long accountId, double amount) throws NotFoundException, InsufficientBalanceException {
+        Account user = authenticationRepository.findAccountById(accountId);
+        if(user == null){
+            throw new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId);
+        }
+        Wallet wallet = walletRepository.findWalletByAccount(user);
+        if(wallet == null){
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản với ID: " + accountId);
+        }
+        // kiem tra so du truoc khi rut
+        double currentBalance = wallet.getBalance();
+        if(currentBalance < amount){
+            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch rút tiền");
+        }
+        // rut tien (withdrawl)
+        double newBalance = currentBalance - amount;
+        wallet.setBalance(newBalance);
+
+        wallet = walletRepository.save(wallet);
+
+        return WalletResponse.builder()
+                .walletId(wallet.getWalletId())
+                .balance(wallet.getBalance())
+                .build();
+    }
+
+    //  Chuyen tien tu mot vi den vi khac (Transfer)
+    public void transfer(Long senderAccountId, Long receiverAccountId, double amount) throws NotFoundException,
+            InsufficientBalanceException {
+        Account senderUser = authenticationRepository.findAccountById(senderAccountId);
+        if (senderUser == null) {
+            throw new NotFoundException("Không tìm thấy tài khoản nguồn với ID: " + senderAccountId);
+        }
+
+        Account receiverUser = authenticationRepository.findAccountById(receiverAccountId);
+        if (receiverUser == null) {
+            throw new NotFoundException("Không tìm thấy tài khoản đích với ID: " + receiverAccountId);
+        }
+
+        Wallet senderWallet = walletRepository.findWalletByAccount(senderUser);
+        if (senderWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + senderAccountId);
+        }
+
+        Wallet receiverWallet = walletRepository.findWalletByAccount(receiverUser);
+        if (receiverWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + receiverAccountId);
+        }
+
+        // Kiem tra so du co du de chuyen khong
+        double senderBalance = senderWallet.getBalance();
+        if(senderBalance < amount){
+            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch chuyển tiền");
+        }
+
+        // Thuc hien chuyen tien
+        double newSenderBalance = senderBalance - amount;
+        double receiverBalance = receiverWallet.getBalance() + amount;
+
+        senderWallet.setBalance(newSenderBalance);
+        receiverWallet.setBalance(receiverBalance);
+
+        senderWallet = walletRepository.save(senderWallet);
+        receiverWallet = walletRepository.save(receiverWallet);
     }
 }

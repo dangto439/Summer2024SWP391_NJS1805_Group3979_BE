@@ -49,4 +49,9 @@ public class ApiHandleException {
     public ResponseEntity<Object>  handleNotFoundException(NotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<Object> handleInsufficientBalanceException(InsufficientBalanceException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
