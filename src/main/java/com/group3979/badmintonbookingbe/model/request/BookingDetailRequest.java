@@ -10,5 +10,4 @@ import java.util.Date;
 public class BookingDetailRequest {
     private Long CourtSlotId;
     private Date playingDate;
-
 }

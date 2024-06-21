@@ -27,7 +27,7 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
     @Query("SELECT a.price \n" +
             "FROM CourtSlot a \n" +
             "WHERE  a.court=:court\n" +
-            "ORDER BY a.price ASC\n" +
+            "ORDER BY a.price desc\n" +
             "LIMIT 1")
     float findPriceByCourt(@Param("court") Court court);
 

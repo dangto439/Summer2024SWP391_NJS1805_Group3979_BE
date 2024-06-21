@@ -106,7 +106,7 @@ public class BookingDetailService {
         flexibleBooking = bookingRepository.save(flexibleBooking);
         return bookingService.getBookingResponse(flexibleBooking, totalPrice, 0);
     }
-    
+
     public Date truncateTime(Date inputDate) {
         if (inputDate == null) {
             return null;
@@ -130,24 +130,28 @@ public class BookingDetailService {
         Promotion promotion =
                 promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
-        for (Date playingDate : playingDates) {
-            for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                //select courtSlot
-                CourtSlot courtSlot = this.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
-                if (courtSlot != null) {
-                    BookingDetail bookingDetail = new BookingDetail();
-                    bookingDetail.setPlayingDate(playingDate);
-                    bookingDetail.setCourtSlot(courtSlot);
-                    bookingDetail.setPrice(courtSlot.getPrice());
-                    bookingDetail.setBooking(fixedBooking);
-                    temporaryPrice += courtSlot.getPrice();
-                    bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-                    bookingDetailRepository.save(bookingDetail);
+        if(fixedBookingRequest.getCourtId() == 0) {
+            for (Date playingDate : playingDates) {
+                for (Long slotId : fixedBookingRequest.getSlotIds()) {
+
+                    // khach hang muon chon bai ki san nao
+                    temporaryPrice += this.saveFixedBookingDetailByClub(fixedBooking, slotId, playingDate);
+                }
+            }
+        }else {
+            for (Date playingDate : playingDates) {
+                for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                    // khach hang chon san cu the
+                    Court court = courtRepository.findByCourtId(fixedBookingRequest.getCourtId());
+                    if(court == null){
+                        throw new CustomException("Sân không tồn tại");
+                    }
+                    temporaryPrice += this.saveFixedBookingDetailByCourt(fixedBooking,slotId,playingDate,court.getCourtId());
                 }
             }
         }
         double totalPrice;
-        double discountPrice =  (temporaryPrice *
+        double discountPrice = (temporaryPrice *
                 (discountRuleRepository.findDiscountRuleByClub(fixedBooking.getClub()).getFixedPercent() / 100));
         if (promotion != null) {
             discountPrice += promotion.getDiscount();
@@ -159,9 +163,34 @@ public class BookingDetailService {
         fixedBooking = bookingRepository.save(fixedBooking);
         return bookingService.getBookingResponse(fixedBooking, temporaryPrice, discountPrice);
     }
-
-
-
+    public double saveFixedBookingDetailByClub(Booking fixedBooking, long slotId, Date playingDate){
+        CourtSlot courtSlot = this.selectCourtSlot(fixedBooking.getClub().getClubId(), slotId, playingDate);
+        if (courtSlot != null) {
+            BookingDetail bookingDetail = new BookingDetail();
+            bookingDetail.setPlayingDate(playingDate);
+            bookingDetail.setCourtSlot(courtSlot);
+            bookingDetail.setPrice(courtSlot.getPrice());
+            bookingDetail.setBooking(fixedBooking);
+            bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
+            bookingDetailRepository.save(bookingDetail);
+            return courtSlot.getPrice();
+        }
+        return 0;
+    }
+    public double saveFixedBookingDetailByCourt(Booking fixedBooking, long slotId, Date playingDate, long courtId){
+        CourtSlot courtSlot = this.selectCourtSlotOfCourt(courtId,slotId,playingDate);
+        if (courtSlot != null) {
+            BookingDetail bookingDetail = new BookingDetail();
+            bookingDetail.setPlayingDate(playingDate);
+            bookingDetail.setCourtSlot(courtSlot);
+            bookingDetail.setPrice(courtSlot.getPrice());
+            bookingDetail.setBooking(fixedBooking);
+            bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
+            bookingDetailRepository.save(bookingDetail);
+            return courtSlot.getPrice();
+        }
+        return 0;
+    }
 
     public CourtSlot selectCourtSlot(long clubId, Long slotId, Date playingDate) {
         Club club = clubRepository.findByClubId(clubId);
@@ -173,6 +202,17 @@ public class BookingDetailService {
             if (existedCourtSlot == null) {
                 return courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot);
             }
+        }
+        return null;
+    }
+
+    public CourtSlot selectCourtSlotOfCourt(long courtId, Long slotId, Date playingDate) {
+        Slot slot = slotRepository.findSlotBySlotId(slotId);
+        Court court = courtRepository.findByCourtId(courtId);
+        CourtSlot existedCourtSlot =
+                courtSlotRepository.findCourtSlotByPlayingDateAndSlot(playingDate, court, slot);
+        if (existedCourtSlot == null) {
+            return courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot);
         }
         return null;
     }
@@ -220,16 +260,17 @@ public class BookingDetailService {
                 .playingDate(bookingDetail.getPlayingDate())
                 .bookingId(bookingDetail.getBooking().getBookingId()).build();
     }
-    public List<BookingDetailResponse> getBookingDetailByBookingId(long bookingId){
+
+    public List<BookingDetailResponse> getBookingDetailByBookingId(long bookingId) {
 
         List<BookingDetailResponse> bookingDetailResponses = new ArrayList<>();
         List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(bookingId);
-        if(!bookingDetails.isEmpty()){
-            for (BookingDetail bookingDetail:bookingDetails){
+        if (!bookingDetails.isEmpty()) {
+            for (BookingDetail bookingDetail : bookingDetails) {
                 bookingDetailResponses.add(this.getBookingDetailResponse(bookingDetail));
             }
             return bookingDetailResponses;
-        }else {
+        } else {
             throw new CustomException("Không tìm thấy kết quả nào");
         }
     }
