@@ -21,6 +21,7 @@ public class Wallet {
     private Long walletId;
     private double balance;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
