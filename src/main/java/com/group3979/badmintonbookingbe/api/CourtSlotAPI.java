@@ -4,6 +4,7 @@ package com.group3979.badmintonbookingbe.api;
 import com.group3979.badmintonbookingbe.entity.Slot;
 import com.group3979.badmintonbookingbe.model.request.CourtSlotRequest;
 import com.group3979.badmintonbookingbe.model.response.CourtSlotResponse;
+import com.group3979.badmintonbookingbe.model.response.CourtSlotStatusResponse;
 import com.group3979.badmintonbookingbe.service.CourtSlotService;
 import com.group3979.badmintonbookingbe.service.SlotService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -56,5 +57,13 @@ public class CourtSlotAPI {
     public ResponseEntity<List<Slot>> getSlotByClubId(@RequestParam long clubId)  {
         List<Slot> slots = slotService.getSlotByClubId(clubId);
         return ResponseEntity.ok(slots);
+    }
+    @GetMapping("/court-slot/status")
+    public ResponseEntity<List<CourtSlotStatusResponse>>  getCourtSlotStatus(@RequestParam String date, @RequestParam long courtId) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date parsedDate = formatter.parse(date);
+
+        List<CourtSlotStatusResponse> courtSlotList = courtSlotService.getCourtSlotByCourtId(parsedDate,courtId);
+        return ResponseEntity.ok(courtSlotList);
     }
 }
