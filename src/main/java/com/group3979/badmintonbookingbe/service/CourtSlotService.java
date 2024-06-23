@@ -171,7 +171,7 @@ public class CourtSlotService {
 
     public List<CourtSlotResponse> existCourtSlotInADay(Date playingDate, long courtId) {
         Court court = courtRepository.findByCourtId(courtId);
-        if(court != null) {
+        if (court != null) {
             List<CourtSlot> courtSlots =
                     courtSlotRepository.findCourtSlotByPlayingDate(extractDate(playingDate), court);
 
@@ -181,37 +181,40 @@ public class CourtSlotService {
                 courtSlotResponses.add(courtSlotResponse);
             }
             return courtSlotResponses;
-        }else {
-            throw new CustomException("Sân không tồn tại");
-        }
-    }
-    public List<CourtSlotStatusResponse> getCourtSlotByCourtId(Date playingDate, long courtId){
-        Court court = courtRepository.findByCourtId(courtId);
-        List<CourtSlotStatusResponse> courtSlotStatusResponses = new ArrayList<>();
-        if(court != null) {
-            List<CourtSlot> courtSlotsExisted =
-                    courtSlotRepository.findCourtSlotByPlayingDate(extractDate(playingDate), court);
-            List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
-            for(CourtSlot courtSlot: courtSlots){
-                if(courtSlotsExisted.contains(courtSlot)){
-                    CourtSlotStatusResponse courtSlotStatusResponse = new CourtSlotStatusResponse();
-                    courtSlotStatusResponse.setCourtSlotId(courtSlot.getCourtSlotId());
-                    courtSlotStatusResponse.setCourtSlotStatus(CourtSlotStatus.INACTIVE);
-                    courtSlotStatusResponses.add(courtSlotStatusResponse);
-                }else {
-                    CourtSlotStatusResponse courtSlotStatusResponse = new CourtSlotStatusResponse();
-                    courtSlotStatusResponse.setCourtSlotId(courtSlot.getCourtSlotId());
-                    courtSlotStatusResponse.setCourtSlotStatus(CourtSlotStatus.ACTIVE);
-                    courtSlotStatusResponses.add(courtSlotStatusResponse);
-                }
-            }
-            return courtSlotStatusResponses;
-        }else {
+        } else {
             throw new CustomException("Sân không tồn tại");
         }
     }
 
-    public  Date extractDate(Date date) {
+    public List<CourtSlotStatusResponse> getCourtSlotByCourtId(Date playingDate, long courtId) {
+        Court court = courtRepository.findByCourtId(courtId);
+        List<CourtSlotStatusResponse> courtSlotStatusResponses = new ArrayList<>();
+        if (court != null) {
+
+            List<CourtSlot> courtSlotsExisted =
+                    courtSlotRepository.findCourtSlotByPlayingDate(extractDate(playingDate), court);
+            List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
+            courtSlots.removeIf(courtSlot -> (courtSlot.getSlot().getTime() < court.getClub().getOpenTime()) ||
+                    (courtSlot.getSlot().getTime() >= court.getClub().getCloseTime()));
+            for (CourtSlot courtSlot : courtSlots) {
+                CourtSlotStatusResponse courtSlotStatusResponse = new CourtSlotStatusResponse();
+                courtSlotStatusResponse.setCourtSlotId(courtSlot.getCourtSlotId());
+                courtSlotStatusResponse.setPrice(courtSlot.getPrice());
+                courtSlotStatusResponse.setSlotId(courtSlot.getSlot().getSlotId());
+                if (courtSlotsExisted.contains(courtSlot)) {
+                    courtSlotStatusResponse.setCourtSlotStatus(CourtSlotStatus.INACTIVE);
+                } else {
+                    courtSlotStatusResponse.setCourtSlotStatus(CourtSlotStatus.ACTIVE);
+                }
+                courtSlotStatusResponses.add(courtSlotStatusResponse);
+            }
+            return courtSlotStatusResponses;
+        } else {
+            throw new CustomException("Sân không tồn tại");
+        }
+    }
+
+    public Date extractDate(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -220,6 +223,7 @@ public class CourtSlotService {
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
+
     public CourtSlotResponse getCourtSlotResponse(CourtSlot courtSlot) {
         Court court = courtSlot.getCourt();
         CourtResponse courtResponse = CourtResponse.builder()
