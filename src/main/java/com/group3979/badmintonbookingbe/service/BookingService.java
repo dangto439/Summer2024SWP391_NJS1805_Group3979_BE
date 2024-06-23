@@ -7,7 +7,6 @@ import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
-import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -47,6 +46,8 @@ public class BookingService {
 
     @Autowired
     IDiscountRuleRepository discountRuleRepository;
+    @Autowired
+    private ICourtRepository courtRepository;
 
     public BookingResponse createDailyBooking(DailyBookingRequest dailyBookingRequest) {
         CourtSlot courtSlot = courtSlotRepository.findCourtSlotByCourtSlotId(dailyBookingRequest.getBookingDetailRequests().get(0).getCourtSlotId());
@@ -85,7 +86,7 @@ public class BookingService {
                 flexibleBooking.setExpirationStatus(ExpirationStatus.UNEXPIRED);
                 flexibleBooking.setBookingType(BookingType.FLEXIBLEBOOKING);
                 double totalPrice;
-                double discountPrice =  temporaryPrice *
+                double discountPrice = temporaryPrice *
                         (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent() / 100);
                 if (promotion != null) {
                     discountPrice = promotion.getDiscount();
@@ -96,7 +97,7 @@ public class BookingService {
                 flexibleBooking.setTotalPrice(totalPrice);
                 flexibleBooking = bookingRepository.save(flexibleBooking);
                 return this.getBookingResponse(flexibleBooking, temporaryPrice, discountPrice);
-            }else {
+            } else {
                 throw new CustomException("Lịch linh hoạt của bạn trên sân này vẫn chưa hết hạn. " +
                         "Vui lòng sử dụng hết thời gian để đặt lịch linh hoạt tiếp theo.");
             }
@@ -138,6 +139,7 @@ public class BookingService {
                 .build();
         return bookingResponse;
     }
+
     public BookingResponse getBookingResponse(Booking booking) {
         BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
                 .bookingDate(booking.getBookingDate())
@@ -153,6 +155,7 @@ public class BookingService {
                 .build();
         return bookingResponse;
     }
+
     public Booking getFlexibleBooking(Account account, Club club) {
         List<Booking> flexibleBookings = bookingRepository.findBookingByAccountAndClub(account, club);
         flexibleBookings.removeIf(booking -> !(booking.getBookingType().equals(BookingType.FLEXIBLEBOOKING)));
@@ -162,73 +165,101 @@ public class BookingService {
         }
         return null;
     }
-    public List<BookingResponse> getBookingResponseCurrentAccount(){
+
+    public List<BookingResponse> getBookingResponseCurrentAccount() {
         List<Booking> bookings = bookingRepository.findBookingByAccount(accountUtils.getCurrentAccount());
         List<BookingResponse> bookingResponses = new ArrayList<>();
-        if(!bookings.isEmpty()){
-            for (Booking booking:bookings){
+        if (!bookings.isEmpty()) {
+            for (Booking booking : bookings) {
                 bookingResponses.add(this.getBookingResponse(booking));
             }
             return bookingResponses;
-        }else {
+        } else {
             throw new CustomException("Không tồn tại booking nào");
         }
     }
-    public BookingResponse getBookingById(long id){
+
+    public BookingResponse getBookingById(long id) {
         Booking booking = bookingRepository.findByBookingId(id);
-        if(booking != null){
+        if (booking != null) {
             return this.getBookingResponse(booking);
-        }else {
+        } else {
             throw new CustomException("Booking không tồn tại");
         }
     }
-    public List<BookingResponse> getAllBooking(){
+
+    public List<BookingResponse> getAllBooking() {
         List<Booking> bookings = bookingRepository.findAll();
         List<BookingResponse> bookingResponses = new ArrayList<>();
-            for (Booking booking:bookings){
-                bookingResponses.add(this.getBookingResponse(booking));
-            }
-            return bookingResponses;
+        for (Booking booking : bookings) {
+            bookingResponses.add(this.getBookingResponse(booking));
+        }
+        return bookingResponses;
     }
+
     public List<String> notifyFullSlot(FixedBookingRequest fixedBookingRequest) {
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-
         List<Date> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         List<String> fullyBookeds = new ArrayList<>();
-        for (Date playingDate : playingDates) {
-            for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                //select courtSlot
-                CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
-                if (courtSlot == null) {
-                    String date = df.format(playingDate);
-                    String slots = String.format("Slot %dh tại sân này vào ngày %s đã hết",slotId,date);
-                    fullyBookeds.add(slots);
+        if (fixedBookingRequest.getCourtId() == 0) {
+            for (Date playingDate : playingDates) {
+                for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                    //select courtSlot
+                    CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
+                    if (courtSlot == null) {
+                        String date = df.format(playingDate);
+                        String slots = String.format("Slot %dh tại sân này vào ngày %s đã hết", slotId, date);
+                        fullyBookeds.add(slots);
+                    }
+                }
+            }
+        } else {
+            for (Date playingDate : playingDates) {
+                for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                    Court court = courtRepository.findByCourtId(fixedBookingRequest.getCourtId());
+                    CourtSlot courtSlot = bookingDetailService.selectCourtSlotOfCourt(fixedBookingRequest.getCourtId(), slotId, playingDate);
+                    if (courtSlot == null) {
+                        String date = df.format(playingDate);
+                        String slots = String.format("Slot %dh tại %s vào ngày %s đã hết", slotId, court.getCourtName(), date);
+                        fullyBookeds.add(slots);
+                    }
                 }
             }
         }
-        if(fullyBookeds.isEmpty()){
+        if (fullyBookeds.isEmpty()) {
             fullyBookeds.add("Không trùng slot");
         }
         return fullyBookeds;
     }
-    public double getPriceFixedBooking( FixedBookingRequest fixedBookingRequest){
+
+    public double getPriceFixedBooking(FixedBookingRequest fixedBookingRequest) {
         List<Date> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         Club club = clubRepository.findByClubId(fixedBookingRequest.getClubId());
         Promotion promotion =
                 promotionService.checkValidPromotion(club.getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
-        for (Date playingDate : playingDates) {
-            for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                //select courtSlot
-                CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
-                if (courtSlot != null) {
-                    temporaryPrice += courtSlot.getPrice();
+        if (fixedBookingRequest.getClubId() == 0) {
+            for (Date playingDate : playingDates) {
+                for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                    CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
+                    if (courtSlot != null) {
+                        temporaryPrice += courtSlot.getPrice();
+                    }
+                }
+            }
+        } else {
+            for (Date playingDate : playingDates) {
+                for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                    CourtSlot courtSlot = bookingDetailService.selectCourtSlotOfCourt(fixedBookingRequest.getCourtId(), slotId, playingDate);
+                    if (courtSlot != null) {
+                        temporaryPrice += courtSlot.getPrice();
+                    }
                 }
             }
         }
-        double discountPrice =  (temporaryPrice *
+        double discountPrice = (temporaryPrice *
                 (discountRuleRepository.findDiscountRuleByClub(club).getFixedPercent() / 100));
         if (promotion != null) {
             discountPrice += promotion.getDiscount();

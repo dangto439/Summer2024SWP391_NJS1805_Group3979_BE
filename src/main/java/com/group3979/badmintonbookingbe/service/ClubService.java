@@ -10,7 +10,6 @@ import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.model.response.NameClubOwnerAndCapacityClubResponse;
-import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.IImageClubRespository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -180,16 +179,9 @@ public class ClubService {
         Club club = clubRepository.findByClubId(id);
         Account account = club.getAccount();
         nameClubOwnerAndCapacityClubResponse.setNameOwner(account.getName());
-
         List<CourtResponse> courts= courtService.getAllCourtsByClub(id);
         int capacity = courts.size();
-        System.out.println(capacity);
-
         nameClubOwnerAndCapacityClubResponse.setCapacity(capacity);
-
-
-
         return nameClubOwnerAndCapacityClubResponse;
-
     }
 }
