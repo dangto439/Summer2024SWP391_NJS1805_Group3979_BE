@@ -11,4 +11,6 @@ import lombok.*;
 public class CourtSlotStatusResponse {
     private long courtSlotId;
     private CourtSlotStatus courtSlotStatus;
+    private long slotId;
+     private double price;
 }
