@@ -32,6 +32,25 @@ public class CourtSlotService {
     @Autowired
     ISlotRepository slotRepository;
 
+    public void createEachCourtSlot(Club club, Court newCourt) {
+        Court court = courtRepository.findByClub(club).get(0);
+        for (int i = 1; i <= 24; i++) {
+            CourtSlot courtSlot = new CourtSlot();
+            Slot slot = slotRepository.findSlotByTime(i);
+            courtSlot.setCourt(newCourt);
+            courtSlot.setSlot(slot);
+            for (CourtSlot courtSlot1 : court.getCourtSlots()) {
+                if(courtSlot.getSlot().getTime() == courtSlot1.getSlot().getTime()) {
+                    courtSlot.setPrice(courtSlot1.getPrice());
+                    break;
+                }
+            }
+            courtSlotRepository.save(courtSlot);
+        }
+
+
+    }
+
     public List<CourtSlotResponse> createCourtSlot(Long clubId, CourtSlotRequest courtSlotRequest) {
         List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
         Club club = clubRepository.findByClubId(clubId);
@@ -108,31 +127,6 @@ public class CourtSlotService {
         return courtSlotRepository.findPriceByCourt(club.getCourts().get(0));
     }
 
-
-    //        Court court = courtRepository.findByCourtId(courtId);
-//
-//        List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
-//        List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
-//
-//        for (CourtSlot courtSlot : courtSlots) {
-//            CourtResponse courtResponse = CourtResponse.builder()
-//                    .courtId(court.getCourtId())
-//                    .courtName(court.getCourtName())
-//                    .courtStatus(court.getCourtStatus())
-//                    .build();
-//
-//            CourtSlotResponse courtSlotResponse = CourtSlotResponse.builder()
-//                    .courtSlotId(courtSlot.getCourtSlotId())
-//                    .price(courtSlot.getPrice())
-//                    .courtResponse(courtResponse)
-//                    .clubId(court.getClub().getClubId())
-//                    .slotId(courtSlot.getSlot().getSlotId())
-//                    .build();
-//
-//            courtSlotResponses.add(courtSlotResponse);
-//        }
-//        return courtSlotResponses;
-//    }
     public List<CourtSlotResponse> updateCourtSlot(Long clubId, CourtSlotRequest courtSlotRequest) {
         List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
         Club club = clubRepository.findByClubId(clubId);

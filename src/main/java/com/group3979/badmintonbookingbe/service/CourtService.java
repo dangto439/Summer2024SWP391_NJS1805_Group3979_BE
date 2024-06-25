@@ -19,6 +19,8 @@ public class CourtService {
     ICourtRepository courtRepository;
     @Autowired
     IClubRepository clubRepository;
+    @Autowired
+    private CourtSlotService courtSlotService;
 
     // get all courts of a club
     public List<CourtResponse> getAllCourtsByClub(long clubId) {
@@ -69,6 +71,7 @@ public class CourtService {
         courtResponse.setCourtId(court.getCourtId());
         courtResponse.setCourtName(court.getCourtName());
         courtResponse.setCourtStatus(court.getCourtStatus());
+        courtSlotService.createEachCourtSlot(club, court);
         return courtResponse;
     }
 
