@@ -59,7 +59,7 @@ public class WalletService {
         String tmnCode = "4AI8TZAL";
         String secretKey = "L7PTI36MCPCFFB0JON87IXJFQYPOYJ2I";
         String vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "http://datsan79.online/";// trang tra ve khi hoan thanh
+        String returnUrl = "http://datsan79.online/payment";// trang tra ve khi hoan thanh
 
         String currCode = "VND";
         Map<String, String> vnpParams = new TreeMap<>();
