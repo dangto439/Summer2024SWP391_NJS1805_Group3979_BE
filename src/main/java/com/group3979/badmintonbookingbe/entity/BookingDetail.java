@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -19,10 +20,8 @@ public class BookingDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long bookingDetailId;
-    private Date playingDate;
+    private LocalDate playingDate;
     private double price;
-    //    @Column(unique=true)
-//    private BigInteger checkinCode;
     @Enumerated(EnumType.STRING)
     private BookingDetailStatus status;
     @ManyToOne
