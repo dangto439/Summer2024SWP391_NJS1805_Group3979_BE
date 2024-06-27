@@ -70,4 +70,10 @@ public class AuthenticationAPI {
     public ResponseEntity blockUser(@PathVariable String email) {
         return ResponseEntity.ok(authenticationService.blockUser(email));
     }
+
+    @GetMapping("/account/{id}")
+    public Account getAccount(@PathVariable long id) {
+        Account account = authenticationService.getAccountById(id);
+        return account;
+    }
 }

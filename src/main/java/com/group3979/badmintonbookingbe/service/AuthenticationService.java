@@ -293,4 +293,8 @@ public class AuthenticationService implements UserDetailsService {
                 .accountStatus(account.getAccountStatus())
                 .build();
     }
+
+    public Account getAccountById(Long id) {
+        return authenticationRepository.findAccountById(id);
+    }
 }
