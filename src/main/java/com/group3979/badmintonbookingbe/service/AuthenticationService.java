@@ -73,6 +73,7 @@ public class AuthenticationService implements UserDetailsService {
                     .gender(account.getGender())
                     .supervisorID(account.getSupervisorID())
                     .accountStatus(account.getAccountStatus())
+                            .avatar(account.getAvatar())
                     .build());
         }
         return authenticationResponses;
@@ -191,6 +192,7 @@ public class AuthenticationService implements UserDetailsService {
         staff.setAccountStatus(AccountStatus.ACTIVE);
         staff.setPassword(passwordEncoder.encode(staffRegisterRequest.getPassword()));
         staff.setSupervisorID(supervisor.getId());
+        staff.setAvatar(avatatDefault);
         Club club = clubRepository.findByClubId(staffRegisterRequest.getClubId());
         if (club == null) {
             throw new BadRequestException("Club not found!");
