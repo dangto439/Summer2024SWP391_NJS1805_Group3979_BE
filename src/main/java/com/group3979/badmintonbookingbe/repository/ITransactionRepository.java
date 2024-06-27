@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ITransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findTransactionsBySenderWallet(Wallet wallet);
+    Transaction findTransactionByTransactionId(long id);
 }

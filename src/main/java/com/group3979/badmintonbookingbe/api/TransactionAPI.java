@@ -34,6 +34,12 @@ public class TransactionAPI {
         return ResponseEntity.ok(transaction);
     }
 
+    @PutMapping("/transaction/{transactionId}")
+    public ResponseEntity updateTransaction(@PathVariable("transactionId") Long transactionId,
+                                            @RequestParam TransactionType transactionType,@RequestBody TransactionRequest transactionRequest) {
+        return ResponseEntity.ok(transactionService.updateTransactionType(transactionRequest, transactionId, transactionType));
+    }
+
     @PostMapping("/transactionV2")
     public ResponseEntity createTransactionV2(@RequestBody TransactionRequest transactionRequest) {
         return ResponseEntity.ok(transactionService.createTransactionV2(transactionRequest));

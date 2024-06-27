@@ -90,6 +90,44 @@ public class TransactionService {
         return buildTransactionResponse(transaction);
     }
 
+    // Update Transaction (Type & Description & Time.now)
+    public TransactionResponse updateTransactionType(TransactionRequest transactionRequest, long transactionId, TransactionType transactionType) {
+        Transaction transaction = transactionRepository.findTransactionByTransactionId(transactionId);
+        if (transaction == null) {
+            throw new CustomException("Transaction not found");
+        }
+
+        LocalDateTime timestamp = LocalDateTime.now();
+        switch (transactionType) {
+            case DEPOSIT:
+                transaction.setTimestamp(timestamp);
+                transaction.setType(TransactionType.DEPOSIT);
+                transaction.setDescription(TransactionType.DEPOSIT.getDescription());
+                break;
+            case TRANSFER:
+                Wallet receiverWallet = walletRepository.
+                        findWalletByAccount(authenticationRepository.
+                                findAccountById(transactionRequest.getReceiverWalletId()));
+                if (receiverWallet == null) {
+                    throw new CustomException("Receiver wallet not found with ID: " + transactionRequest.getReceiverWalletId());
+                }
+                transaction.setTimestamp(timestamp);
+                transaction.setType(TransactionType.TRANSFER);
+                transaction.setDescription(TransactionType.TRANSFER.getDescription());
+                transaction.setReceiverWallet(receiverWallet);
+                break;
+            case REFUND:
+                transaction.setTimestamp(timestamp);
+                transaction.setType(TransactionType.REFUND);
+                transaction.setDescription(TransactionType.REFUND.getDescription());
+                break;
+            default:
+                throw new CustomException("Invalid transaction type: " + transactionType);
+        }
+        transaction = transactionRepository.save(transaction);
+        return buildTransactionResponse(transaction);
+    }
+
     // Get All Transactions for Admin
     public List<TransactionResponse> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
