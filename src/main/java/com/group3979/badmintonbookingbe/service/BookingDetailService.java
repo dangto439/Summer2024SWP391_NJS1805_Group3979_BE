@@ -8,13 +8,16 @@ import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
+import com.group3979.badmintonbookingbe.model.response.CheckedBookingDetailResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @Service
@@ -60,8 +63,8 @@ public class BookingDetailService {
             bookingDetail.setCourtSlot(courtSlot);
             bookingDetail.setPrice(courtSlot.getPrice());
             bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-            bookingDetail.setPlayingDate(this.truncateTime(bookingDetailRequest.getPlayingDate()));
-            bookingDetailRepository.save(bookingDetail);
+            bookingDetail.setPlayingDate(bookingDetailRequest.getPlayingDate());
+            this.generateCheckInCode(bookingDetail);
 
         }
         double totalPrice;
@@ -76,7 +79,6 @@ public class BookingDetailService {
         booking = bookingRepository.save(booking);
         return bookingService.getBookingResponse(booking, temporaryPrice, discountPrice);
     }
-
     //dat lich ngay sau khi da dat lich linh hoat
     public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
         double totalPrice = 0;
@@ -90,8 +92,8 @@ public class BookingDetailService {
             bookingDetail.setCourtSlot(courtSlot);
             bookingDetail.setPrice(courtSlot.getPrice());
             bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-            bookingDetail.setPlayingDate(this.truncateTime(bookingDetailRequest.getPlayingDate()));
-            bookingDetailRepository.save(bookingDetail);
+            bookingDetail.setPlayingDate(bookingDetailRequest.getPlayingDate());
+            this.generateCheckInCode(bookingDetail);
             if (amountTime <= 0) {
                 totalPrice += courtSlot.getPrice();
             }
@@ -106,47 +108,30 @@ public class BookingDetailService {
         flexibleBooking = bookingRepository.save(flexibleBooking);
         return bookingService.getBookingResponse(flexibleBooking, totalPrice, 0);
     }
-
-    public Date truncateTime(Date inputDate) {
-        if (inputDate == null) {
-            return null;
-        }
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(inputDate);
-        // Đặt giờ, phút, giây, mili giây thành 0
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        return calendar.getTime();
-    }
-
     //dat lich co dinh
     public BookingResponse createFixedBookingDetail(Booking fixedBooking, FixedBookingRequest fixedBookingRequest) {
-        List<Date> playingDates = this.getAllDaysOfBooking(fixedBookingRequest.getYear(),
+        List<LocalDate> playingDates = this.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         Promotion promotion =
                 promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
-        if(fixedBookingRequest.getCourtId() == 0) {
-            for (Date playingDate : playingDates) {
+        if (fixedBookingRequest.getCourtId() == 0) {
+            for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
 
                     // khach hang muon chon bai ki san nao
                     temporaryPrice += this.saveFixedBookingDetailByClub(fixedBooking, slotId, playingDate);
                 }
             }
-        }else {
-            for (Date playingDate : playingDates) {
+        } else {
+            for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
                     // khach hang chon san cu the
                     Court court = courtRepository.findByCourtId(fixedBookingRequest.getCourtId());
-                    if(court == null){
+                    if (court == null) {
                         throw new CustomException("Sân không tồn tại");
                     }
-                    temporaryPrice += this.saveFixedBookingDetailByCourt(fixedBooking,slotId,playingDate,court.getCourtId());
+                    temporaryPrice += this.saveFixedBookingDetailByCourt(fixedBooking, slotId, playingDate, court.getCourtId());
                 }
             }
         }
@@ -163,7 +148,8 @@ public class BookingDetailService {
         fixedBooking = bookingRepository.save(fixedBooking);
         return bookingService.getBookingResponse(fixedBooking, temporaryPrice, discountPrice);
     }
-    public double saveFixedBookingDetailByClub(Booking fixedBooking, long slotId, Date playingDate){
+
+    public double saveFixedBookingDetailByClub(Booking fixedBooking, long slotId, LocalDate playingDate) {
         CourtSlot courtSlot = this.selectCourtSlot(fixedBooking.getClub().getClubId(), slotId, playingDate);
         if (courtSlot != null) {
             BookingDetail bookingDetail = new BookingDetail();
@@ -172,13 +158,14 @@ public class BookingDetailService {
             bookingDetail.setPrice(courtSlot.getPrice());
             bookingDetail.setBooking(fixedBooking);
             bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-            bookingDetailRepository.save(bookingDetail);
+            this.generateCheckInCode(bookingDetail);
             return courtSlot.getPrice();
         }
         return 0;
     }
-    public double saveFixedBookingDetailByCourt(Booking fixedBooking, long slotId, Date playingDate, long courtId){
-        CourtSlot courtSlot = this.selectCourtSlotOfCourt(courtId,slotId,playingDate);
+
+    public double saveFixedBookingDetailByCourt(Booking fixedBooking, long slotId, LocalDate playingDate, long courtId) {
+        CourtSlot courtSlot = this.selectCourtSlotOfCourt(courtId, slotId, playingDate);
         if (courtSlot != null) {
             BookingDetail bookingDetail = new BookingDetail();
             bookingDetail.setPlayingDate(playingDate);
@@ -186,13 +173,25 @@ public class BookingDetailService {
             bookingDetail.setPrice(courtSlot.getPrice());
             bookingDetail.setBooking(fixedBooking);
             bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-            bookingDetailRepository.save(bookingDetail);
+            this.generateCheckInCode(bookingDetail);
             return courtSlot.getPrice();
         }
         return 0;
     }
 
-    public CourtSlot selectCourtSlot(long clubId, Long slotId, Date playingDate) {
+    public BookingDetail generateCheckInCode(BookingDetail bookingDetail) {
+        try {
+            String checkInCode = String.valueOf(ThreadLocalRandom.current().nextInt(100_000_000, 1_000_000_000));
+            bookingDetail.setCheckInCode(checkInCode);
+            bookingDetail = bookingDetailRepository.save(bookingDetail);
+            return bookingDetail;
+        } catch (DataIntegrityViolationException ex) {
+            bookingDetail = this.generateCheckInCode(bookingDetail);
+            return bookingDetail;
+        }
+    }
+
+    public CourtSlot selectCourtSlot(long clubId, Long slotId, LocalDate playingDate) {
         Club club = clubRepository.findByClubId(clubId);
         Slot slot = slotRepository.findSlotBySlotId(slotId);
         List<Court> courts = courtRepository.findByClub(club);
@@ -206,7 +205,7 @@ public class BookingDetailService {
         return null;
     }
 
-    public CourtSlot selectCourtSlotOfCourt(long courtId, Long slotId, Date playingDate) {
+    public CourtSlot selectCourtSlotOfCourt(long courtId, Long slotId, LocalDate playingDate) {
         Slot slot = slotRepository.findSlotBySlotId(slotId);
         Court court = courtRepository.findByCourtId(courtId);
         CourtSlot existedCourtSlot =
@@ -217,24 +216,40 @@ public class BookingDetailService {
         return null;
     }
 
-    public List<Date> getAllDaysOfBooking(int year, int month, List<Integer> dayOfWeeks) {
-        List<Date> days = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month - 1, 1);
-        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+    public List<LocalDate> getAllDaysOfBooking(int year, int month, List<Integer> dayOfWeeks) {
+        List<LocalDate> days = new ArrayList<>();
+        LocalDate dayOfMonth = LocalDate.of(year, month, 1);
+        int daysInMonth = dayOfMonth.lengthOfMonth();
         for (int day = 1; day <= daysInMonth; day++) {
-            calendar.set(Calendar.DAY_OF_MONTH, day);
+            LocalDate currentDay = dayOfMonth.withDayOfMonth(day);
             for (Integer dayOfWeek : dayOfWeeks) {
-                if (calendar.get(Calendar.DAY_OF_WEEK) == dayOfWeek) {
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    days.add(calendar.getTime());
+                if (currentDay.getDayOfWeek() == this.getDayOfWeekByNumber(dayOfWeek)) {
+                    days.add(currentDay);
                 }
             }
         }
         return days;
+    }
+
+           public DayOfWeek getDayOfWeekByNumber(int dayNumber) {
+        switch (dayNumber) {
+            case 1:
+                return DayOfWeek.SUNDAY;
+            case 2:
+                return DayOfWeek.MONDAY;
+            case 3:
+                return DayOfWeek.TUESDAY;
+            case 4:
+                return DayOfWeek.WEDNESDAY;
+            case 5:
+                return DayOfWeek.THURSDAY;
+            case 6:
+                return DayOfWeek.FRIDAY;
+            case 7:
+                return DayOfWeek.SATURDAY;
+            default:
+                throw new IllegalArgumentException("Invalid day number: " + dayNumber);
+        }
     }
 
     public BookingDetailResponse cancelBookingDetail(long bookingDetailId) {
@@ -275,5 +290,21 @@ public class BookingDetailService {
         }
     }
 
+    public CheckedBookingDetailResponse getBookingDetailByCheckInCode(String checkInCode) {
+        BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByCheckInCode(checkInCode);
+        if (bookingDetail != null) {
+            CheckedBookingDetailResponse bookingDetailResponse = CheckedBookingDetailResponse.builder()
+                    .bookingStatus(bookingDetail.getBooking().getBookingStatus())
+                    .phone(bookingDetail.getBooking().getAccount().getPhone())
+                    .customerName(bookingDetail.getBooking().getAccount().getName())
+                    .checkInCode(bookingDetail.getCheckInCode())
+                    .courtName(bookingDetail.getCourtSlot().getCourt().getCourtName())
+                    .timeSlot(bookingDetail.getCourtSlot().getSlot().getTime())
+                    .playingDate(bookingDetail.getPlayingDate()).build();
+            return bookingDetailResponse;
+        } else {
+            throw new CustomException("Không tìm thấy booking nào");
+        }
+    }
 }
 

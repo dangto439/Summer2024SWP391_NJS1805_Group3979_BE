@@ -5,6 +5,7 @@ import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
+import com.group3979.badmintonbookingbe.model.response.CheckedBookingDetailResponse;
 import com.group3979.badmintonbookingbe.service.BookingDetailService;
 import com.group3979.badmintonbookingbe.service.BookingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -60,12 +61,12 @@ public class BookingAPI {
         return ResponseEntity.ok().body(fixedBooking);
     }
     @DeleteMapping("/booking/booking-detail/{bookingDetailId}")
-    public ResponseEntity<BookingDetailResponse> cancelBookingDetail(@RequestParam long bookingDetailId){
+    public ResponseEntity<BookingDetailResponse> cancelBookingDetail(@PathVariable long bookingDetailId){
         BookingDetailResponse bookingDetailResponse = bookingDetailService.cancelBookingDetail(bookingDetailId);
         return ResponseEntity.ok().body(bookingDetailResponse);
     }
     @GetMapping("/booking/booking-detail/{bookingId}")
-    public ResponseEntity<List<BookingDetailResponse>> getBookingDetailbyBookingId(@RequestParam long bookingId){
+    public ResponseEntity<List<BookingDetailResponse>> getBookingDetailByBookingId(@PathVariable long bookingId){
         List<BookingDetailResponse> bookingDetailResponses = bookingDetailService.getBookingDetailByBookingId(bookingId);
         return ResponseEntity.ok().body(bookingDetailResponses);
     }
@@ -78,5 +79,10 @@ public class BookingAPI {
     public ResponseEntity<Double> getPriceFixedBooking(@RequestBody FixedBookingRequest fixedBookingRequest){
         Double responses = bookingService.getPriceFixedBooking(fixedBookingRequest);
         return ResponseEntity.ok().body(responses);
+    }
+    @GetMapping("/booking/booking-detail-response/{checkInCode}")
+    public ResponseEntity<CheckedBookingDetailResponse> getBookingDetailByCheckInCode(@PathVariable String checkInCode){
+        CheckedBookingDetailResponse bookingDetailResponse = bookingDetailService.getBookingDetailByCheckInCode(checkInCode);
+        return ResponseEntity.ok().body(bookingDetailResponse);
     }
 }
