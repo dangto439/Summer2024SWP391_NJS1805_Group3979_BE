@@ -249,7 +249,7 @@ public class BookingService {
         Promotion promotion =
                 promotionService.checkValidPromotion(club.getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
-        if (fixedBookingRequest.getClubId() == 0) {
+        if (fixedBookingRequest.getCourtId() == 0) {
             for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
                     CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);

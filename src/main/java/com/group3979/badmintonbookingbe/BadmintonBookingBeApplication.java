@@ -17,7 +17,6 @@ import java.util.TimeZone;
 public class BadmintonBookingBeApplication {
 
     public static void main(String[] args) {
-
         SpringApplication.run(BadmintonBookingBeApplication.class, args);
     }
 

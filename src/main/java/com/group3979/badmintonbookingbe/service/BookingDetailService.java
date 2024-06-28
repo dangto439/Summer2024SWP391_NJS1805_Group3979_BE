@@ -118,7 +118,6 @@ public class BookingDetailService {
         if (fixedBookingRequest.getCourtId() == 0) {
             for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
-
                     // khach hang muon chon bai ki san nao
                     temporaryPrice += this.saveFixedBookingDetailByClub(fixedBooking, slotId, playingDate);
                 }
@@ -191,7 +190,7 @@ public class BookingDetailService {
         }
     }
 
-    public CourtSlot selectCourtSlot(long clubId, Long slotId, LocalDate playingDate) {
+    public CourtSlot selectCourtSlot(long clubId, long slotId, LocalDate playingDate) {
         Club club = clubRepository.findByClubId(clubId);
         Slot slot = slotRepository.findSlotBySlotId(slotId);
         List<Court> courts = courtRepository.findByClub(club);
@@ -205,7 +204,7 @@ public class BookingDetailService {
         return null;
     }
 
-    public CourtSlot selectCourtSlotOfCourt(long courtId, Long slotId, LocalDate playingDate) {
+    public CourtSlot selectCourtSlotOfCourt(long courtId,long slotId, LocalDate playingDate) {
         Slot slot = slotRepository.findSlotBySlotId(slotId);
         Court court = courtRepository.findByCourtId(courtId);
         CourtSlot existedCourtSlot =
