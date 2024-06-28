@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-
 @RestController
 @RequestMapping("/api")
 @SecurityRequirement(name = "api")
@@ -42,24 +40,23 @@ public class WalletAPI {
         return ResponseEntity.ok(wallet);
     }
 
-    @PostMapping("/wallet/{accountId}/deposit")
-    public ResponseEntity deposit(@PathVariable("accountId") Long accountId, @RequestParam double amount)
+    @PostMapping("/wallet/{walletId}/deposit")
+    public ResponseEntity deposit(@PathVariable("walletId") Long walletId, @RequestParam double amount)
             throws NotFoundException {
-        WalletResponse wallet = walletService.deposit(accountId, amount);
-        return ResponseEntity.ok(wallet);
-    }
-
-    @PostMapping("/wallet/{accountId}/withdrawal")
-    public ResponseEntity withdrawal(@PathVariable("accountId") Long accountId, @RequestParam double amount)
-            throws NotFoundException, InsufficientBalanceException {
-        WalletResponse wallet = walletService.withdrawl(accountId, amount);
+        WalletResponse wallet = walletService.deposit(walletId, amount);
         return ResponseEntity.ok(wallet);
     }
 
     @PostMapping("/wallet/transfer")
-    public ResponseEntity transfer(@RequestParam Long senderAccountId, @RequestParam Long receiverAccountId,
+    public ResponseEntity transfer(@RequestParam Long senderWalletId, @RequestParam Long receiverWalletId,
                                    @RequestParam double amount) throws NotFoundException, InsufficientBalanceException {
-        walletService.transfer(senderAccountId, receiverAccountId, amount);
+        walletService.transfer(senderWalletId, receiverWalletId, amount);
         return ResponseEntity.ok("Chuyển tiền thành công");
+    }
+
+    @GetMapping("/wallet-owner/{clubId}")
+    public ResponseEntity ownerWallet(@PathVariable Long clubId) throws NotFoundException {
+        WalletResponse wallet = walletService.getWalletOfClubOwner(clubId);
+        return ResponseEntity.ok(wallet);
     }
 }
