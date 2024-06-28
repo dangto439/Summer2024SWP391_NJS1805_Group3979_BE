@@ -3,13 +3,14 @@ package com.group3979.badmintonbookingbe.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.util.List;
 
 @Entity
-@Data
+
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Club {
@@ -32,7 +33,6 @@ public class Club {
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
-    //
 
     @OneToOne(mappedBy = "club")
     private DiscountRule discountRule;

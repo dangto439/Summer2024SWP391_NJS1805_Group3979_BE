@@ -2,10 +2,7 @@ package com.group3979.badmintonbookingbe.entity;
 
 import com.group3979.badmintonbookingbe.eNum.TransactionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 import java.time.LocalDateTime;

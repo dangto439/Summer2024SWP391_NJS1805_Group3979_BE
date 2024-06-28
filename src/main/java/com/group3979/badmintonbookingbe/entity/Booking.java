@@ -6,10 +6,7 @@ import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
