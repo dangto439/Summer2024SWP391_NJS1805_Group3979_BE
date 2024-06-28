@@ -8,6 +8,7 @@ public enum TransactionType {
     DEPOSIT("Giao dịch nạp tiền"),
     TRANSFER("Giao dịch chuyển tiền"),
     PENDING("Giao dịch đang chờ xử lý"),
+    CANCEL("Giao dịch đã hủy bỏ")
     ;
 
     private final String description;

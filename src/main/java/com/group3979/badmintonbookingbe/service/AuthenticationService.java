@@ -144,6 +144,7 @@ public class AuthenticationService implements UserDetailsService {
                 account.setAccountStatus(AccountStatus.ACTIVE);
                 account.setAvatar(avatatDefault);
                 account.setGender(Gender.MALE); // default set khi create by login gg: MALE
+                walletService.createWallet(email);
                 account = authenticationRepository.save(account);
             }
             accountResponse.setId(account.getId());
@@ -196,6 +197,7 @@ public class AuthenticationService implements UserDetailsService {
         staff.setPassword(passwordEncoder.encode(staffRegisterRequest.getPassword()));
         staff.setSupervisorID(supervisor.getId());
         staff.setAvatar(avatatDefault);
+        walletService.createWallet(staffRegisterRequest.getEmail());
         Club club = clubRepository.findByClubId(staffRegisterRequest.getClubId());
         if (club == null) {
             throw new BadRequestException("Club not found!");
