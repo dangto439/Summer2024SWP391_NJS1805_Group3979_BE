@@ -1,7 +1,12 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.group3979.badmintonbookingbe.eNum.TransactionType;
 import com.group3979.badmintonbookingbe.entity.Account;
+import com.group3979.badmintonbookingbe.entity.Club;
+import com.group3979.badmintonbookingbe.entity.Transaction;
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
+import com.group3979.badmintonbookingbe.repository.IClubRepository;
+import com.group3979.badmintonbookingbe.repository.ITransactionRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,44 +27,54 @@ import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IWalletRepository;
 import javassist.NotFoundException;
 
-
-import java.math.BigDecimal;
-
 @Service
 public class WalletService {
     @Autowired
     AccountUtils accountUtils;
-
     @Autowired
     IAuthenticationRepository authenticationRepository;
-
     @Autowired
     IWalletRepository walletRepository;
+    @Autowired
+    TransactionService transactionService;
+    @Autowired
+    ITransactionRepository transactionRepository;
+    @Autowired
+    IClubRepository clubRepository;
+
 
     public String createUrl(String amount) throws NoSuchAlgorithmException, InvalidKeyException, Exception{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime createDate = LocalDateTime.now();
         String formattedCreateDate = createDate.format(formatter);
 
+//        DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+//        Date timestamp = new Date();
+//        String timestampString = df.format(timestamp);
+
+
         Account user = accountUtils.getCurrentAccount();
 
         String orderId = UUID.randomUUID().toString().substring(0,6);
 
-//        Wallet wallet = walletRepository.findWalletByUser_Id(user.getId());
-//
-//        Transaction transaction = new Transaction();
-//
-//        transaction.setAmount(Float.parseFloat(rechargeRequestDTO.getAmount()));
-//        transaction.setTransactionType(TransactionEnum.PENDING);
-//        transaction.setTo(wallet);
-//        transaction.setTransactionDate(formattedCreateDate);
-//        transaction.setDescription("Recharge");
-//        Transaction transactionReturn = transactionRepository.save(transaction);
+        Wallet wallet = walletRepository.findWalletByAccount(user);
+
+        Transaction transaction = new Transaction();
+
+        transaction.setAmount(Double.parseDouble(amount));
+        transaction.setType(TransactionType.PENDING);
+        transaction.setSenderWallet(wallet);
+        transaction.setTimestamp(createDate);
+        transaction.setDescription(TransactionType.PENDING.getDescription());
+        transaction = transactionRepository.save(transaction);
+
 
         String tmnCode = "4AI8TZAL";
         String secretKey = "L7PTI36MCPCFFB0JON87IXJFQYPOYJ2I";
         String vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "http://datsan79.online/payment";// trang tra ve khi hoan thanh
+        String returnUrl = "http://datsan79.online/payment?walletId="+user.getWallet().getWalletId()+"&transactionId="+transaction.getTransactionId();
+        // trang tra ve khi hoan thanh
+
 
         String currCode = "VND";
         Map<String, String> vnpParams = new TreeMap<>();
@@ -163,6 +178,32 @@ public class WalletService {
                 .build();
     }
 
+    public WalletResponse getWalletOfClubOwner(Long clubId) throws NotFoundException {
+        Club clubOfOwner = clubRepository.findByClubId(clubId);
+
+        if (clubOfOwner == null) {
+            throw new NotFoundException("Không tìm thấy câu lạc bộ có ID: " + clubId);
+        }
+
+        Account clubOwner = clubOfOwner.getAccount();
+
+        if (clubOwner == null) {
+            throw new NotFoundException("Không tìm thấy tài khoản chủ câu lạc bộ có ID: " + clubId);
+        }
+
+        Wallet wallet = walletRepository.findWalletByAccount(clubOwner);
+
+        if (wallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản có ID: " + clubOwner.getId());
+        }
+
+        return WalletResponse.builder()
+                .walletId(wallet.getWalletId())
+                .balance(wallet.getBalance())
+                .build();
+    }
+
+
     // Update Balance of Wallet
     public WalletResponse updateWallet(Long accountId, double newBalance) throws NotFoundException {
         Account user = authenticationRepository.findAccountById(accountId);
@@ -182,14 +223,10 @@ public class WalletService {
     }
 
     // Nap tien vao vi (Deposit)
-    public WalletResponse deposit(Long accountId, double amount) throws NotFoundException {
-        Account user = authenticationRepository.findAccountById(accountId);
-        if(user == null){
-            throw new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId);
-        }
-        Wallet wallet = walletRepository.findWalletByAccount(user);
+    public WalletResponse deposit(Long walletId, double amount) throws NotFoundException {
+        Wallet wallet = walletRepository.findWalletByWalletId(walletId);
         if(wallet == null){
-            throw new NotFoundException("Không tìm thấy ví cho tài khoản với ID: " + accountId);
+            throw new NotFoundException("Không tìm thấy ví với ID: " + walletId);
         }
 
         // nap tien
@@ -206,53 +243,43 @@ public class WalletService {
     }
 
     // Rut tien tu vi (Withdrawl)
-    public WalletResponse withdrawl(Long accountId, double amount) throws NotFoundException, InsufficientBalanceException {
-        Account user = authenticationRepository.findAccountById(accountId);
-        if(user == null){
-            throw new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId);
-        }
-        Wallet wallet = walletRepository.findWalletByAccount(user);
-        if(wallet == null){
-            throw new NotFoundException("Không tìm thấy ví cho tài khoản với ID: " + accountId);
-        }
-        // kiem tra so du truoc khi rut
-        double currentBalance = wallet.getBalance();
-        if(currentBalance < amount){
-            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch rút tiền");
-        }
-        // rut tien (withdrawl)
-        double newBalance = currentBalance - amount;
-        wallet.setBalance(newBalance);
-
-        wallet = walletRepository.save(wallet);
-
-        return WalletResponse.builder()
-                .walletId(wallet.getWalletId())
-                .balance(wallet.getBalance())
-                .build();
-    }
+//    public WalletResponse withdrawl(Long accountId, double amount) throws NotFoundException, InsufficientBalanceException {
+//        Account user = authenticationRepository.findAccountById(accountId);
+//        if(user == null){
+//            throw new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId);
+//        }
+//        Wallet wallet = walletRepository.findWalletByAccount(user);
+//        if(wallet == null){
+//            throw new NotFoundException("Không tìm thấy ví cho tài khoản với ID: " + accountId);
+//        }
+//        // kiem tra so du truoc khi rut
+//        double currentBalance = wallet.getBalance();
+//        if(currentBalance < amount){
+//            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch rút tiền");
+//        }
+//        // rut tien (withdrawl)
+//        double newBalance = currentBalance - amount;
+//        wallet.setBalance(newBalance);
+//
+//        wallet = walletRepository.save(wallet);
+//
+//        return WalletResponse.builder()
+//                .walletId(wallet.getWalletId())
+//                .balance(wallet.getBalance())
+//                .build();
+//    }
 
     //  Chuyen tien tu mot vi den vi khac (Transfer)
-    public void transfer(Long senderAccountId, Long receiverAccountId, double amount) throws NotFoundException,
+    public void transfer(Long senderWalletId, Long receiverWalletId, double amount) throws NotFoundException,
             InsufficientBalanceException {
-        Account senderUser = authenticationRepository.findAccountById(senderAccountId);
-        if (senderUser == null) {
-            throw new NotFoundException("Không tìm thấy tài khoản nguồn với ID: " + senderAccountId);
-        }
-
-        Account receiverUser = authenticationRepository.findAccountById(receiverAccountId);
-        if (receiverUser == null) {
-            throw new NotFoundException("Không tìm thấy tài khoản đích với ID: " + receiverAccountId);
-        }
-
-        Wallet senderWallet = walletRepository.findWalletByAccount(senderUser);
+        Wallet senderWallet = walletRepository.findWalletByWalletId(senderWalletId);
         if (senderWallet == null) {
-            throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + senderAccountId);
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + senderWalletId);
         }
 
-        Wallet receiverWallet = walletRepository.findWalletByAccount(receiverUser);
+        Wallet receiverWallet = walletRepository.findWalletByWalletId(receiverWalletId);
         if (receiverWallet == null) {
-            throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + receiverAccountId);
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + receiverWalletId);
         }
 
         // Kiem tra so du co du de chuyen khong
