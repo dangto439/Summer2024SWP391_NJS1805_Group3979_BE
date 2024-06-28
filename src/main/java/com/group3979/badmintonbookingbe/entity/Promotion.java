@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -25,8 +25,8 @@ public class Promotion {
     private String promotionCode;
 
     private double discount; // specific price for discount
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     @Enumerated(EnumType.STRING)
     PromotionStatus promotionStatus;
 

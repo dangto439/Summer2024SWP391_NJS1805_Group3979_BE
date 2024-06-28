@@ -8,6 +8,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -17,7 +19,7 @@ import java.util.Date;
 @Builder
 public class BookingResponse {
     private long bookingId;
-    private Date bookingDate;
+    private LocalDateTime bookingDate;
     private double totalPrice;
     private double temporaryPrice;
     private double discountPrice;

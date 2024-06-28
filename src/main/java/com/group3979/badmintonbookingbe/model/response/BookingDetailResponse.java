@@ -1,12 +1,10 @@
 package com.group3979.badmintonbookingbe.model.response;
 
 import com.group3979.badmintonbookingbe.eNum.BookingDetailStatus;
-import com.group3979.badmintonbookingbe.entity.Booking;
-import com.group3979.badmintonbookingbe.entity.CourtSlot;
-import jakarta.persistence.*;
+
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -15,7 +13,7 @@ import java.util.Date;
 @Builder
 public class BookingDetailResponse {
     private long bookingDetailId;
-    private Date playingDate;
+    private LocalDate playingDate;
     private double price;
     private BookingDetailStatus status;
     private long bookingId;

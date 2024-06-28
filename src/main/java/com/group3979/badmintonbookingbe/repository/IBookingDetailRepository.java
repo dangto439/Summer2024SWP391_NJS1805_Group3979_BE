@@ -11,4 +11,5 @@ import java.util.List;
 public interface IBookingDetailRepository extends JpaRepository<BookingDetail, Long> {
     BookingDetail findBookingDetailByBookingDetailId(long bookingDetailId);
     List<BookingDetail> findBookingDetailByBooking_BookingId(long booking_bookingId);
+    BookingDetail findBookingDetailByCheckInCode(String checkInCode);
 }

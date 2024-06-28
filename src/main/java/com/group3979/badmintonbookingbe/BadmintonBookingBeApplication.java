@@ -17,7 +17,7 @@ import java.util.TimeZone;
 public class BadmintonBookingBeApplication {
 
     public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
         SpringApplication.run(BadmintonBookingBeApplication.class, args);
     }
 

@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -46,11 +49,10 @@ public class CourtSlotAPI {
         return ResponseEntity.ok(courtSlotList);
     }
     @GetMapping("/court-slot/exist")
-    public ResponseEntity existCourtSlot(@RequestParam String date, @RequestParam long courtId) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        Date parsedDate = formatter.parse(date);
-
-        List<CourtSlotResponse> courtSlotList = courtSlotService.existCourtSlotInADay(parsedDate,courtId);
+    public ResponseEntity existCourtSlot(@RequestParam String date, @RequestParam long courtId) throws DateTimeParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(date, formatter);
+        List<CourtSlotResponse> courtSlotList = courtSlotService.existCourtSlotInADay(localDate,courtId);
         return ResponseEntity.ok(courtSlotList);
     }
     @GetMapping("/club/slots")
@@ -59,11 +61,12 @@ public class CourtSlotAPI {
         return ResponseEntity.ok(slots);
     }
     @GetMapping("/court-slot/status")
-    public ResponseEntity<List<CourtSlotStatusResponse>>  getCourtSlotStatus(@RequestParam String date, @RequestParam long courtId) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        Date parsedDate = formatter.parse(date);
+    public ResponseEntity<List<CourtSlotStatusResponse>>  getCourtSlotStatus(@RequestParam String date,
+                                                                             @RequestParam long courtId) throws DateTimeParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(date, formatter);;
 
-        List<CourtSlotStatusResponse> courtSlotList = courtSlotService.getCourtSlotByCourtId(parsedDate,courtId);
+        List<CourtSlotStatusResponse> courtSlotList = courtSlotService.getCourtSlotByCourtId(localDate,courtId);
         return ResponseEntity.ok(courtSlotList);
     }
 }

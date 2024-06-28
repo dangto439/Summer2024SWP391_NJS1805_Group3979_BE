@@ -16,6 +16,7 @@ import com.group3979.badmintonbookingbe.repository.ISlotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -163,11 +164,11 @@ public class CourtSlotService {
         return courtSlotResponses;
     }
 
-    public List<CourtSlotResponse> existCourtSlotInADay(Date playingDate, long courtId) {
+    public List<CourtSlotResponse> existCourtSlotInADay(LocalDate playingDate, long courtId) {
         Court court = courtRepository.findByCourtId(courtId);
         if (court != null) {
             List<CourtSlot> courtSlots =
-                    courtSlotRepository.findCourtSlotByPlayingDate(extractDate(playingDate), court);
+                    courtSlotRepository.findCourtSlotByPlayingDate(playingDate, court);
 
             List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
             for (CourtSlot courtSlot : courtSlots) {
@@ -180,13 +181,13 @@ public class CourtSlotService {
         }
     }
 
-    public List<CourtSlotStatusResponse> getCourtSlotByCourtId(Date playingDate, long courtId) {
+    public List<CourtSlotStatusResponse> getCourtSlotByCourtId(LocalDate playingDate, long courtId) {
         Court court = courtRepository.findByCourtId(courtId);
         List<CourtSlotStatusResponse> courtSlotStatusResponses = new ArrayList<>();
         if (court != null) {
 
             List<CourtSlot> courtSlotsExisted =
-                    courtSlotRepository.findCourtSlotByPlayingDate(extractDate(playingDate), court);
+                    courtSlotRepository.findCourtSlotByPlayingDate(playingDate, court);
             List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
             courtSlots.removeIf(courtSlot -> (courtSlot.getSlot().getTime() < court.getClub().getOpenTime()) ||
                     (courtSlot.getSlot().getTime() >= court.getClub().getCloseTime()));
@@ -208,15 +209,6 @@ public class CourtSlotService {
         }
     }
 
-    public Date extractDate(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
-    }
 
     public CourtSlotResponse getCourtSlotResponse(CourtSlot courtSlot) {
         Court court = courtSlot.getCourt();

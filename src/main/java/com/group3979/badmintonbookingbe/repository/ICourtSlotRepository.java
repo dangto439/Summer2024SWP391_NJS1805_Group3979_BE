@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
             "AND a IN (SELECT b.courtSlot\n" +
             "FROM BookingDetail b\n" +
             "WHERE b.status = 'UNFINISHED' AND b.playingDate =:playingDate )")
-    CourtSlot findCourtSlotByPlayingDateAndSlot(@Param("playingDate") Date playingDate,
+    CourtSlot findCourtSlotByPlayingDateAndSlot(@Param("playingDate") LocalDate playingDate,
                                                       @Param("court") Court court, @Param("slot") Slot slot);
     @Query("SELECT a \n" +
             "FROM CourtSlot a \n" +
@@ -47,7 +48,7 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
             "AND a IN (SELECT b.courtSlot\n" +
             "FROM BookingDetail b\n" +
             "WHERE b.status = 'UNFINISHED' AND b.playingDate =:playingDate )")
-    List<CourtSlot> findCourtSlotByPlayingDate(@Param("playingDate") Date playingDate,
+    List<CourtSlot> findCourtSlotByPlayingDate(@Param("playingDate") LocalDate playingDate,
                                                 @Param("court") Court court);
 }
 

@@ -16,9 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Transactional
@@ -46,6 +50,7 @@ public class BookingService {
 
     @Autowired
     IDiscountRuleRepository discountRuleRepository;
+    
     @Autowired
     private ICourtRepository courtRepository;
 
@@ -60,7 +65,8 @@ public class BookingService {
         } else {
             Booking booking = new Booking();
             booking.setAccount(accountUtils.getCurrentAccount());
-            booking.setBookingDate(new Date());
+            LocalDateTime localDateTime = LocalDateTime.now();
+            booking.setBookingDate(localDateTime);
             booking.setBookingType(BookingType.DAILYBOOKING);
             booking.setClub(club);
             booking = bookingRepository.save(booking);
@@ -79,7 +85,8 @@ public class BookingService {
                 double temporaryPrice = courtSlotService.getDefaultPriceByClub(club) * flexibleBookingRequest.getAmountTime();
                 Booking flexibleBooking = new Booking();
                 flexibleBooking.setAccount(accountUtils.getCurrentAccount());
-                flexibleBooking.setBookingDate(new Date());
+                LocalDateTime localDateTime = LocalDateTime.now();
+                flexibleBooking.setBookingDate(localDateTime);
                 flexibleBooking.setBookingType(BookingType.FLEXIBLEBOOKING);
                 flexibleBooking.setAmountTime(flexibleBookingRequest.getAmountTime());
                 flexibleBooking.setClub(club);
@@ -114,7 +121,8 @@ public class BookingService {
             fixedBooking.setAccount(accountUtils.getCurrentAccount());
             fixedBooking.setClub(club);
             fixedBooking.setBookingType(BookingType.FIXEDBOOKING);
-            fixedBooking.setBookingDate(new Date());
+            LocalDateTime localDateTime = LocalDateTime.now();
+            fixedBooking.setBookingDate(localDateTime);
             fixedBooking = bookingRepository.save(fixedBooking);
             return bookingDetailService.createFixedBookingDetail(fixedBooking, fixedBookingRequest);
         } else {
@@ -166,6 +174,7 @@ public class BookingService {
         return null;
     }
 
+
     public List<BookingResponse> getBookingResponseCurrentAccount() {
         List<Booking> bookings = bookingRepository.findBookingByAccount(accountUtils.getCurrentAccount());
         List<BookingResponse> bookingResponses = new ArrayList<>();
@@ -199,11 +208,11 @@ public class BookingService {
 
     public List<String> notifyFullSlot(FixedBookingRequest fixedBookingRequest) {
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        List<Date> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
+        List<LocalDate> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         List<String> fullyBookeds = new ArrayList<>();
         if (fixedBookingRequest.getCourtId() == 0) {
-            for (Date playingDate : playingDates) {
+            for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
                     //select courtSlot
                     CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
@@ -215,7 +224,7 @@ public class BookingService {
                 }
             }
         } else {
-            for (Date playingDate : playingDates) {
+            for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
                     Court court = courtRepository.findByCourtId(fixedBookingRequest.getCourtId());
                     CourtSlot courtSlot = bookingDetailService.selectCourtSlotOfCourt(fixedBookingRequest.getCourtId(), slotId, playingDate);
@@ -234,14 +243,14 @@ public class BookingService {
     }
 
     public double getPriceFixedBooking(FixedBookingRequest fixedBookingRequest) {
-        List<Date> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
+        List<LocalDate> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         Club club = clubRepository.findByClubId(fixedBookingRequest.getClubId());
         Promotion promotion =
                 promotionService.checkValidPromotion(club.getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
         if (fixedBookingRequest.getClubId() == 0) {
-            for (Date playingDate : playingDates) {
+            for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
                     CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
                     if (courtSlot != null) {
@@ -250,7 +259,7 @@ public class BookingService {
                 }
             }
         } else {
-            for (Date playingDate : playingDates) {
+            for (LocalDate playingDate : playingDates) {
                 for (Long slotId : fixedBookingRequest.getSlotIds()) {
                     CourtSlot courtSlot = bookingDetailService.selectCourtSlotOfCourt(fixedBookingRequest.getCourtId(), slotId, playingDate);
                     if (courtSlot != null) {
