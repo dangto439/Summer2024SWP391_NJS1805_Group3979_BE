@@ -43,11 +43,11 @@ public class TransactionService {
     public TransactionResponse createTransaction(TransactionRequest transactionRequest) {
         Account senderAccount = accountUtils.getCurrentAccount();
         if (senderAccount == null) {
-            throw new CustomException("Sender account not found");
+            throw new CustomException("Không tìm thấy tài khoản người gửi");
         }
         Wallet senderWallet = walletRepository.findWalletByAccount(senderAccount);
         if (senderWallet == null) {
-            throw new CustomException("Sender wallet not found");
+            throw new CustomException("Không tìm thấy ví của người gửi");
         }
 
         LocalDateTime timestamp = LocalDateTime.now();
@@ -69,12 +69,12 @@ public class TransactionService {
         Wallet senderWallet = walletRepository.findWalletByAccount(senderAccount);
         Wallet receiverWallet = walletRepository.findWalletByWalletId(transactionRequest.getReceiverWalletId());
         if (receiverWallet == null) {
-            throw new CustomException("Receiver wallet not found with ID: " + transactionRequest.getReceiverWalletId());
+            throw new CustomException("Không tìm thấy ví người nhận có ID: " + transactionRequest.getReceiverWalletId());
         }
 
         TransactionType transactionType = transactionRequest.getType();
         if (transactionType == null) {
-            throw new CustomException("Transaction type cannot be null");
+            throw new CustomException("Loại giao dịch không thể rỗng");
         }
         LocalDateTime timestamp = LocalDateTime.now();
         Transaction transaction = new Transaction();
@@ -94,7 +94,7 @@ public class TransactionService {
     public TransactionResponse updateTransactionType(TransactionRequest transactionRequest, long transactionId, TransactionType transactionType) {
         Transaction transaction = transactionRepository.findTransactionByTransactionId(transactionId);
         if (transaction == null) {
-            throw new CustomException("Transaction not found");
+            throw new CustomException("Không tìm thấy giao dịch");
         }
 
         LocalDateTime timestamp = LocalDateTime.now();
@@ -109,7 +109,7 @@ public class TransactionService {
                         findWalletByAccount(authenticationRepository.
                                 findAccountById(transactionRequest.getReceiverWalletId()));
                 if (receiverWallet == null) {
-                    throw new CustomException("Receiver wallet not found with ID: " + transactionRequest.getReceiverWalletId());
+                    throw new CustomException("Không tìm thấy ví người nhận có ID: " + transactionRequest.getReceiverWalletId());
                 }
                 transaction.setTimestamp(timestamp);
                 transaction.setType(TransactionType.TRANSFER);
@@ -122,7 +122,7 @@ public class TransactionService {
                 transaction.setDescription(TransactionType.REFUND.getDescription());
                 break;
             default:
-                throw new CustomException("Invalid transaction type: " + transactionType);
+                throw new CustomException("Loại giao dịch không hợp lệ: " + transactionType);
         }
         transaction = transactionRepository.save(transaction);
         return buildTransactionResponse(transaction);
@@ -142,12 +142,12 @@ public class TransactionService {
     public List<TransactionResponse> getTransactionsForAccount(Long accountId)throws NotFoundException {
         Account account = authenticationRepository.findAccountById(accountId);
         if (account == null) {
-            throw new NotFoundException("Account not found with ID: " + accountId);
+            throw new NotFoundException("Không tìm thấy tài khoản có ID: " + accountId);
         }
         // Find Wallet of this account
         Wallet wallet = walletRepository.findWalletByAccount(account);
         if (wallet == null) {
-            throw new NotFoundException("Wallet not found for account with ID: " + accountId);
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản có ID: " + accountId);
         }
         // Get all transaction of account
         List<Transaction> transactions = transactionRepository.findTransactionsBySenderWallet(wallet);
