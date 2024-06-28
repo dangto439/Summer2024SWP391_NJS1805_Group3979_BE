@@ -139,6 +139,15 @@ public class TransactionService {
         return transactionResponses;
     }
 
+    // Get Transaction by TransactionID
+    public TransactionResponse getTransactionById(long transactionId) throws NotFoundException {
+        Transaction transaction = transactionRepository.findTransactionByTransactionId(transactionId);
+        if (transaction == null) {
+            throw new NotFoundException("Không tìm thấy giao dịch");
+        }
+        return buildTransactionResponse(transaction);
+    }
+
     private TransactionResponse buildTransactionResponse(Transaction transaction) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if(transaction.getBooking() == null){
