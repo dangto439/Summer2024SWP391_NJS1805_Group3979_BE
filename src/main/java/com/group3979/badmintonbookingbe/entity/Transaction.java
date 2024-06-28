@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Entity
 @Getter
@@ -21,7 +22,7 @@ public class Transaction {
     private Long transactionId;
     private String description;
     private double amount;
-    private Date timestamp;
+    private LocalDateTime timestamp;
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
