@@ -97,6 +97,10 @@ public class TransactionService {
                 transaction.setType(TransactionType.REFUND);
                 transaction.setDescription(TransactionType.REFUND.getDescription());
                 break;
+            case CANCEL:
+                transaction.setTimestamp(timestamp);
+                transaction.setType(TransactionType.CANCEL);
+                transaction.setDescription(TransactionType.CANCEL.getDescription());
             default:
                 throw new CustomException("Loại giao dịch không hợp lệ: " + transactionType);
         }
