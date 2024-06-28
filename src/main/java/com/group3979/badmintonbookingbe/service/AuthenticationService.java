@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.group3979.badmintonbookingbe.eNum.AccountStatus;
+import com.group3979.badmintonbookingbe.eNum.Gender;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.model.request.*;
@@ -141,6 +142,8 @@ public class AuthenticationService implements UserDetailsService {
                 account.setEmail(email);
                 account.setRole(Role.CUSTOMER);
                 account.setAccountStatus(AccountStatus.ACTIVE);
+                account.setAvatar(avatatDefault);
+                account.setGender(Gender.MALE); // default set khi create by login gg: MALE
                 account = authenticationRepository.save(account);
             }
             accountResponse.setId(account.getId());
@@ -158,7 +161,7 @@ public class AuthenticationService implements UserDetailsService {
         return accountResponse;
     }
 
-    public AuthenticationResponse getAccountReponseByEmail(String email) {
+    public AuthenticationResponse getAccountResponseByEmail(String email) {
         Account account = authenticationRepository.findAccountByEmail(email);
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                 .accountId(account.getId())
