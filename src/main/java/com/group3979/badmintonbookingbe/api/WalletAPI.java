@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
+import com.group3979.badmintonbookingbe.model.request.TransferRequest;
 import com.group3979.badmintonbookingbe.model.response.WalletResponse;
 import com.group3979.badmintonbookingbe.service.WalletService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -48,9 +49,14 @@ public class WalletAPI {
     }
 
     @PostMapping("/wallet/transfer")
-    public ResponseEntity transfer(@RequestParam Long senderWalletId, @RequestParam Long receiverWalletId,
-                                   @RequestParam double amount) throws NotFoundException, InsufficientBalanceException {
-        walletService.transfer(senderWalletId, receiverWalletId, amount);
+    public ResponseEntity transfer(@RequestBody TransferRequest transferRequest) throws NotFoundException, InsufficientBalanceException {
+        walletService.transfer(transferRequest);
+        return ResponseEntity.ok("Chuyển tiền thành công");
+    }
+
+    @PostMapping("wallet/transfer-booking")
+    public ResponseEntity transferBooking(@RequestBody TransferRequest transferRequest) throws NotFoundException {
+        walletService.transferOnBooking(transferRequest);
         return ResponseEntity.ok("Chuyển tiền thành công");
     }
 
