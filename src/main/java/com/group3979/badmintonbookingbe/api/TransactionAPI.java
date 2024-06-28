@@ -28,20 +28,14 @@ public class TransactionAPI {
         return ResponseEntity.ok(transactionService.getTransactionsForAccount(accountId));
     }
 
-    @PostMapping("/transaction")
-    public ResponseEntity createTransaction(@RequestBody TransactionRequest transactionRequest) {
-        TransactionResponse transaction = transactionService.createTransaction(transactionRequest);
-        return ResponseEntity.ok(transaction);
-    }
-
     @PutMapping("/transaction/{transactionId}")
     public ResponseEntity updateTransaction(@PathVariable("transactionId") Long transactionId,
                                             @RequestParam TransactionType transactionType,@RequestBody TransactionRequest transactionRequest) {
         return ResponseEntity.ok(transactionService.updateTransactionType(transactionRequest, transactionId, transactionType));
     }
 
-    @PostMapping("/transactionV2")
+    @PostMapping("/transaction")
     public ResponseEntity createTransactionV2(@RequestBody TransactionRequest transactionRequest) {
-        return ResponseEntity.ok(transactionService.createTransactionV2(transactionRequest));
+        return ResponseEntity.ok(transactionService.createTransaction(transactionRequest));
     }
 }

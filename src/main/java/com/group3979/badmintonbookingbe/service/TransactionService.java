@@ -39,32 +39,8 @@ public class TransactionService {
 
     @Autowired
     ITransactionRepository transactionRepository;
-    // Create Transaction sau bat' ky` 1 giao dich. nao` (default type: PENDING)
-    public TransactionResponse createTransaction(TransactionRequest transactionRequest) {
-        Account senderAccount = accountUtils.getCurrentAccount();
-        if (senderAccount == null) {
-            throw new CustomException("Không tìm thấy tài khoản người gửi");
-        }
-        Wallet senderWallet = walletRepository.findWalletByAccount(senderAccount);
-        if (senderWallet == null) {
-            throw new CustomException("Không tìm thấy ví của người gửi");
-        }
-
-        LocalDateTime timestamp = LocalDateTime.now();
-        Transaction transaction = new Transaction();
-        transaction.setAmount(transactionRequest.getAmount());
-        transaction.setTimestamp(timestamp);
-        transaction.setType(TransactionType.PENDING);
-        transaction.setSenderWallet(senderWallet);
-        transaction.setDescription(TransactionType.PENDING.getDescription());
-        transaction.setBooking(bookingRepository.findByBookingId(transactionRequest.getBookingId()));
-
-        transaction = transactionRepository.save(transaction);
-        return buildTransactionResponse(transaction);
-    }
-
     // Create Transaction with the optional TransactionType
-    public TransactionResponse createTransactionV2(TransactionRequest transactionRequest){
+    public TransactionResponse createTransaction(TransactionRequest transactionRequest){
         Account senderAccount = accountUtils.getCurrentAccount();
         Wallet senderWallet = walletRepository.findWalletByAccount(senderAccount);
         Wallet receiverWallet = walletRepository.findWalletByWalletId(transactionRequest.getReceiverWalletId());

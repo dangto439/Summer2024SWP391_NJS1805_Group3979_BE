@@ -8,17 +8,13 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.TimeZone;
 
 @SpringBootApplication
 
 @OpenAPIDefinition(info = @Info(title = "BadmintonBooking API", version = "2.0", description = "Information"))
 @SecurityScheme(name = "api", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class BadmintonBookingBeApplication {
-
     public static void main(String[] args) {
-
         SpringApplication.run(BadmintonBookingBeApplication.class, args);
     }
-
 }
