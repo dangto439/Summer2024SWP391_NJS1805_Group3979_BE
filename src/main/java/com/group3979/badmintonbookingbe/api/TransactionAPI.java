@@ -34,6 +34,10 @@ public class TransactionAPI {
         return ResponseEntity.ok(transactionService.updateTransactionType(transactionRequest, transactionId, transactionType));
     }
 
+    @GetMapping("transaction/{transactionId}")
+    public ResponseEntity getTransactionById(@PathVariable long transactionId) throws NotFoundException {
+        return ResponseEntity.ok(transactionService.getTransactionById(transactionId));
+    }
     @PostMapping("/transaction")
     public ResponseEntity createTransactionV2(@RequestBody TransactionRequest transactionRequest) {
         return ResponseEntity.ok(transactionService.createTransaction(transactionRequest));
