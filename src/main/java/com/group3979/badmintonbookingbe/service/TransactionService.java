@@ -66,6 +66,30 @@ public class TransactionService {
         return buildTransactionResponse(transaction);
     }
 
+    // create transaction
+    public void createTransactionV2(long bookingId, double amount, long senderWalletId, long receiverWalletId, TransactionType transactionType){
+        Wallet senderWallet = walletRepository.findWalletByWalletId(senderWalletId);
+        Wallet receiverWallet = walletRepository.findWalletByWalletId(receiverWalletId);
+        if (receiverWallet == null) {
+            throw new CustomException("Không tìm thấy ví người nhận có ID: " + receiverWallet);
+        }
+
+        if (transactionType == null) {
+            throw new CustomException("Loại giao dịch không thể rỗng");
+        }
+        LocalDateTime timestamp = LocalDateTime.now();
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTimestamp(timestamp);
+        transaction.setType(transactionType);
+        transaction.setSenderWallet(senderWallet);
+        transaction.setReceiverWallet(receiverWallet);
+        transaction.setDescription(transactionType.getDescription());
+        transaction.setBooking(bookingRepository.findByBookingId(bookingId));
+
+        transactionRepository.save(transaction);
+    }
+
     // Update Transaction (Type & Description & Time.now)
     public TransactionResponse updateTransactionType(TransactionRequest transactionRequest, long transactionId, TransactionType transactionType) {
         Transaction transaction = transactionRepository.findTransactionByTransactionId(transactionId);
