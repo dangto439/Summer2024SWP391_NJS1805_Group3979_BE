@@ -9,4 +9,5 @@ public class TransferRequest {
     private long senderWalletId;
     private long receiverWalletId;
     private double amount;
+    private long bookingId;
 }
