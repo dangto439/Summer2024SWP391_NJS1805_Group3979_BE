@@ -2,6 +2,7 @@ package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
+import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,12 @@ public class AuthenticationAPI {
     @GetMapping("/account/{id}")
     public Account getAccount(@PathVariable long id) {
         Account account = authenticationService.getAccountById(id);
+        return account;
+    }
+
+    @PutMapping("/update-account-admin")
+    public Account updateAccountAdmin(@RequestBody AuthenticationResponse accountResponse, String password) {
+        Account account = authenticationService.UpdateAccount(accountResponse, password);
         return account;
     }
 }

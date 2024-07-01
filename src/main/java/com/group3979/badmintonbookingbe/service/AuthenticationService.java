@@ -302,4 +302,19 @@ public class AuthenticationService implements UserDetailsService {
     public Account getAccountById(Long id) {
         return authenticationRepository.findAccountById(id);
     }
+
+    public Account UpdateAccount(AuthenticationResponse accountResponse, String password) {
+        Account account = authenticationRepository.findAccountById(accountResponse.getAccountId());
+
+        account.setAvatar(accountResponse.getAvatar());
+        account.setAccountStatus(accountResponse.getAccountStatus());
+        account.setPhone(accountResponse.getPhone());
+        account.setEmail(accountResponse.getEmail());
+        account.setName(accountResponse.getName());
+        account.setRole(accountResponse.getRole());
+        account.setGender(accountResponse.getGender());
+        account.setPassword(passwordEncoder.encode(password));
+        return authenticationRepository.save(account);
+    }
 }
+

@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.api;
 
+import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.model.request.CourtRequest;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.service.CourtService;
@@ -48,5 +49,10 @@ public class CourtAPI {
     public ResponseEntity<CourtResponse> changeCourtStatus(@RequestBody CourtRequest courtRequest) {
         CourtResponse courtResponse = courtService.changeCourtStatus(courtRequest);
         return ResponseEntity.ok(courtResponse);
+    }
+    @GetMapping("/get-all-court")
+    public List<Court> getAllCourts() {
+        List<Court> courts = courtService.getAllCourt();
+        return courts;
     }
 }

@@ -94,4 +94,9 @@ public class CourtService {
             courtResponse.setCourtStatus(court.getCourtStatus());
             return courtResponse;
     }
+
+    public List<Court> getAllCourt () {
+        List<Court> courts = courtRepository.findAll();
+        return courts;
+    }
 }
