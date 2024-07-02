@@ -56,6 +56,16 @@ public class Account implements UserDetails{
     @OneToMany(mappedBy = "account")
     List<Booking> bookings;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "account")
+    List<Registration> registrations;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "firstPlayer")
+    List<Game> matchesOfFirstPlayer;
+    @JsonIgnore
+    @OneToMany(mappedBy = "secondPlayer")
+    List<Game> matchesOfSecondPlayer;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

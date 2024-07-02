@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IDiscountRuleRepository extends JpaRepository<DiscountRule, Long> {
     DiscountRule findDiscountRuleByClub(Club club);
+    DiscountRule findDiscountRuleByClub_ClubId(long clubId);
 }

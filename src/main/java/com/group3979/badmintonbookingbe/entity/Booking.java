@@ -43,7 +43,7 @@ public class Booking {
     //
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "acount_id")
+    @JoinColumn(name = "customer_id")
     Account account;
 
     @ManyToOne

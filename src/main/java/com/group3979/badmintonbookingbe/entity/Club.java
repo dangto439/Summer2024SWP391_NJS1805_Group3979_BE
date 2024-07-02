@@ -56,4 +56,8 @@ public class Club {
     @JsonIgnore
     @OneToMany(mappedBy = "club")
     List<Promotion> promotions;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "club")
+    List<Contest> contests;
 }
