@@ -125,6 +125,7 @@ public class TransactionService {
                 transaction.setTimestamp(timestamp);
                 transaction.setType(TransactionType.CANCEL);
                 transaction.setDescription(TransactionType.CANCEL.getDescription());
+                break;
             default:
                 throw new CustomException("Loại giao dịch không hợp lệ: " + transactionType);
         }
