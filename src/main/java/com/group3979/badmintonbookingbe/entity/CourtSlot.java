@@ -29,4 +29,8 @@ public class CourtSlot {
     @JsonIgnore
     @OneToMany(mappedBy = "courtSlot")
     List<BookingDetail> bookingDetails;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "courtSlot")
+    List<Game> games;
 }

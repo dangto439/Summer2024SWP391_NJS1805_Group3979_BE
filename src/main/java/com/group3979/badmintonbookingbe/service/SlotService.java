@@ -26,7 +26,7 @@ public class SlotService {
                 slots.add(slotRepository.findSlotByTime(i));
             }
         }else {
-            throw new CustomException("Club không tồn tại");
+            throw new CustomException("Câu lạc bộ không tồn tại");
         }
         return slots;
     }
