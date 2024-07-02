@@ -110,7 +110,7 @@ public class BookingService {
             }
 
         } else {
-            throw new CustomException("Club không tồn tại");
+            throw new CustomException("Câu lạc bộ không tồn tại");
         }
     }
 
@@ -126,7 +126,7 @@ public class BookingService {
             fixedBooking = bookingRepository.save(fixedBooking);
             return bookingDetailService.createFixedBookingDetail(fixedBooking, fixedBookingRequest);
         } else {
-            throw new CustomException("Club không tồn tại");
+            throw new CustomException("Câu lạc bộ không tồn tại");
         }
     }
 
@@ -245,9 +245,8 @@ public class BookingService {
     public double getPriceFixedBooking(FixedBookingRequest fixedBookingRequest) {
         List<LocalDate> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
-        Club club = clubRepository.findByClubId(fixedBookingRequest.getClubId());
         Promotion promotion =
-                promotionService.checkValidPromotion(club.getClubId(), fixedBookingRequest.getPromotionCode());
+                promotionService.checkValidPromotion(fixedBookingRequest.getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
         if (fixedBookingRequest.getCourtId() == 0) {
             for (LocalDate playingDate : playingDates) {
@@ -269,7 +268,7 @@ public class BookingService {
             }
         }
         double discountPrice = (temporaryPrice *
-                (discountRuleRepository.findDiscountRuleByClub(club).getFixedPercent() / 100));
+                (discountRuleRepository.findDiscountRuleByClub_ClubId(fixedBookingRequest.getClubId()).getFixedPercent() / 100));
         if (promotion != null) {
             discountPrice += promotion.getDiscount();
             return temporaryPrice - discountPrice;

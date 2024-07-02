@@ -230,7 +230,7 @@ public class BookingDetailService {
         return days;
     }
 
-           public DayOfWeek getDayOfWeekByNumber(int dayNumber) {
+    public DayOfWeek getDayOfWeekByNumber(int dayNumber) {
         switch (dayNumber) {
             case 1:
                 return DayOfWeek.SUNDAY;
@@ -254,7 +254,7 @@ public class BookingDetailService {
     public BookingDetailResponse cancelBookingDetail(long bookingDetailId) {
         BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByBookingDetailId(bookingDetailId);
         if (bookingDetail != null) {
-            bookingDetail.setStatus(BookingDetailStatus.CANCELLED);
+            bookingDetail.setStatus(BookingDetailStatus.CANCEL);
             bookingDetail = bookingDetailRepository.save(bookingDetail);
             return this.getBookingDetailResponse(bookingDetail);
         } else {
