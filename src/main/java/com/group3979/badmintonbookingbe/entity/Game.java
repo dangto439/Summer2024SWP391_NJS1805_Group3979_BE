@@ -2,10 +2,7 @@ package com.group3979.badmintonbookingbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,6 +10,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Game {
@@ -40,6 +38,8 @@ public class Game {
 
     private int gameNumber;
 
+    private int round;
+
     @ManyToOne
     @JoinColumn(name = "court_slot_id")
     private CourtSlot courtSlot;
@@ -47,5 +47,4 @@ public class Game {
     @JsonIgnore
     @OneToMany(mappedBy = "game")
     List<Score> scores;
-
 }

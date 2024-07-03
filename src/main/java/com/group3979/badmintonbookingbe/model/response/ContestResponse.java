@@ -1,13 +1,16 @@
-package com.group3979.badmintonbookingbe.model.request;
+package com.group3979.badmintonbookingbe.model.response;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Setter
 @Getter
-public class ContestRequest {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ContestResponse {
+    private long contestId;
     private double participationPrice;
     private int capacity;
     private double firstPrize;

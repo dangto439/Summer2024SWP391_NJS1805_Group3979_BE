@@ -11,5 +11,5 @@ import java.util.List;
 public interface ICourtRepository extends JpaRepository<Court, Long> {
    List<Court> findByClub(Club club);
    Court findByCourtId(long courtId);
-
+   int countCourtByClub(Club club);
 }
