@@ -42,7 +42,7 @@ public class GameService {
 
     public void arrangePlayersContest(Contest contest) {
         List<Game> games = gameRepository.findGamesByContest(contest);
-        List<Registration> registrations = registrationRepository.findRegistrationByContest(contest);
+        List<Registration> registrations = registrationRepository.findRegistrationsByContest(contest);
         Collections.shuffle(registrations);
         games.removeIf(game -> game.getGameNumber() > (contest.getCapacity() / 2));
         int i = 0;
