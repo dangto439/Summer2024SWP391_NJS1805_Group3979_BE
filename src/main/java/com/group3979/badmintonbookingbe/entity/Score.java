@@ -2,6 +2,7 @@ package com.group3979.badmintonbookingbe.entity;
 
 import com.group3979.badmintonbookingbe.eNum.SetNumber;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,9 @@ public class Score {
     @Enumerated(EnumType.STRING)
     private SetNumber setNumber;
 
+    @Min(value = 0, message = "Score must be non-negative")
     private int firstPlayerSetScore;
 
+    @Min(value = 0, message = "Score must be non-negative")
     private int secondPlayerSetScore;
 }
