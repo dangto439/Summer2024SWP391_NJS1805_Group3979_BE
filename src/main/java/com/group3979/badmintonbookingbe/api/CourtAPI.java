@@ -55,4 +55,9 @@ public class CourtAPI {
         List<Court> courts = courtService.getAllCourt();
         return courts;
     }
+    @GetMapping("/courts/amount")
+    public ResponseEntity<Integer> getAmountCourtsOfCurrentAccount() {
+        int amountCourts = courtService.getAmountOfClubsCurrentAccount();
+        return ResponseEntity.ok(amountCourts);
+    }
 }

@@ -1,12 +1,14 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.CourtStatus;
+import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.model.request.CourtRequest;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.ICourtRepository;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ public class CourtService {
     IClubRepository clubRepository;
     @Autowired
     private CourtSlotService courtSlotService;
+    @Autowired
+    private AccountUtils accountUtils;
 
     // get all courts of a club
     public List<CourtResponse> getAllCourtsByClub(long clubId) {
@@ -98,5 +102,14 @@ public class CourtService {
     public List<Court> getAllCourt () {
         List<Court> courts = courtRepository.findAll();
         return courts;
+    }
+    public int getAmountOfClubsCurrentAccount(){
+        Account account = accountUtils.getCurrentAccount();
+        List<Club> clubs = clubRepository.findClubsByAccount(account);
+        int amountCourt = 0;
+        for(Club club:clubs){
+            amountCourt += courtRepository.countCourtByClub(club);
+        }
+        return amountCourt;
     }
 }
