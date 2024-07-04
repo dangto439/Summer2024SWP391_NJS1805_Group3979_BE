@@ -27,7 +27,8 @@ import org.springframework.stereotype.Service;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.entity.Account;
 import org.springframework.web.server.ResponseStatusException;
-
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class AuthenticationService implements UserDetailsService {
         List<Account> accounts = new ArrayList<>();
         List<AuthenticationResponse> authenticationResponses = new ArrayList<>();
         accounts = authenticationRepository.findAll();
-        for(Account account : accounts) {
+        for (Account account : accounts) {
             authenticationResponses.add(AuthenticationResponse.builder()
                     .accountId(account.getId())
                     .phone(account.getPhone())
@@ -74,15 +75,28 @@ public class AuthenticationService implements UserDetailsService {
                     .gender(account.getGender())
                     .supervisorID(account.getSupervisorID())
                     .accountStatus(account.getAccountStatus())
-                            .avatar(account.getAvatar())
+                    .avatar(account.getAvatar())
+                    .signupDate(account.getSignupDate())
                     .build());
         }
         return authenticationResponses;
     }
 
-    public Account register(RegisterRequest registerRequest) {
+    public Account register(RegisterRequest registerRequest) throws SQLIntegrityConstraintViolationException {
+        // check duplicate email and phone
+        Account existEmailAccount = authenticationRepository.findAccountByEmail(registerRequest.getEmail());
+        if(existEmailAccount != null) {
+            throw new SQLIntegrityConstraintViolationException("Email đã tồn tại");
+        }
+
+        Account existPhoneAccount = authenticationRepository.findAccountByPhone(registerRequest.getPhone());
+        if(existPhoneAccount != null) {
+            throw new SQLIntegrityConstraintViolationException("Số điện thoại đã tồn tại");
+        }
+
         // registerRequest: thông tin người dùng yêu cầu:
         // solve register logic
+        LocalDate signupDate = LocalDate.now();
         Account account = new Account();
         account.setPhone(registerRequest.getPhone());
         account.setEmail(registerRequest.getEmail());
@@ -90,6 +104,7 @@ public class AuthenticationService implements UserDetailsService {
         account.setName(registerRequest.getName());
         account.setRole(registerRequest.getRole());
         account.setAvatar(avatatDefault);
+        account.setSignupDate(signupDate);
 
         if (account.getRole().equals(Role.CUSTOMER)) {
             account.setAccountStatus(AccountStatus.ACTIVE);
@@ -99,7 +114,7 @@ public class AuthenticationService implements UserDetailsService {
 
         account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         // nhờ repository save xuống db
-        account = authenticationRepository.save(account);
+        account = authenticationRepository.saveAndFlush(account);
         walletService.createWallet(account.getEmail()); // after save account to DB, create a wallet
         emailService.sendMail(account.getEmail(), account.getName());
         return account;
@@ -120,6 +135,7 @@ public class AuthenticationService implements UserDetailsService {
             accountResponse.setSupervisorID(account.getSupervisorID());
             accountResponse.setGender(account.getGender());
             accountResponse.setAccountStatus(account.getAccountStatus());
+            accountResponse.setSignupDate(account.getSignupDate());
             accountResponse.setToken(token);
             return accountResponse;
         } else if (account.getAccountStatus().equals(AccountStatus.INACTIVE)) {
@@ -144,6 +160,7 @@ public class AuthenticationService implements UserDetailsService {
                 account.setAccountStatus(AccountStatus.ACTIVE);
                 account.setAvatar(avatatDefault);
                 account.setGender(Gender.MALE); // default set khi create by login gg: MALE
+                account.setSignupDate(LocalDate.now());
                 walletService.createWallet(email);
                 account = authenticationRepository.save(account);
             }
@@ -172,6 +189,7 @@ public class AuthenticationService implements UserDetailsService {
                 .name(account.getName())
                 .gender(account.getGender())
                 .accountStatus(account.getAccountStatus())
+                .signupDate(account.getSignupDate())
                 .build();
         return authenticationResponse;
     }
@@ -185,7 +203,18 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     // register Account for Staff (Role = "STAFF")
-    public StaffResponse registerStaff(StaffRegisterRequest staffRegisterRequest) throws BadRequestException {
+    public StaffResponse registerStaff(StaffRegisterRequest staffRegisterRequest) throws BadRequestException, SQLIntegrityConstraintViolationException {
+        // check duplicate email and phone
+        Account existEmailAccount = authenticationRepository.findAccountByEmail(staffRegisterRequest.getEmail());
+        if(existEmailAccount != null) {
+            throw new SQLIntegrityConstraintViolationException("Email đã tồn tại");
+        }
+
+        Account existPhoneAccount = authenticationRepository.findAccountByPhone(staffRegisterRequest.getPhone());
+        if(existPhoneAccount != null) {
+            throw new SQLIntegrityConstraintViolationException("Số điện thoại đã tồn tại");
+        }
+        // solve logic
         Account staff = new Account();
         Account supervisor = accountUtils.getCurrentAccount();
         staff.setPhone(staffRegisterRequest.getPhone());
@@ -197,10 +226,11 @@ public class AuthenticationService implements UserDetailsService {
         staff.setPassword(passwordEncoder.encode(staffRegisterRequest.getPassword()));
         staff.setSupervisorID(supervisor.getId());
         staff.setAvatar(avatatDefault);
+        staff.setSignupDate(LocalDate.now());
         walletService.createWallet(staffRegisterRequest.getEmail());
         Club club = clubRepository.findByClubId(staffRegisterRequest.getClubId());
         if (club == null) {
-            throw new BadRequestException("Club not found!");
+            throw new BadRequestException("Không tìm thấy câu lạc bộ!");
         }
         staff.setClub(club);
 
@@ -216,6 +246,7 @@ public class AuthenticationService implements UserDetailsService {
                 .accountStatus(staff.getAccountStatus())
                 .supervisorID(staff.getSupervisorID())
                 .clubId(staff.getClub().getClubId())
+                .signupDate(staff.getSignupDate())
                 .build();
     }
 
@@ -236,6 +267,7 @@ public class AuthenticationService implements UserDetailsService {
                     .supervisorID(staff.getSupervisorID())
                     .accountStatus(staff.getAccountStatus())
                     .clubId(staff.getClub().getClubId())
+                    .signupDate(staff.getSignupDate())
                     .build());
         }
         return staffResponses;
@@ -258,6 +290,7 @@ public class AuthenticationService implements UserDetailsService {
                     .supervisorID(staff.getSupervisorID())
                     .accountStatus(staff.getAccountStatus())
                     .clubId(clubId)
+                    .signupDate(staff.getSignupDate())
                     .build());
         }
         return staffResponses;
@@ -296,6 +329,7 @@ public class AuthenticationService implements UserDetailsService {
                 .gender(account.getGender())
                 .supervisorID(account.getSupervisorID())
                 .accountStatus(account.getAccountStatus())
+                .signupDate(account.getSignupDate())
                 .build();
     }
 

@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.entity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +40,7 @@ public class Account implements UserDetails{
     AccountStatus accountStatus;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+    private LocalDate signupDate;
 
     @JsonIgnore
     @OneToOne(mappedBy = "account")

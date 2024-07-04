@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestController
 @RequestMapping("api")
@@ -26,7 +27,7 @@ public class AuthenticationAPI {
 
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity register(@RequestBody RegisterRequest registerRequest) throws SQLIntegrityConstraintViolationException {
         Account account = authenticationService.register(registerRequest);
         return ResponseEntity.ok(account);
     }
@@ -40,14 +41,14 @@ public class AuthenticationAPI {
     @PostMapping("/forgot-password")
     public ResponseEntity forgotPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         emailService.sendPasswordResetMail(resetPasswordRequest);
-        return ResponseEntity.ok("Password reset email sent successfully");
+        return ResponseEntity.ok("Email đặt lại mật khẩu đã được gửi thành công!");
     }
 
     // reset password
     @PutMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody NewPasswordRequest newPasswordRequest) {
         authenticationService.resetPassword(newPasswordRequest);
-        return ResponseEntity.ok("Password has been reset successfully");
+        return ResponseEntity.ok("Mật khẩu đã được đặt lại thành công!");
     }
 
     @PostMapping("/login-google")
@@ -59,7 +60,7 @@ public class AuthenticationAPI {
     @GetMapping("/admin-only")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity testAdmin() {
-        return ResponseEntity.ok("Admin!!!!!!!!!!!!");
+        return ResponseEntity.ok("Admin!");
     }
 
     @GetMapping("/get-all-account")
