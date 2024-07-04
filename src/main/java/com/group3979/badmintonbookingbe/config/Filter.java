@@ -56,7 +56,7 @@ public class Filter extends OncePerRequestFilter{
         } else {
             String token = getToken(request);
             if (token == null) {
-                resolver.resolveException(request, response, null, new AuthException("Empty token!"));
+                resolver.resolveException(request, response, null, new AuthException("Token trống")); // Empty token
                 return;
             }
             Account account;
@@ -66,16 +66,16 @@ public class Filter extends OncePerRequestFilter{
                 // neu bi block thi nem ra exception va ngung ko thuc hien bat ky request nao nua
                 if(account.getAccountStatus().equals(AccountStatus.INACTIVE)){
                     resolver.resolveException(request, response, null, new AuthException("Tài khoản của bạn đã bị khóa, " +
-                            "vui lòng liên hệ với quản trị viên để biết thêm chi tiết."));
+                            "vui lòng liên hệ với quản trị viên để biết thêm chi tiết"));
                     return;
                 }
             } catch (ExpiredJwtException expiredJwtException) {
                 // token het han
-                resolver.resolveException(request, response, null, new AuthException("Expired Token!"));
+                resolver.resolveException(request, response, null, new AuthException("Token đã hết hạn")); // Expired Token
                 return;
             } catch (MalformedJwtException malformedJwtException) {
                 //token sai
-                resolver.resolveException(request, response, null, new AuthException("Invalid Token!"));
+                resolver.resolveException(request, response, null, new AuthException("Token không hợp lệ")); // Invalid Token
                 return;
             }
             // token dung

@@ -80,18 +80,18 @@ public class ClubAPI {
     public ResponseEntity<Object> deleteClub(@PathVariable Long id) {
         boolean deleteSuccess = clubService.deleteStatusClub(id);
         if (deleteSuccess) {
-            return ResponseEntity.ok("Deleted Successfully");
+            return ResponseEntity.ok("Đã xóa thành công");
         }
-        return new ResponseEntity<>("Delete failed", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Xóa thất bại", HttpStatus.BAD_REQUEST);
     }
     //delete  image by Id
     @DeleteMapping("/club/image/{imageId}")
     public ResponseEntity<Object> deleteImageClub(@PathVariable Long imageId) {
        boolean  deleteResult =  imageClubService.deleteImageClubById(imageId);
        if(deleteResult) {
-          return ResponseEntity.ok("Deleted Successfully");
+          return ResponseEntity.ok("Đã xóa thành công");
        }
-        return new ResponseEntity<>("Delete failed", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Xóa thất bại", HttpStatus.BAD_REQUEST);
     }
 //    //get a image by Id
 //    @GetMapping("/image-club/{imageId}")

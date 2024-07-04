@@ -4,6 +4,7 @@ import com.group3979.badmintonbookingbe.eNum.AccountStatus;
 import com.group3979.badmintonbookingbe.eNum.Gender;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import lombok.*;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -20,4 +21,5 @@ public class AuthenticationResponse {
     private Long supervisorID;
     private AccountStatus accountStatus;
     private String avatar;
+    private LocalDate signupDate;
 }

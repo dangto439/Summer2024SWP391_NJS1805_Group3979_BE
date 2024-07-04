@@ -5,6 +5,8 @@ import com.group3979.badmintonbookingbe.eNum.Gender;
 import com.group3979.badmintonbookingbe.eNum.Role;
 import lombok.*;
 
+import java.time.LocalDate;
+
 
 @Getter
 @Setter
@@ -21,4 +23,5 @@ public class StaffResponse {
     private Long supervisorID;
     private AccountStatus accountStatus;
     private Long clubId;
+    private LocalDate signupDate;
 }

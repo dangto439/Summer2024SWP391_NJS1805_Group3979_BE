@@ -41,9 +41,9 @@ public class CourtAPI {
     public ResponseEntity<String> inactiveCourtStatus(@PathVariable Long id) {
         boolean result = courtService.inactiveCourtStatus(id);
         if (result) {
-            return ResponseEntity.ok("Inactive Successfully");
+            return ResponseEntity.ok("Chuyển sang trạng thái không hoạt động thành công");
         }
-        return ResponseEntity.ok("Inactive failed");
+        return ResponseEntity.ok("Chuyển sang trạng thái không hoạt động thất bại");
     }
     @PutMapping("/court/{id}")
     public ResponseEntity<CourtResponse> changeCourtStatus(@RequestBody CourtRequest courtRequest) {
