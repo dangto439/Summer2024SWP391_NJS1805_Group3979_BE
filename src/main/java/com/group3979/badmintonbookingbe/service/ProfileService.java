@@ -71,7 +71,7 @@ public class ProfileService {
                     .avatar(account.getAvatar())
                     .build();
         }else {
-            throw new BadRequestException("Passwords do not match");
+            throw new BadRequestException("Mật khẩu không khớp");
         }
     }
 }

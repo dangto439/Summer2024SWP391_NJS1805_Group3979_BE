@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @RestController
@@ -38,7 +39,7 @@ public class StaffAPI {
         try {
             StaffResponse staff = authenticationService.registerStaff(staffRegisterRequest);
             return ResponseEntity.ok(staff);
-        }catch(BadRequestException e){
+        }catch(BadRequestException | SQLIntegrityConstraintViolationException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -48,7 +49,7 @@ public class StaffAPI {
     public ResponseEntity<String> blockStaff(@PathVariable Long id) {
         boolean blockedCheck = authenticationService.blockStaff(id);
         if (blockedCheck)
-            return ResponseEntity.ok("Blocked staff");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not found the staff to block !!");
+            return ResponseEntity.ok("Đã chặn nhân viên");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy nhân viên để chặn");
     }
 }

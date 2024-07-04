@@ -15,6 +15,7 @@ import java.util.List;
 public interface IAuthenticationRepository extends JpaRepository<Account, Long> {
     Account findAccountByEmail(String email);
     Account findAccountById(Long id);
+    Account findAccountByPhone(String phone);
     @Query("SELECT a FROM Account a WHERE a.role = :role AND a.supervisorID = :supervisorID")
     List<Account> findClubStaffBySupervisorId(@Param("role") Role role, @Param("supervisorID") Long supervisorID);
     List<Account> findClubStaffByClub(Club club);
