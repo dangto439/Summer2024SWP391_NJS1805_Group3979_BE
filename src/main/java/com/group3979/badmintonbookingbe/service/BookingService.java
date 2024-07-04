@@ -8,6 +8,7 @@ import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
+import com.group3979.badmintonbookingbe.model.response.revenueResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -275,6 +276,10 @@ public class BookingService {
         } else {
             return (temporaryPrice - discountPrice);
         }
+    }
+
+    public List<revenueResponse> getRevenueBookingResponse(int year) {
+        return bookingRepository.findRevenueResponseBookingByYear(year);
     }
 }
 
