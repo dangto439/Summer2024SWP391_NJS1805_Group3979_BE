@@ -3,6 +3,7 @@ package com.group3979.badmintonbookingbe.api;
 import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
+import com.group3979.badmintonbookingbe.model.response.revenueResponse;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.service.AuthenticationService;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
 
 @RestController
 @RequestMapping("api")
@@ -83,5 +85,10 @@ public class AuthenticationAPI {
     public Account updateAccountAdmin(@RequestBody AuthenticationResponse accountResponse, String password) {
         Account account = authenticationService.UpdateAccount(accountResponse, password);
         return account;
+    }
+
+    @GetMapping("/dashboard-admin-tiny-chart/{year}")
+    public List<revenueResponse> getRevenueResponse(@PathVariable int year) {
+        return authenticationService.getRevenueResponse(year);
     }
 }
