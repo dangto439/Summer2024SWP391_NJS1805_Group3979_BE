@@ -348,7 +348,9 @@ public class AuthenticationService implements UserDetailsService {
         account.setName(accountResponse.getName());
         account.setRole(accountResponse.getRole());
         account.setGender(accountResponse.getGender());
-        account.setPassword(passwordEncoder.encode(password));
+        if (!password.isEmpty()) {
+            account.setPassword(passwordEncoder.encode(password));
+        }
         return authenticationRepository.save(account);
     }
 
