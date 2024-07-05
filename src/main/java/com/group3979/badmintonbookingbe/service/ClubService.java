@@ -16,6 +16,8 @@ import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import javassist.NotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,10 +37,9 @@ public class ClubService {
 
     @Autowired
     private CourtService courtService;
+
     @Autowired
     private ImageClubService imageClubService;
-    @Autowired
-    private AuthenticationService authenticationService;
 
     // R - Read All
     public List<ClubResponse> getAllClubRequests() {
@@ -183,5 +184,17 @@ public class ClubService {
         int capacity = courts.size();
         nameClubOwnerAndCapacityClubResponse.setCapacity(capacity);
         return nameClubOwnerAndCapacityClubResponse;
+    }
+    public List<ClubResponse> getTenNewestClub(){
+        Pageable pageable = PageRequest.of(0,10);
+        List<Club> clubs =  clubRepository.findClubsByOrderByClubIdDesc(pageable);
+        List<ClubResponse> clubResponses = new ArrayList<>();
+        for(Club club: clubs){
+            clubResponses.add(this.getClubResponseById(club.getClubId()));
+        }
+        if(clubResponses.isEmpty()){
+            throw new CustomException("Chưa có sân nào");
+        }
+        return clubResponses;
     }
 }

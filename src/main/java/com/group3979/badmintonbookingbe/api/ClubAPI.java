@@ -121,9 +121,14 @@ public class ClubAPI {
         return ResponseEntity.ok(clubResponses);
     }
     @GetMapping("/club/name-club-owner/{id}")
-    public  ResponseEntity getNameClubOWner(@PathVariable Long id) {
+    public  ResponseEntity getNameClubOwner(@PathVariable Long id) {
         NameClubOwnerAndCapacityClubResponse NameClubOwnerAndCapacityClubResponse = clubService.GetNameClubOwner(id);
         return ResponseEntity.ok(NameClubOwnerAndCapacityClubResponse);
+    }
+    @GetMapping("/clubs/10")
+    public  ResponseEntity<List<ClubResponse>> getTenNewestClub() {
+       List<ClubResponse> clubResponses = clubService.getTenNewestClub();
+        return ResponseEntity.ok(clubResponses);
     }
 
 }
