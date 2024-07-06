@@ -83,7 +83,6 @@ public class BookingDetailService {
     public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
         double totalPrice = 0;
         int amountTime = flexibleBooking.getAmountTime();
-        //Club club = flexibleBooking.getClub();
         for (BookingDetailRequest bookingDetailRequest : dailyBookingRequest.getBookingDetailRequests()) {
             BookingDetail bookingDetail = new BookingDetail();
             CourtSlot courtSlot = courtSlotRepository
