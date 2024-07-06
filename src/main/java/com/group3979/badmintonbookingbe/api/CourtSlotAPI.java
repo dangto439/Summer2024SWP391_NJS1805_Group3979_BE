@@ -12,12 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -33,8 +30,9 @@ public class CourtSlotAPI {
 
     @PostMapping("/court-slot/{clubId}")
     public ResponseEntity createCourtSlot(@PathVariable Long clubId, @RequestBody CourtSlotRequest courtSlotRequest) {
-        List<CourtSlotResponse> courtSlotList = courtSlotService.createCourtSlot(clubId, courtSlotRequest);
-        return ResponseEntity.ok(courtSlotList);
+//      List<CourtSlotResponse> courtSlotList = courtSlotService.createCourtSlot(clubId, courtSlotRequest);
+        courtSlotService.createCourtSlot(clubId, courtSlotRequest);
+        return ResponseEntity.ok("Đã tạo thành công");
     }
 
     @GetMapping("/court-slot/{courtId}")

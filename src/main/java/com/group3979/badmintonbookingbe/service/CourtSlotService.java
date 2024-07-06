@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -48,18 +46,22 @@ public class CourtSlotService {
             }
             courtSlotRepository.save(courtSlot);
         }
-
-
     }
 
-    public List<CourtSlotResponse> createCourtSlot(Long clubId, CourtSlotRequest courtSlotRequest) {
+    public void createCourtSlot(Long clubId, CourtSlotRequest courtSlotRequest) {
         List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();
         Club club = clubRepository.findByClubId(clubId);
         List<Court> courtList = courtRepository.findByClub(club);
+        List<CourtSlot> courtSlotList = courtSlotRepository.findCourtSlotsByCourt_Club(club);
 
         for (int start = 1, end = 24; start <= end; start++) {
             for (Court court : courtList) {
-                if (courtSlotRepository.existsByCourtAndSlot_Time(court, start)) continue;
+                int temp = start;
+                CourtSlot courtSlotV2 = courtSlotList.stream()
+                        .filter(cs -> cs.getCourt().equals(court))
+                        .filter(cs -> cs.getSlot().getTime() == temp)
+                        .findFirst().orElse(null);
+                if (courtSlotV2 != null) continue;
                 CourtSlot courtSlot = new CourtSlot();
                 Slot slot = slotRepository.findSlotByTime(start);
 
@@ -91,9 +93,7 @@ public class CourtSlotService {
             }
         }
         if (courtSlotResponses.isEmpty()) throw new AuthException("Đã thêm đủ slot của sân");
-        return courtSlotResponses;
     }
-
 
     public List<CourtSlotResponse> getAllCourtSlots(Long courtId) {
         List<CourtSlotResponse> courtSlotResponses = new ArrayList<>();

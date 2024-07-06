@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.repository;
 
+import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.entity.CourtSlot;
 import com.group3979.badmintonbookingbe.entity.Slot;
@@ -9,13 +10,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Repository
 public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
     boolean existsByCourtAndSlot_Time(Court court, int time);
-
+    List<CourtSlot> findCourtSlotsByCourt_Club(Club club);
     List<CourtSlot> findByCourt(Court court);
     CourtSlot findCourtSlotByCourtSlotId(Long id);
 
