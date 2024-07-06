@@ -21,4 +21,5 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
             "FROM Booking t WHERE YEAR(t.bookingDate) = :year " +
             "GROUP BY MONTH(t.bookingDate) ORDER BY MONTH(t.bookingDate)")
     List<revenueResponse> findRevenueResponseBookingByYear(@Param("year") int year);
+    List<Booking> findBookingByClub_ClubId(long clubId);
 }

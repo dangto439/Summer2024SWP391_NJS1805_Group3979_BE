@@ -51,7 +51,7 @@ public class BookingService {
 
     @Autowired
     IDiscountRuleRepository discountRuleRepository;
-    
+
     @Autowired
     private ICourtRepository courtRepository;
 
@@ -280,6 +280,15 @@ public class BookingService {
 
     public List<revenueResponse> getRevenueBookingResponse(int year) {
         return bookingRepository.findRevenueResponseBookingByYear(year);
+    }
+
+    public List<BookingResponse> getBookingByClubId(long id) {
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        List<Booking> bookings = bookingRepository.findBookingByClub_ClubId(id);
+        for(Booking booking: bookings){
+            bookingResponses.add(this.getBookingResponse(booking));
+        }
+        return bookingResponses;
     }
 }
 

@@ -66,6 +66,11 @@ public class BookingAPI {
         BookingDetailResponse bookingDetailResponse = bookingDetailService.cancelBookingDetail(bookingDetailId);
         return ResponseEntity.ok().body(bookingDetailResponse);
     }
+    @GetMapping("/bookings/{clubId}")
+    public ResponseEntity<List<BookingResponse>> getBookingByClubId(@PathVariable long clubId) {
+        List<BookingResponse> bookingResponses = bookingService.getBookingByClubId(clubId);
+        return ResponseEntity.ok(bookingResponses);
+    }
     @GetMapping("/booking/booking-detail/{bookingId}")
     public ResponseEntity<List<BookingDetailResponse>> getBookingDetailByBookingId(@PathVariable long bookingId){
         List<BookingDetailResponse> bookingDetailResponses = bookingDetailService.getBookingDetailByBookingId(bookingId);
@@ -81,12 +86,12 @@ public class BookingAPI {
         Double responses = bookingService.getPriceFixedBooking(fixedBookingRequest);
         return ResponseEntity.ok().body(responses);
     }
+
     @GetMapping("/booking/booking-detail-response/{checkInCode}")
     public ResponseEntity<CheckedBookingDetailResponse> getBookingDetailByCheckInCode(@PathVariable String checkInCode){
         CheckedBookingDetailResponse bookingDetailResponse = bookingDetailService.getBookingDetailByCheckInCode(checkInCode);
         return ResponseEntity.ok().body(bookingDetailResponse);
     }
-
     @GetMapping("/dashboard-admin-bar-chart/{year}")
     public List<revenueResponse> getRevenueResponse(@PathVariable int year) {
         return bookingService.getRevenueBookingResponse(year);
