@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.request.ScoreRequest;
+import com.group3979.badmintonbookingbe.model.request.ScoreUpdateRequest;
 import com.group3979.badmintonbookingbe.model.response.ScoreResponse;
 import com.group3979.badmintonbookingbe.service.ScoreService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,18 +26,14 @@ public class ScoreAPI {
     }
 
     @PostMapping("/score")
-    public ResponseEntity<ScoreResponse> addScore(@RequestBody ScoreRequest scoreRequest) {
-        ScoreResponse scoreResponse = scoreService.createScore(scoreRequest);
+    public ResponseEntity<List<ScoreResponse>> addScore(@RequestBody List<ScoreRequest> scoreRequests) {
+        List<ScoreResponse> scoreResponse = scoreService.createScore(scoreRequests);
         return ResponseEntity.ok(scoreResponse);
     }
 
-    @PutMapping("/score/{scoreId}")
-    public ResponseEntity<ScoreResponse> updateScore(
-            @PathVariable("scoreId") long scoreId,
-            @RequestParam("firstPlayerScore") int firstPlayerScore,
-            @RequestParam("secondPlayerScore") int secondPlayerScore) {
-
-        ScoreResponse updatedScore = scoreService.updateScore(scoreId, firstPlayerScore, secondPlayerScore);
+    @PutMapping("/score")
+    public ResponseEntity<List<ScoreResponse>> updateScore(@RequestBody List<ScoreUpdateRequest> scoreUpdateRequest) {
+        List<ScoreResponse> updatedScore = scoreService.updateScore(scoreUpdateRequest);
         return ResponseEntity.ok(updatedScore);
     }
 }
