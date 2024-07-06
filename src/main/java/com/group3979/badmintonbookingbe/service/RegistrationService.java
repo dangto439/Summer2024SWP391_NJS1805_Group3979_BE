@@ -13,6 +13,7 @@ import com.group3979.badmintonbookingbe.repository.IRegistrationRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,36 +30,52 @@ public class RegistrationService {
     AccountUtils accountUtils;
     @Autowired
     IAuthenticationRepository authenticationRepository;
+    @Autowired
+    GameService gameService;
+
+    @Transactional
     // register to participate in the contest
     public RegistrationResponse registrationContest(long contestId) {
-        // get Date
-        LocalDate registrationDate = LocalDate.now();
         // find contest
         Contest contest = contestRepository.findByContestId(contestId);
-        if(contest == null) {
+        if (contest == null) {
             throw new CustomException("Không tìm thấy cuộc thi với ID: " + contestId);
+        }
+        // check exceeded capacity
+        if (registrationRepository.countByContest(contest) >= contest.getCapacity()){
+            throw new CustomException("Cuộc thi đã đủ số lượng người đăng ký");
         }
         // get current account
         Account account = accountUtils.getCurrentAccount();
         // find registration by account to check duplicate
         Registration checkRegistration = registrationRepository.findRegistrationByAccountAndContest(account, contest);
-        if(checkRegistration != null){
+        if (checkRegistration != null) {
             throw new CustomException("Người chơi đã đăng ký tham gia cuộc thi này");
         }
         Registration registration = new Registration();
         registration.setContest(contest);
         registration.setAccount(account);
-        registration.setRegistrationDate(registrationDate);
+        registration.setRegistrationDate(LocalDate.now());
 
-        registration = registrationRepository.save(registration);
+        registration = registrationRepository.saveAndFlush(registration);
+        arrangePlayers(contest);
         return buildRegistrationResponse(registration);
     }
+
+    // khi contest du so ng tham gia thi tu sap xep lich thi dau
+    public void arrangePlayers(Contest contest){
+        int checkQuantity = registrationRepository.countByContest(contest);
+        if(checkQuantity == contest.getCapacity()){
+            gameService.arrangePlayersContest(contest);
+        }
+    }
+
 
     // get list of participants by contestId
     public List<Registration> getAllRegistrations(long contestId) {
         // find contest
         Contest contest = contestRepository.findByContestId(contestId);
-        if(contest == null) {
+        if (contest == null) {
             throw new CustomException("Không tìm thấy cuộc thi với ID: " + contestId);
         }
         return registrationRepository.findRegistrationsByContest(contest);
@@ -69,16 +86,16 @@ public class RegistrationService {
     }
 
     // update registration
-    public Registration updateRegistration(long registrationId, RegistrationRequest registrationRequest)  {
+    public Registration updateRegistration(long registrationId, RegistrationRequest registrationRequest) {
         Optional<Registration> existRegistration = getRegistrationById(registrationId);
 
         Contest contest = contestRepository.findByContestId(registrationRequest.getContestId());
-        if(contest == null) {
+        if (contest == null) {
             throw new CustomException("Không tìm thấy cuộc thi với ID: " + registrationRequest.getContestId());
         }
 
         Account player = authenticationRepository.findAccountById(registrationRequest.getPlayerId());
-        if(player == null) {
+        if (player == null) {
             throw new CustomException("Không tìm thấy người chơi với ID: " + registrationRequest.getPlayerId());
         }
 
@@ -87,7 +104,7 @@ public class RegistrationService {
             existRegistration.get().setAccount(authenticationRepository.findAccountById(registrationRequest.getPlayerId()));
 
             return registrationRepository.save(existRegistration.get());
-        }else {
+        } else {
             throw new CustomException("Không tìm thấy người đăng ký tham gia với ID: " + registrationId);
         }
 
@@ -97,8 +114,8 @@ public class RegistrationService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return RegistrationResponse.builder()
                 .registrationId(registration.getRegistrationId())
-                .contest(registration.getContest())
-                .account(registration.getAccount())
+                .contestId(registration.getContest().getContestId())
+                .accountId(registration.getAccount().getId())
                 .registrationDate(formatter.format(registration.getRegistrationDate()))
                 .build();
     }
