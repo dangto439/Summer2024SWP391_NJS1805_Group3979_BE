@@ -39,10 +39,20 @@ public class BookingAPI {
         List<BookingResponse> responses = bookingService.getAllBooking();
         return ResponseEntity.ok().body(responses);
     }
+    @GetMapping("/booking/flexible")
+    public ResponseEntity<List<BookingResponse>> getFlexibleBookingCurrentAccount(){
+        List<BookingResponse> responses = bookingService.getFlexibleBookingCurrentAccount();
+        return ResponseEntity.ok().body(responses);
+    }
     @GetMapping("/bookings/current-account")
     public ResponseEntity<List<BookingResponse>> getBookingCurrentAccount(){
         List<BookingResponse> responses = bookingService.getBookingResponseCurrentAccount();
         return ResponseEntity.ok().body(responses);
+    }
+    @PutMapping("/booking/{bookingId}")
+    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable long bookingId){
+        BookingResponse bookingResponse = bookingService.cancelBookingClubId(bookingId);
+        return ResponseEntity.ok(bookingResponse);
     }
     @GetMapping("/booking/{id}")
     public ResponseEntity<BookingResponse> getBookingById(@PathVariable long id){
@@ -81,12 +91,12 @@ public class BookingAPI {
         List<String> responses = bookingService.notifyFullSlot(fixedBookingRequest);
         return ResponseEntity.ok().body(responses);
     }
+
     @PostMapping("/booking/fixed/price")
     public ResponseEntity<Double> getPriceFixedBooking(@RequestBody FixedBookingRequest fixedBookingRequest){
         Double responses = bookingService.getPriceFixedBooking(fixedBookingRequest);
         return ResponseEntity.ok().body(responses);
     }
-
     @GetMapping("/booking/booking-detail-response/{checkInCode}")
     public ResponseEntity<CheckedBookingDetailResponse> getBookingDetailByCheckInCode(@PathVariable String checkInCode){
         CheckedBookingDetailResponse bookingDetailResponse = bookingDetailService.getBookingDetailByCheckInCode(checkInCode);

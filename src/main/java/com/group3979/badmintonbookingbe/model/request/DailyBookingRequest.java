@@ -11,4 +11,6 @@ import java.util.List;
 public class DailyBookingRequest {
     List<BookingDetailRequest> bookingDetailRequests;
     private String promotionCode;
+    //flexibleId = 0 -> ko xai flexibleBooking
+    private long flexibleId;
 }

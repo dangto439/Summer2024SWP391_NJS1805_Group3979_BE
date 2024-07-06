@@ -1,5 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.group3979.badmintonbookingbe.eNum.BookingDetailStatus;
+import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import com.group3979.badmintonbookingbe.entity.*;
@@ -20,10 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Transactional
@@ -55,11 +54,13 @@ public class BookingService {
     @Autowired
     private ICourtRepository courtRepository;
 
+    @Autowired
+    private IBookingDetailRepository bookingDetailRepository;
+
     public BookingResponse createDailyBooking(DailyBookingRequest dailyBookingRequest) {
         CourtSlot courtSlot = courtSlotRepository.findCourtSlotByCourtSlotId(dailyBookingRequest.getBookingDetailRequests().get(0).getCourtSlotId());
         Club club = clubRepository.findByClubId(courtSlot.getCourt().getClub().getClubId());
-        Booking flexBooking = this.getFlexibleBooking(accountUtils.getCurrentAccount(), club);
-
+        Booking flexBooking = bookingRepository.findByBookingId(dailyBookingRequest.getFlexibleId());
         //xem da dat lich linh hoat ch va lich linh hoat con han ko va dat dung club ch
         if (flexBooking != null) {
             return bookingDetailService.createFlexibleBookingDetail(flexBooking, dailyBookingRequest);
@@ -74,7 +75,17 @@ public class BookingService {
             return bookingDetailService.createDailyBookingDetail(booking, dailyBookingRequest);
         }
     }
-
+    public List<BookingResponse> getFlexibleBookingCurrentAccount(){
+        Account currentAccount = accountUtils.getCurrentAccount();
+        List<Booking> bookings = bookingRepository.findBookingByAccount(currentAccount);
+        bookings.removeIf(booking -> !(booking.getBookingType().equals(BookingType.FLEXIBLEBOOKING)));
+        bookings.removeIf(booking -> booking.getExpirationStatus().equals(ExpirationStatus.EXPIRED));
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        for(Booking booking: bookings){
+            bookingResponses.add(this.getBookingResponse(booking));
+        }
+        return bookingResponses;
+    }
     public BookingResponse createFlexibleBooking(FlexibleBookingRequest flexibleBookingRequest) {
         Club club = clubRepository.findByClubId(flexibleBookingRequest.getClubId());
         Booking existedBooking = this.getFlexibleBooking(accountUtils.getCurrentAccount(), club);
@@ -289,6 +300,22 @@ public class BookingService {
             bookingResponses.add(this.getBookingResponse(booking));
         }
         return bookingResponses;
+    }
+    public BookingResponse cancelBookingClubId(long bookingId){
+        Booking booking = bookingRepository.findByBookingId(bookingId);
+        if(booking != null){
+            booking.setBookingStatus(BookingStatus.CANCEL);
+             booking = bookingRepository.save(booking);
+            List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(bookingId);
+
+            for(BookingDetail bookingDetail:bookingDetails){
+                bookingDetail.setStatus(BookingDetailStatus.CANCEL);
+            }
+            bookingDetailRepository.saveAll(bookingDetails);
+            return this.getBookingResponse(booking);
+        }else {
+            throw new CustomException("Booking không tồn tại");
+        }
     }
 }
 
