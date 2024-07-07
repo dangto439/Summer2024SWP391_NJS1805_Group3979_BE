@@ -35,9 +35,6 @@ public class BookingDetailService {
     private IBookingRepository bookingRepository;
 
     @Autowired
-    private IClubRepository clubRepository;
-
-    @Autowired
     private ICourtRepository courtRepository;
 
     @Autowired
@@ -79,6 +76,7 @@ public class BookingDetailService {
         booking = bookingRepository.save(booking);
         return bookingService.getBookingResponse(booking, temporaryPrice, discountPrice);
     }
+
     //dat lich ngay sau khi da dat lich linh hoat
     public BookingResponse createFlexibleBookingDetail(Booking flexibleBooking, DailyBookingRequest dailyBookingRequest) {
         double totalPrice = 0;
@@ -107,6 +105,7 @@ public class BookingDetailService {
         flexibleBooking = bookingRepository.save(flexibleBooking);
         return bookingService.getBookingResponse(flexibleBooking, totalPrice, 0);
     }
+
     //dat lich co dinh
     public BookingResponse createFixedBookingDetail(Booking fixedBooking, FixedBookingRequest fixedBookingRequest) {
         List<LocalDate> playingDates = this.getAllDaysOfBooking(fixedBookingRequest.getYear(),
@@ -114,23 +113,11 @@ public class BookingDetailService {
         Promotion promotion =
                 promotionService.checkValidPromotion(fixedBooking.getClub().getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
-        if (fixedBookingRequest.getCourtId() == 0) {
-            for (LocalDate playingDate : playingDates) {
-                for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                    // khach hang muon chon bai ki san nao
-                    temporaryPrice += this.saveFixedBookingDetailByClub(fixedBooking, slotId, playingDate);
-                }
-            }
-        } else {
-            for (LocalDate playingDate : playingDates) {
-                for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                    // khach hang chon san cu the
-                    Court court = courtRepository.findByCourtId(fixedBookingRequest.getCourtId());
-                    if (court == null) {
-                        throw new CustomException("Sân không tồn tại");
-                    }
-                    temporaryPrice += this.saveFixedBookingDetailByCourt(fixedBooking, slotId, playingDate, court.getCourtId());
-                }
+
+        for (LocalDate playingDate : playingDates) {
+            for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                temporaryPrice +=
+                        this.saveFixedBookingDetailByClub(fixedBooking,fixedBookingRequest.getCourtIds(), slotId, playingDate);
             }
         }
         double totalPrice;
@@ -147,8 +134,8 @@ public class BookingDetailService {
         return bookingService.getBookingResponse(fixedBooking, temporaryPrice, discountPrice);
     }
 
-    public double saveFixedBookingDetailByClub(Booking fixedBooking, long slotId, LocalDate playingDate) {
-        CourtSlot courtSlot = this.selectCourtSlot(fixedBooking.getClub().getClubId(), slotId, playingDate);
+    public double saveFixedBookingDetailByClub(Booking fixedBooking, List<Long> courtIds, long slotId, LocalDate playingDate) {
+        CourtSlot courtSlot = this.selectCourtSlot(courtIds, slotId, playingDate);
         if (courtSlot != null) {
             BookingDetail bookingDetail = new BookingDetail();
             bookingDetail.setPlayingDate(playingDate);
@@ -162,20 +149,6 @@ public class BookingDetailService {
         return 0;
     }
 
-    public double saveFixedBookingDetailByCourt(Booking fixedBooking, long slotId, LocalDate playingDate, long courtId) {
-        CourtSlot courtSlot = this.selectCourtSlotOfCourt(courtId, slotId, playingDate);
-        if (courtSlot != null) {
-            BookingDetail bookingDetail = new BookingDetail();
-            bookingDetail.setPlayingDate(playingDate);
-            bookingDetail.setCourtSlot(courtSlot);
-            bookingDetail.setPrice(courtSlot.getPrice());
-            bookingDetail.setBooking(fixedBooking);
-            bookingDetail.setStatus(BookingDetailStatus.UNFINISHED);
-            this.generateCheckInCode(bookingDetail);
-            return courtSlot.getPrice();
-        }
-        return 0;
-    }
 
     public BookingDetail generateCheckInCode(BookingDetail bookingDetail) {
         try {
@@ -189,27 +162,18 @@ public class BookingDetailService {
         }
     }
 
-    public CourtSlot selectCourtSlot(long clubId, long slotId, LocalDate playingDate) {
-        Club club = clubRepository.findByClubId(clubId);
+    public CourtSlot selectCourtSlot(List<Long> courtIds, long slotId, LocalDate playingDate) {
         Slot slot = slotRepository.findSlotBySlotId(slotId);
-        List<Court> courts = courtRepository.findByClub(club);
+        List<Court> courts = new ArrayList<>();
+        for (Long courtId : courtIds) {
+            courts.add(courtRepository.findByCourtId(courtId));
+        }
         for (Court court : courts) {
             CourtSlot existedCourtSlot =
                     courtSlotRepository.findCourtSlotByPlayingDateAndSlot(playingDate, court, slot);
             if (existedCourtSlot == null) {
                 return courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot);
             }
-        }
-        return null;
-    }
-
-    public CourtSlot selectCourtSlotOfCourt(long courtId,long slotId, LocalDate playingDate) {
-        Slot slot = slotRepository.findSlotBySlotId(slotId);
-        Court court = courtRepository.findByCourtId(courtId);
-        CourtSlot existedCourtSlot =
-                courtSlotRepository.findCourtSlotByPlayingDateAndSlot(playingDate, court, slot);
-        if (existedCourtSlot == null) {
-            return courtSlotRepository.findCourtSlotByCourtAndSlot(court, slot);
         }
         return null;
     }
