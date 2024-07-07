@@ -24,6 +24,8 @@ public class Contest {
 
     private double participationPrice;
 
+    private String name;
+
     private int capacity;
 
     private double firstPrize;

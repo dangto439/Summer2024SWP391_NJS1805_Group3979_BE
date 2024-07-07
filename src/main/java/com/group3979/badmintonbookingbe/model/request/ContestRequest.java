@@ -15,4 +15,5 @@ public class ContestRequest {
     private LocalDate startDate;
     private long clubId;
     private String urlBanner;
+    private String name;
 }

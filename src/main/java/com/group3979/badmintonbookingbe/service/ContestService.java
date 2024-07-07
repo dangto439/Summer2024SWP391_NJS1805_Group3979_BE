@@ -1,15 +1,21 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.ContestStatus;
+import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Contest;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.ContestRequest;
+import com.group3979.badmintonbookingbe.model.request.UpdateContestRequest;
 import com.group3979.badmintonbookingbe.model.response.ContestResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.IContestRepository;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ContestService {
@@ -19,9 +25,12 @@ public class ContestService {
     IContestRepository contestRepository;
     @Autowired
     GameService gameService;
-    public ContestResponse createContest(ContestRequest contestRequest){
+    @Autowired
+    AccountUtils accountUtils;
+
+    public ContestResponse createContest(ContestRequest contestRequest) {
         Club club = clubRepository.findByClubId(contestRequest.getClubId());
-        if(club != null){
+        if (club != null) {
             Contest contest = new Contest();
             contest.setCapacity(contestRequest.getCapacity());
             contest.setClub(club);
@@ -31,14 +40,43 @@ public class ContestService {
             contest.setParticipationPrice(contestRequest.getParticipationPrice());
             contest.setStartDate(contestRequest.getStartDate());
             contest.setContestStatus(ContestStatus.ACTIVE);
+            contest.setName(contestRequest.getName());
             contest = contestRepository.save(contest);
             gameService.createMatchesContest(contest.getCapacity(), contest);
             return this.buildContestResponse(contest);
-        }else {
+        } else {
             throw new CustomException("Câu lạc bộ không tồn tại");
         }
     }
-    public ContestResponse buildContestResponse(Contest contest){
+
+    public ContestResponse updateContest(UpdateContestRequest updateContestRequest) {
+        Club club = clubRepository.findByClubId(updateContestRequest.getClubId());
+        Contest contest = contestRepository.findByContestId(updateContestRequest.getContestId());
+        if (club != null) {
+            if (contest != null) {
+                contest.setClub(club);
+                contest.setFirstPrize(updateContestRequest.getFirstPrize());
+                contest.setSecondPrize(updateContestRequest.getSecondPrize());
+                contest.setUrlBanner(updateContestRequest.getUrlBanner());
+                contest.setParticipationPrice(updateContestRequest.getParticipationPrice());
+                contest.setStartDate(updateContestRequest.getStartDate());
+                contest.setContestStatus(ContestStatus.ACTIVE);
+                contest.setName(updateContestRequest.getName());
+                contest = contestRepository.save(contest);
+                return this.buildContestResponse(contest);
+            } else {
+                throw new CustomException("Cuộc thi đấu không tồn tại");
+            }
+        } else {
+            throw new CustomException("Câu lạc bộ không tồn tại");
+        }
+    }
+
+    public ContestResponse getContestById(long id) {
+        return this.buildContestResponse(contestRepository.findByContestId(id));
+    }
+
+    public ContestResponse buildContestResponse(Contest contest) {
         return ContestResponse.builder()
                 .clubId(contest.getClub().getClubId())
                 .contestId(contest.getContestId())
@@ -48,6 +86,28 @@ public class ContestService {
                 .urlBanner(contest.getUrlBanner())
                 .capacity(contest.getCapacity())
                 .participationPrice(contest.getParticipationPrice())
+                .name(contest.getName())
                 .build();
     }
+
+    public List<ContestResponse> getContestsCurrentAccount() {
+        Account account = accountUtils.getCurrentAccount();
+        List<Contest> contests = contestRepository.findContestsByClub_Account(account);
+        List<ContestResponse> contestResponses = new ArrayList<>();
+        for(Contest contest:contests){
+            contestResponses.add(this.buildContestResponse(contest));
+        }
+        return contestResponses;
+    }
+
+    public List<ContestResponse> getAllContest(){
+        List<ContestResponse> contestResponses = new ArrayList<>();
+        List<Contest> contests = contestRepository.findAll();
+        for(Contest contest: contests){
+            contestResponses.add(this.buildContestResponse(contest));
+        }
+        return contestResponses;
+    }
+
+
 }
