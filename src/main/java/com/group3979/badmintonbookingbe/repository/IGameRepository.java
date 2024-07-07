@@ -11,4 +11,5 @@ import java.util.List;
 public interface IGameRepository extends JpaRepository<Game,Long> {
     List<Game> findGamesByContest(Contest contest);
     Game findGameByGameId(long gameId);
+    List<Game> findGamesByContest_ContestId(long contestId);
 }

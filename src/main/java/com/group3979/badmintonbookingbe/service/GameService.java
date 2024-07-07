@@ -4,11 +4,15 @@ import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Contest;
 import com.group3979.badmintonbookingbe.entity.Game;
 import com.group3979.badmintonbookingbe.entity.Registration;
+import com.group3979.badmintonbookingbe.model.request.GameTimeRequest;
+import com.group3979.badmintonbookingbe.model.response.GameResponse;
+import com.group3979.badmintonbookingbe.repository.ICourtSlotRepository;
 import com.group3979.badmintonbookingbe.repository.IGameRepository;
 import com.group3979.badmintonbookingbe.repository.IRegistrationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -19,6 +23,8 @@ public class GameService {
     IGameRepository gameRepository;
     @Autowired
     IRegistrationRepository registrationRepository;
+    @Autowired
+    ICourtSlotRepository courtSlotRepository;
 
     public void createMatchesContest(int capacity, Contest contest) {
         int gameNumber = 1;
@@ -101,4 +107,36 @@ public class GameService {
         int gamesInThisRound = capacity / (1 << currentRound);
         return gamesInPreviousRounds + gamesInThisRound + (gameNumber - gamesInPreviousRounds + 1) / 2;
     }
+    public GameResponse getGameById(long id){
+        return this.buildGameResponse(gameRepository.findGameByGameId(id));
+    }
+    public GameResponse updateGameCourtSlotAndPlayingDate(long id, GameTimeRequest gameTimeRequest){
+    Game game = gameRepository.findGameByGameId(id);
+    game.setPlayingDate(gameTimeRequest.getPlayingDate());
+    game.setCourtSlot(courtSlotRepository.findCourtSlotByCourtSlotId(gameTimeRequest.getCourtSlotId()));
+    game = gameRepository.save(game);
+    return this.buildGameResponse(game);
+    }
+    public GameResponse buildGameResponse(Game game){
+        return GameResponse.builder()
+                .playingDate(game.getPlayingDate())
+                .contestId(game.getContest().getContestId())
+                .firstPlayerId(game.getFirstPlayer().getId())
+                .secondPlayerId(game.getSecondPlayer().getId())
+                .gameId(game.getGameId())
+                .round(game.getRound())
+                .scoreFirstPlayer(game.getScoreFirstPlayer())
+                .scoreSecondPlayer(game.getScoreSecondPlayer())
+                .gameNumber(game.getGameNumber())
+                .build();
+    }
+    public List<GameResponse> getGamesByContestId(long contestId){
+        List<Game> games = gameRepository.findGamesByContest_ContestId(contestId);
+        List<GameResponse> gameResponses = new ArrayList<>();
+        for(Game game: games){
+            gameResponses.add(this.buildGameResponse(game));
+        }
+        return gameResponses;
+    }
+
 }
