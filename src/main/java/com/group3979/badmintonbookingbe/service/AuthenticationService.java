@@ -63,9 +63,8 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public List<AuthenticationResponse> getAllAccounts() {
-        List<Account> accounts = new ArrayList<>();
+        List<Account> accounts = authenticationRepository.findAll();
         List<AuthenticationResponse> authenticationResponses = new ArrayList<>();
-        accounts = authenticationRepository.findAll();
         for (Account account : accounts) {
             authenticationResponses.add(AuthenticationResponse.builder()
                     .accountId(account.getId())

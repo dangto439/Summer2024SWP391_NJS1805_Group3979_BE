@@ -10,8 +10,8 @@ public class FixedBookingRequest {
     private int year;
     private int month;
     private long clubId;
-    //if court = 0 -> any court
-    private long courtId;
+
+    private List<Long> courtIds;
     private String promotionCode;
     //Sunday: 1, Monday:2, Tuesday:3, Wednesday: 4, Thursday: 5, Friday:6, Saturday: 7
     private List<Integer> dayOfWeeks;

@@ -13,6 +13,7 @@ public class ContestResponse {
     private long contestId;
     private double participationPrice;
     private int capacity;
+    private String name;
     private double firstPrize;
     private double secondPrize;
     private LocalDate startDate;

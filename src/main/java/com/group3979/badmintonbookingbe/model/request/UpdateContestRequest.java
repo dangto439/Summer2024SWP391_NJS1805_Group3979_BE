@@ -7,13 +7,13 @@ import java.time.LocalDate;
 
 @Setter
 @Getter
-public class ContestRequest {
+public class UpdateContestRequest {
+    private long contestId;
+    private String name;
     private double participationPrice;
-    private int capacity;
     private double firstPrize;
     private double secondPrize;
     private LocalDate startDate;
     private long clubId;
     private String urlBanner;
-    private String name;
 }

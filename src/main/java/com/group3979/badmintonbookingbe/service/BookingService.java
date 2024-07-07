@@ -17,10 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +50,6 @@ public class BookingService {
     @Autowired
     IDiscountRuleRepository discountRuleRepository;
 
-    @Autowired
-    private ICourtRepository courtRepository;
 
     @Autowired
     private IBookingDetailRepository bookingDetailRepository;
@@ -75,17 +72,19 @@ public class BookingService {
             return bookingDetailService.createDailyBookingDetail(booking, dailyBookingRequest);
         }
     }
-    public List<BookingResponse> getFlexibleBookingCurrentAccount(){
+
+    public List<BookingResponse> getFlexibleBookingCurrentAccount() {
         Account currentAccount = accountUtils.getCurrentAccount();
         List<Booking> bookings = bookingRepository.findBookingByAccount(currentAccount);
         bookings.removeIf(booking -> !(booking.getBookingType().equals(BookingType.FLEXIBLEBOOKING)));
         bookings.removeIf(booking -> booking.getExpirationStatus().equals(ExpirationStatus.EXPIRED));
         List<BookingResponse> bookingResponses = new ArrayList<>();
-        for(Booking booking: bookings){
+        for (Booking booking : bookings) {
             bookingResponses.add(this.getBookingResponse(booking));
         }
         return bookingResponses;
     }
+
     public BookingResponse createFlexibleBooking(FlexibleBookingRequest flexibleBookingRequest) {
         Club club = clubRepository.findByClubId(flexibleBookingRequest.getClubId());
         Booking existedBooking = this.getFlexibleBooking(accountUtils.getCurrentAccount(), club);
@@ -219,32 +218,23 @@ public class BookingService {
     }
 
     public List<String> notifyFullSlot(FixedBookingRequest fixedBookingRequest) {
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        List<LocalDate> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
-                fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        List<LocalDate> playingDates = bookingDetailService.getAllDaysOfBooking(
+                fixedBookingRequest.getYear(),
+                fixedBookingRequest.getMonth(),
+                fixedBookingRequest.getDayOfWeeks()
+        );
         List<String> fullyBookeds = new ArrayList<>();
-        if (fixedBookingRequest.getCourtId() == 0) {
-            for (LocalDate playingDate : playingDates) {
-                for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                    //select courtSlot
-                    CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
-                    if (courtSlot == null) {
-                        String date = df.format(playingDate);
-                        String slots = String.format("Slot %dh tại sân này vào ngày %s đã hết", slotId, date);
-                        fullyBookeds.add(slots);
-                    }
-                }
-            }
-        } else {
-            for (LocalDate playingDate : playingDates) {
-                for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                    Court court = courtRepository.findByCourtId(fixedBookingRequest.getCourtId());
-                    CourtSlot courtSlot = bookingDetailService.selectCourtSlotOfCourt(fixedBookingRequest.getCourtId(), slotId, playingDate);
-                    if (courtSlot == null) {
-                        String date = df.format(playingDate);
-                        String slots = String.format("Slot %dh tại %s vào ngày %s đã hết", slotId, court.getCourtName(), date);
-                        fullyBookeds.add(slots);
-                    }
+        for (LocalDate playingDate : playingDates) {
+            for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                // Select courtSlot
+                CourtSlot courtSlot = bookingDetailService.selectCourtSlot(
+                        fixedBookingRequest.getCourtIds(), slotId, playingDate
+                );
+                if (courtSlot == null) {
+                    String date = dtf.format(playingDate);
+                    String slot = String.format("Slot %dh tại sân này vào ngày %s đã hết", slotId, date);
+                    fullyBookeds.add(slot);
                 }
             }
         }
@@ -254,28 +244,18 @@ public class BookingService {
         return fullyBookeds;
     }
 
+
     public double getPriceFixedBooking(FixedBookingRequest fixedBookingRequest) {
         List<LocalDate> playingDates = bookingDetailService.getAllDaysOfBooking(fixedBookingRequest.getYear(),
                 fixedBookingRequest.getMonth(), fixedBookingRequest.getDayOfWeeks());
         Promotion promotion =
                 promotionService.checkValidPromotion(fixedBookingRequest.getClubId(), fixedBookingRequest.getPromotionCode());
         double temporaryPrice = 0;
-        if (fixedBookingRequest.getCourtId() == 0) {
-            for (LocalDate playingDate : playingDates) {
-                for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                    CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getClubId(), slotId, playingDate);
-                    if (courtSlot != null) {
-                        temporaryPrice += courtSlot.getPrice();
-                    }
-                }
-            }
-        } else {
-            for (LocalDate playingDate : playingDates) {
-                for (Long slotId : fixedBookingRequest.getSlotIds()) {
-                    CourtSlot courtSlot = bookingDetailService.selectCourtSlotOfCourt(fixedBookingRequest.getCourtId(), slotId, playingDate);
-                    if (courtSlot != null) {
-                        temporaryPrice += courtSlot.getPrice();
-                    }
+        for (LocalDate playingDate : playingDates) {
+            for (Long slotId : fixedBookingRequest.getSlotIds()) {
+                CourtSlot courtSlot = bookingDetailService.selectCourtSlot(fixedBookingRequest.getCourtIds(), slotId, playingDate);
+                if (courtSlot != null) {
+                    temporaryPrice += courtSlot.getPrice();
                 }
             }
         }
@@ -296,24 +276,25 @@ public class BookingService {
     public List<BookingResponse> getBookingByClubId(long id) {
         List<BookingResponse> bookingResponses = new ArrayList<>();
         List<Booking> bookings = bookingRepository.findBookingByClub_ClubId(id);
-        for(Booking booking: bookings){
+        for (Booking booking : bookings) {
             bookingResponses.add(this.getBookingResponse(booking));
         }
         return bookingResponses;
     }
-    public BookingResponse cancelBookingClubId(long bookingId){
+
+    public BookingResponse cancelBookingClubId(long bookingId) {
         Booking booking = bookingRepository.findByBookingId(bookingId);
-        if(booking != null){
+        if (booking != null) {
             booking.setBookingStatus(BookingStatus.CANCEL);
-             booking = bookingRepository.save(booking);
+            booking = bookingRepository.save(booking);
             List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(bookingId);
 
-            for(BookingDetail bookingDetail:bookingDetails){
+            for (BookingDetail bookingDetail : bookingDetails) {
                 bookingDetail.setStatus(BookingDetailStatus.CANCEL);
             }
             bookingDetailRepository.saveAll(bookingDetails);
             return this.getBookingResponse(booking);
-        }else {
+        } else {
             throw new CustomException("Booking không tồn tại");
         }
     }
