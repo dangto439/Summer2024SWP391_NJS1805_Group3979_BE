@@ -37,9 +37,12 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
             "FROM CourtSlot a \n" +
             "WHERE a.slot = :slot \n" +
             "AND a.court = :court \n" +
-            "AND a IN (SELECT b.courtSlot\n" +
+            "AND( a IN (SELECT b.courtSlot\n" +
             "FROM BookingDetail b\n" +
-            "WHERE b.status = 'UNFINISHED' AND b.playingDate =:playingDate )")
+            "WHERE b.status = 'UNFINISHED' AND b.playingDate =:playingDate )\n" +
+            "OR  a IN (SELECT b.courtSlot \n" +
+            "FROM Game b \n" +
+            "WHERE b.playingDate =:playingDate ))")
     CourtSlot findCourtSlotByPlayingDateAndSlot(@Param("playingDate") LocalDate playingDate,
                                                       @Param("court") Court court, @Param("slot") Slot slot);
     @Query("SELECT a \n" +
@@ -48,8 +51,16 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
             "AND a IN (SELECT b.courtSlot\n" +
             "FROM BookingDetail b\n" +
             "WHERE b.status = 'UNFINISHED' AND b.playingDate =:playingDate )")
-    List<CourtSlot> findCourtSlotByPlayingDate(@Param("playingDate") LocalDate playingDate,
-                                                @Param("court") Court court);
+    List<CourtSlot> findCourtSlotByPlayingDateInBookingDetail(@Param("playingDate") LocalDate playingDate,
+                                                              @Param("court") Court court);
+    @Query("SELECT a \n" +
+            "FROM CourtSlot a \n" +
+            "WHERE a.court = :court \n" +
+            "AND a IN (SELECT b.courtSlot\n" +
+            "FROM Game b\n" +
+            "WHERE b.playingDate =:playingDate )")
+    List<CourtSlot> findCourtSlotByPlayingDateInGame(@Param("playingDate") LocalDate playingDate,
+                                               @Param("court") Court court);
 }
 
 
