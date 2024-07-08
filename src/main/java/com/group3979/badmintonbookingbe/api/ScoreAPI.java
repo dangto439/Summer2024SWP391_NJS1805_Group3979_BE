@@ -31,9 +31,9 @@ public class ScoreAPI {
         return ResponseEntity.ok(scoreResponse);
     }
 
-    @PutMapping("/score")
-    public ResponseEntity<List<ScoreResponse>> updateScore(@RequestBody List<ScoreUpdateRequest> scoreUpdateRequest) {
-        List<ScoreResponse> updatedScore = scoreService.updateScore(scoreUpdateRequest);
+    @PutMapping("/score/{gameId}")
+    public ResponseEntity<List<ScoreResponse>> updateScore(@PathVariable long gameId,@RequestBody List<ScoreUpdateRequest> scoreUpdateRequests) {
+        List<ScoreResponse> updatedScore = scoreService.updateScore(gameId, scoreUpdateRequests);
         return ResponseEntity.ok(updatedScore);
     }
 }
