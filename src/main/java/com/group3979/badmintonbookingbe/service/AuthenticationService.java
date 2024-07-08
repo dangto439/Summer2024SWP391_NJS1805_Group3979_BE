@@ -337,18 +337,18 @@ public class AuthenticationService implements UserDetailsService {
         return authenticationRepository.findAccountById(id);
     }
 
-    public Account UpdateAccount(AuthenticationResponse accountResponse, String password) {
-        Account account = authenticationRepository.findAccountById(accountResponse.getAccountId());
+    public Account updateAccount(UpdateAccountRequest updateAccountRequest) {
+        Account account = authenticationRepository.findAccountById(updateAccountRequest.getAccountId());
 
-        account.setAvatar(accountResponse.getAvatar());
-        account.setAccountStatus(accountResponse.getAccountStatus());
-        account.setPhone(accountResponse.getPhone());
-        account.setEmail(accountResponse.getEmail());
-        account.setName(accountResponse.getName());
-        account.setRole(accountResponse.getRole());
-        account.setGender(accountResponse.getGender());
-        if (!password.isEmpty()) {
-            account.setPassword(passwordEncoder.encode(password));
+        account.setAvatar(updateAccountRequest.getAvatar());
+        account.setAccountStatus(updateAccountRequest.getAccountStatus());
+        account.setPhone(updateAccountRequest.getPhone());
+        account.setEmail(updateAccountRequest.getEmail());
+        account.setName(updateAccountRequest.getName());
+        account.setRole(updateAccountRequest.getRole());
+        account.setGender(updateAccountRequest.getGender());
+        if (!updateAccountRequest.getPassword().isEmpty()) {
+            account.setPassword(passwordEncoder.encode(updateAccountRequest.getPassword()));
         }
         return authenticationRepository.save(account);
     }

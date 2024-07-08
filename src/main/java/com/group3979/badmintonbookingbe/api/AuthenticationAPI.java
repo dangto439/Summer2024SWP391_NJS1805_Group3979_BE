@@ -82,8 +82,8 @@ public class AuthenticationAPI {
     }
 
     @PutMapping("/update-account-admin")
-    public Account updateAccountAdmin(@RequestBody AuthenticationResponse accountResponse, String password) {
-        Account account = authenticationService.UpdateAccount(accountResponse, password);
+    public Account updateAccountAdmin(@RequestBody UpdateAccountRequest updateAccountRequest) {
+        Account account = authenticationService.updateAccount(updateAccountRequest);
         return account;
     }
 
