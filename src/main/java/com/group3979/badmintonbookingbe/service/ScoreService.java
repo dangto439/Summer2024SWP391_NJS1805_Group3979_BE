@@ -98,6 +98,12 @@ public class ScoreService {
             scoreRepository.removeBySetNumberAndGame(SetNumber.THIRDSET, game);
             // after remove, update scoreList
             scoreList = scoreRepository.findScoresByGame(game);
+        }else if(scoreList.size() == 2 && scoreUpdateRequests.size() == 3) {
+            Score thirdScore = new Score();
+            thirdScore.setSetNumber(SetNumber.THIRDSET);
+            thirdScore.setGame(game);
+            scoreRepository.save(thirdScore);
+            scoreList = scoreRepository.findScoresByGame(game);
         }
 
         List<ScoreResponse> scoreResponseList = new ArrayList<>();
@@ -106,6 +112,7 @@ public class ScoreService {
 
         for (int i = 0; i < scoreUpdateRequests.size(); i++) {
             ScoreUpdateRequest scoreUpdateRequest = scoreUpdateRequests.get(i);
+
             Score score = scoreList.get(i);
 
             score.setFirstPlayerSetScore(scoreUpdateRequest.getFirstPlayerSetScore());
