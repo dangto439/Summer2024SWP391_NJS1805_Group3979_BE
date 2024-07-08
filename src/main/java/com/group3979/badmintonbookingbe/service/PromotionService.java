@@ -12,11 +12,11 @@ import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
+
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import java.util.List;
-import java.util.TimeZone;
 
 
 @Service
@@ -32,8 +32,7 @@ public class PromotionService {
 
     public PromotionResponse createPromotion(Long clubId, PromotionRequest promotionRequest) {
         //Format Date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         Promotion promotion = new Promotion();
         promotion.setPromotionCode(promotionRequest.getPromotionCode());
@@ -63,8 +62,7 @@ public class PromotionService {
         List<PromotionResponse> promotionResponseList = new ArrayList<>();
 
         //Format Date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         for (Promotion promotion : promotionList) {
             PromotionResponse promotionResponse = PromotionResponse.builder()
@@ -83,8 +81,7 @@ public class PromotionService {
 
     public PromotionResponse updatePromotion(Long promotionId, PromotionRequest promotionRequest) {
         //Format Date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         Promotion promotion = promotionRepository.findByPromotionId(promotionId);
         if (promotion != null) {

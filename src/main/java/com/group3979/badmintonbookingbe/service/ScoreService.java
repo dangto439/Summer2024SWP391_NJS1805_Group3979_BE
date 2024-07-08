@@ -11,6 +11,7 @@ import com.group3979.badmintonbookingbe.repository.IGameRepository;
 import com.group3979.badmintonbookingbe.repository.IScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class ScoreService {
     @Autowired
     GameService gameService;
 
+    @Transactional
     // CREATE - tao ra Score cho 1 tran dau
     public List<ScoreResponse> createScore(List<ScoreRequest> scoreRequests) {
         List<ScoreResponse> scores = new ArrayList<>();
@@ -31,7 +33,7 @@ public class ScoreService {
         int temp = 1; // temp
         int finalFirstPlayer = 0;
         int finalSecondPlayer = 0;
-        for(ScoreRequest scoreRequest : scoreRequests) {
+        for (ScoreRequest scoreRequest : scoreRequests) {
             Game game = gameRepository.findById(scoreRequest.getGameId()).get();
             if (game == null) {
                 throw new CustomException("Không tìm thấy trận đấu với ID: " + scoreRequest.getGameId());
@@ -40,11 +42,11 @@ public class ScoreService {
             Score score = new Score();
             score.setGame(game);
 
-            if(temp == 1){
+            if (temp == 1) {
                 score.setSetNumber(SetNumber.FIRSTSET);
-            }else if(temp == 2){
+            } else if (temp == 2) {
                 score.setSetNumber(SetNumber.SECONDSET);
-            }else{
+            } else {
                 score.setSetNumber(SetNumber.THIRDSET);
             }
             temp++;
@@ -53,9 +55,9 @@ public class ScoreService {
             score.setSecondPlayerSetScore(scoreRequest.getSecondPlayerSetScore());
 
 
-            if(scoreRequest.getFirstPlayerSetScore() > scoreRequest.getSecondPlayerSetScore()){
+            if (scoreRequest.getFirstPlayerSetScore() > scoreRequest.getSecondPlayerSetScore()) {
                 finalFirstPlayer += 1;
-            }else {
+            } else {
                 finalSecondPlayer += 1;
             }
 
@@ -82,19 +84,44 @@ public class ScoreService {
         return scoreResponseList;
     }
 
+    @Transactional
     // UPDATE - update khi nao ghi diem(create) sai thoi
-    public List<ScoreResponse> updateScore(List<ScoreUpdateRequest> scoreUpdateRequestList) {
-        List<ScoreResponse> scoreResponseList = new ArrayList<>();
-        for(ScoreUpdateRequest scoreUpdateRequest : scoreUpdateRequestList) {
-            Score score = scoreRepository.findById(scoreUpdateRequest.getScoreId()).orElseThrow(() ->
-                    new RuntimeException("Không tìm thấy điểm số với id " + scoreUpdateRequest.getScoreId()));
+    public List<ScoreResponse> updateScore(long gameId, List<ScoreUpdateRequest> scoreUpdateRequests) {
+        // find Game
+        Game game = gameRepository.findGameByGameId(gameId);
+        if (game == null) {
+            throw new RuntimeException("Không tìm thấy trận đấu với id " + gameId);
+        }
 
-            score.setFirstPlayerSetScore(scoreUpdateRequest.getFirstPlayerScore());
-            score.setSecondPlayerSetScore(scoreUpdateRequest.getSecondPlayerScore());
+        List<Score> scoreList = scoreRepository.findScoresByGame(game);
+        if (scoreList.size() == 3 && scoreUpdateRequests.size() == 2) {
+            scoreRepository.removeBySetNumberAndGame(SetNumber.THIRDSET, game);
+            // after remove, update scoreList
+            scoreList = scoreRepository.findScoresByGame(game);
+        }
+
+        List<ScoreResponse> scoreResponseList = new ArrayList<>();
+        int finalFirstPlayer = 0;
+        int finalSecondPlayer = 0;
+
+        for (int i = 0; i < scoreUpdateRequests.size(); i++) {
+            ScoreUpdateRequest scoreUpdateRequest = scoreUpdateRequests.get(i);
+            Score score = scoreList.get(i);
+
+            score.setFirstPlayerSetScore(scoreUpdateRequest.getFirstPlayerSetScore());
+            score.setSecondPlayerSetScore(scoreUpdateRequest.getSecondPlayerSetScore());
+
+            if (scoreUpdateRequest.getFirstPlayerSetScore() > scoreUpdateRequest.getSecondPlayerSetScore()) {
+                finalFirstPlayer += 1;
+            } else {
+                finalSecondPlayer += 1;
+            }
 
             score = scoreRepository.save(score);
             scoreResponseList.add(buildScoreResponse(score));
         }
+
+        gameService.updateScore(finalFirstPlayer, finalSecondPlayer, game);
         return scoreResponseList;
     }
 

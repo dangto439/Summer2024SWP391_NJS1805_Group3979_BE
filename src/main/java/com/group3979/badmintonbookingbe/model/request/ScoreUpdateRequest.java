@@ -3,10 +3,9 @@ package com.group3979.badmintonbookingbe.model.request;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 public class ScoreUpdateRequest {
-    private long scoreId;
-    private int firstPlayerScore;
-    private int secondPlayerScore;
+    private int firstPlayerSetScore;
+    private int secondPlayerSetScore;
 }
