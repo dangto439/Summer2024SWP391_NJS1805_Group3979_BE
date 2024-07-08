@@ -319,12 +319,14 @@ public class WalletService {
         clubOwnerWallet.setBalance(clubOwnerBalance);
         platformWallet.setBalance(platformBalance);
 
+        // Create & Save Transaction  cho Sender
+        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+                senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
         // Create & Save Transaction  cho Platform and ClubOwner
         transactionService.createTransactionV2(transferRequest.getBookingId(), amountReceivedOfOwner,
                 senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.RECEIVE);
         transactionService.createTransactionV2(transferRequest.getBookingId(), amountReceivedOfPlatform,
                 senderWallet.getWalletId(), platformWallet.getWalletId(), TransactionType.RECEIVE);
-
         // Save Wallet
         walletRepository.save(senderWallet);
         walletRepository.save(clubOwnerWallet);
