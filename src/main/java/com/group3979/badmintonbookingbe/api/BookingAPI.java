@@ -6,7 +6,7 @@ import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.model.response.CheckedBookingDetailResponse;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.service.BookingDetailService;
 import com.group3979.badmintonbookingbe.service.BookingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -103,7 +103,7 @@ public class BookingAPI {
         return ResponseEntity.ok().body(bookingDetailResponse);
     }
     @GetMapping("/dashboard-admin-bar-chart/{year}")
-    public List<revenueResponse> getRevenueResponse(@PathVariable int year) {
+    public List<RevenueResponse> getRevenueResponse(@PathVariable int year) {
         return bookingService.getRevenueBookingResponse(year);
     }
 }

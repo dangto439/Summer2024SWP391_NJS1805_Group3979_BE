@@ -231,6 +231,7 @@ public class BookingDetailService {
                 .bookingDetailId(bookingDetail.getBookingDetailId())
                 .checkInCode(bookingDetail.getCheckInCode())
                 .price(bookingDetail.getPrice())
+                .courtName(bookingDetail.getCourtSlot().getCourt().getCourtName())
                 .timeSlot(bookingDetail.getCourtSlot().getSlot().getTime())
                 .status(bookingDetail.getStatus())
                 .CourtSlotId(bookingDetail.getCourtSlot().getCourtSlotId())

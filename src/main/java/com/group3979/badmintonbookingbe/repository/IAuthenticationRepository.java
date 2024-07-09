@@ -2,7 +2,7 @@ package com.group3979.badmintonbookingbe.repository;
 
 import com.group3979.badmintonbookingbe.eNum.Role;
 import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,12 +22,12 @@ public interface IAuthenticationRepository extends JpaRepository<Account, Long> 
     List<Account> findClubStaffByClub(Club club);
 
 
-    @Query("SELECT new com.group3979.badmintonbookingbe.model.response.revenueResponse(MONTH(a.signupDate), COUNT(a.id)) " +
+    @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(a.signupDate), COUNT(a.id)) " +
             "FROM Account a " +
             "WHERE YEAR(a.signupDate) = :year " +
             "GROUP BY MONTH(a.signupDate) " +
             "ORDER BY MONTH(a.signupDate)")
-    List<revenueResponse> countSignupsByMonthForYear(@Param("year") int year);
+    List<RevenueResponse> countSignupsByMonthForYear(@Param("year") int year);
 
 
 }

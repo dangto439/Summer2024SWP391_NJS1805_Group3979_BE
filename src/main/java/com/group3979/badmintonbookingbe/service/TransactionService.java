@@ -7,7 +7,7 @@ import com.group3979.badmintonbookingbe.entity.Wallet;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.TransactionRequest;
 import com.group3979.badmintonbookingbe.model.response.TransactionResponse;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
 import com.group3979.badmintonbookingbe.repository.IBookingRepository;
 import com.group3979.badmintonbookingbe.repository.ITransactionRepository;
@@ -200,11 +200,11 @@ public class TransactionService {
 
 
     //phan thong ke
-    public List<revenueResponse> getRevenueResponse(int year) {
+    public List<RevenueResponse> getRevenueResponse(int year) {
         return transactionRepository.findRevenueResponseByYear(year);
     }
 
-    public List<revenueResponse> getRevenueResponse(int year, int month) {
+    public List<RevenueResponse> getRevenueResponse(int year, int month) {
         return transactionRepository.findWeeklyRevenueByMonthAndYear(year, month);
     }
 }
