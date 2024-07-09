@@ -10,7 +10,7 @@ import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +107,7 @@ public class BookingService {
                 double discountPrice = temporaryPrice *
                         (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent() / 100);
                 if (promotion != null) {
-                    discountPrice = promotion.getDiscount();
+                    discountPrice += promotion.getDiscount();
                     totalPrice = temporaryPrice - discountPrice;
                 } else {
                     totalPrice = temporaryPrice - discountPrice;
@@ -269,7 +269,7 @@ public class BookingService {
         }
     }
 
-    public List<revenueResponse> getRevenueBookingResponse(int year) {
+    public List<RevenueResponse> getRevenueBookingResponse(int year) {
         return bookingRepository.findRevenueResponseBookingByYear(year);
     }
 

@@ -2,8 +2,7 @@ package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
-import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.service.EmailService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +87,7 @@ public class AuthenticationAPI {
     }
 
     @GetMapping("/dashboard-admin-tiny-chart/{year}")
-    public List<revenueResponse> getRevenueResponse(@PathVariable int year) {
+    public List<RevenueResponse> getRevenueResponse(@PathVariable int year) {
         return authenticationService.getRevenueResponse(year);
     }
 }

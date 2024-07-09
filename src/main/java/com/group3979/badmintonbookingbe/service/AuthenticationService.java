@@ -11,7 +11,7 @@ import com.group3979.badmintonbookingbe.model.request.*;
 import com.group3979.badmintonbookingbe.model.response.AccountResponse;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.StaffResponse;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.apache.coyote.BadRequestException;
@@ -354,7 +354,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     //thong ke account cho admin
-    public List<revenueResponse> getRevenueResponse(int year) {
+    public List<RevenueResponse> getRevenueResponse(int year) {
         return authenticationRepository.countSignupsByMonthForYear(year);
     }
 }

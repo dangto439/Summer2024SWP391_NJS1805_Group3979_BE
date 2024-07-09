@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class revenueResponse {
+public class RevenueResponse {
     private int month;
     private double sumamount;
 }

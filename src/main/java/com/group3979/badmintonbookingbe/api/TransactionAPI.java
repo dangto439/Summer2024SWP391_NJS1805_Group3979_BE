@@ -2,8 +2,7 @@ package com.group3979.badmintonbookingbe.api;
 
 import com.group3979.badmintonbookingbe.eNum.TransactionType;
 import com.group3979.badmintonbookingbe.model.request.TransactionRequest;
-import com.group3979.badmintonbookingbe.model.response.TransactionResponse;
-import com.group3979.badmintonbookingbe.model.response.revenueResponse;
+import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.service.TransactionService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -48,12 +46,12 @@ public class TransactionAPI {
     }
 
     @GetMapping("/dashboard-admin-area-chart/{year}")
-    public List<revenueResponse> getRevenueResponse(@PathVariable int year) {
+    public List<RevenueResponse> getRevenueResponse(@PathVariable int year) {
         return transactionService.getRevenueResponse(year);
     }
 
     @GetMapping("/dashboard-admin-area-chart/{year}/{month}")
-    public List<revenueResponse> getRevenueResponse(@PathVariable int year, @PathVariable int month) {
+    public List<RevenueResponse> getRevenueResponse(@PathVariable int year, @PathVariable int month) {
         return transactionService.getRevenueResponse(year, month);
     }
 }

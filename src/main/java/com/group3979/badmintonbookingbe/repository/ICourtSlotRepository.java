@@ -40,7 +40,7 @@ public interface ICourtSlotRepository extends JpaRepository<CourtSlot, Long> {
             "AND( a IN (SELECT b.courtSlot\n" +
             "FROM BookingDetail b\n" +
             "WHERE b.status = 'UNFINISHED' AND b.playingDate =:playingDate )\n" +
-            "OR  a IN (SELECT b.courtSlot \n" +
+            "OR a IN (SELECT b.courtSlot \n" +
             "FROM Game b \n" +
             "WHERE b.playingDate =:playingDate ))")
     CourtSlot findCourtSlotByPlayingDateAndSlot(@Param("playingDate") LocalDate playingDate,
