@@ -9,6 +9,7 @@ import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
+import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.repository.*;
@@ -142,8 +143,14 @@ public class BookingService {
     }
 
     public BookingResponse getBookingResponse(Booking booking, double temporaryPrice, double discountPrice) {
+        List<BookingDetailResponse> bookingDetailResponseList = new ArrayList<>();
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(booking.getBookingId());
+        for(BookingDetail bookingDetail:bookingDetails){
+            bookingDetailResponseList.add(bookingDetailService.getBookingDetailResponse(bookingDetail));
+        }
         BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
                 .bookingDate(booking.getBookingDate())
+                .bookingDetailResponseList(bookingDetailResponseList)
                 .bookingId(booking.getBookingId())
                 .amountTime(booking.getAmountTime())
                 .totalPrice(booking.getTotalPrice())
@@ -160,9 +167,15 @@ public class BookingService {
     }
 
     public BookingResponse getBookingResponse(Booking booking) {
+        List<BookingDetailResponse> bookingDetailResponseList = new ArrayList<>();
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(booking.getBookingId());
+        for(BookingDetail bookingDetail:bookingDetails){
+            bookingDetailResponseList.add(bookingDetailService.getBookingDetailResponse(bookingDetail));
+        }
         BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
                 .bookingDate(booking.getBookingDate())
                 .bookingId(booking.getBookingId())
+                .bookingDetailResponseList(bookingDetailResponseList)
                 .amountTime(booking.getAmountTime())
                 .totalPrice(booking.getTotalPrice())
                 .ClubId(booking.getClub().getClubId())
