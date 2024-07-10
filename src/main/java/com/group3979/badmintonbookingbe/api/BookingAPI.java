@@ -49,7 +49,7 @@ public class BookingAPI {
         List<BookingResponse> responses = bookingService.getBookingResponseCurrentAccount();
         return ResponseEntity.ok().body(responses);
     }
-    @PutMapping("/booking/{bookingId}")
+    @DeleteMapping("/booking/{bookingId}")
     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable long bookingId){
         BookingResponse bookingResponse = bookingService.cancelBookingClubId(bookingId);
         return ResponseEntity.ok(bookingResponse);
