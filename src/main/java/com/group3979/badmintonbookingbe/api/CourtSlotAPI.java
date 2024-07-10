@@ -46,13 +46,6 @@ public class CourtSlotAPI {
         List<CourtSlotResponse> courtSlotList = courtSlotService.updateCourtSlot(clubId, courtSlotRequest);
         return ResponseEntity.ok(courtSlotList);
     }
-    @GetMapping("/court-slot/exist")
-    public ResponseEntity existCourtSlot(@RequestParam String date, @RequestParam long courtId) throws DateTimeParseException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate localDate = LocalDate.parse(date, formatter);
-        List<CourtSlotResponse> courtSlotList = courtSlotService.existCourtSlotInADay(localDate,courtId);
-        return ResponseEntity.ok(courtSlotList);
-    }
     @GetMapping("/club/slots")
     public ResponseEntity<List<Slot>> getSlotByClubId(@RequestParam long clubId)  {
         List<Slot> slots = slotService.getSlotByClubId(clubId);
@@ -65,6 +58,13 @@ public class CourtSlotAPI {
         LocalDate localDate = LocalDate.parse(date, formatter);;
 
         List<CourtSlotStatusResponse> courtSlotList = courtSlotService.getCourtSlotByCourtId(localDate,courtId);
+        return ResponseEntity.ok(courtSlotList);
+    }
+    @GetMapping("/court-slot/exist")
+    public ResponseEntity existCourtSlot(@RequestParam String date, @RequestParam long courtId) throws DateTimeParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(date, formatter);
+        List<CourtSlotResponse> courtSlotList = courtSlotService.existCourtSlotInADay(localDate,courtId);
         return ResponseEntity.ok(courtSlotList);
     }
 }

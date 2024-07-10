@@ -14,6 +14,7 @@ public class UpdateContestRequest {
     private double firstPrize;
     private double secondPrize;
     private LocalDate startDate;
+    private LocalDate endDate;
     private long clubId;
     private String urlBanner;
 }

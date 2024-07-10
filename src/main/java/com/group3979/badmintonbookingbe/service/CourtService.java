@@ -79,14 +79,19 @@ public class CourtService {
         return courtResponse;
     }
 
-    public boolean inactiveCourtStatus(long id) {
+    public CourtResponse changeCourtStatus(long id) {
         Court court = courtRepository.findByCourtId(id);
         if (court != null) {
-            court.setCourtStatus(CourtStatus.INACTIVE);
-            courtRepository.save(court);
-            return true;
+            if(court.getCourtStatus().equals(CourtStatus.ACTIVE)){
+                court.setCourtStatus(CourtStatus.INACTIVE);
+                courtRepository.save(court);
+            }else {
+                court.setCourtStatus(CourtStatus.ACTIVE);
+                courtRepository.save(court);
+            }
+            return this.buildCourtResponse(court);
         }
-        return false;
+        return null;
     }
     public CourtResponse changeCourtStatus(CourtRequest courtRequest){
             Court court = courtRepository.findByCourtId(courtRequest.getCourtId());
@@ -97,6 +102,11 @@ public class CourtService {
             courtResponse.setCourtName(court.getCourtName());
             courtResponse.setCourtStatus(court.getCourtStatus());
             return courtResponse;
+    }
+    public CourtResponse buildCourtResponse(Court court){
+        return CourtResponse.builder().courtId(court.getCourtId())
+                .courtStatus(court.getCourtStatus())
+                .courtName(court.getCourtName()).build();
     }
 
     public List<Court> getAllCourt () {

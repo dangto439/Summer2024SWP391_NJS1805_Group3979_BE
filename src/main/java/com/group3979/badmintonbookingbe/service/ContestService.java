@@ -55,6 +55,7 @@ public class ContestService {
         if (club != null) {
             if (contest != null) {
                 contest.setClub(club);
+                contest.setEndDate(updateContestRequest.getEndDate());
                 contest.setFirstPrize(updateContestRequest.getFirstPrize());
                 contest.setSecondPrize(updateContestRequest.getSecondPrize());
                 contest.setUrlBanner(updateContestRequest.getUrlBanner());
@@ -78,6 +79,7 @@ public class ContestService {
 
     public ContestResponse buildContestResponse(Contest contest) {
         return ContestResponse.builder()
+                .endDate(contest.getEndDate())
                 .clubId(contest.getClub().getClubId())
                 .contestId(contest.getContestId())
                 .firstPrize(contest.getFirstPrize())
