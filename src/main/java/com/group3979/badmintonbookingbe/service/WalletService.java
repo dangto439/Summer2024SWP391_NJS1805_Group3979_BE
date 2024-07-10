@@ -173,6 +173,24 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
+    // Find Wallet By Email
+    public WalletResponse getWalletByEmail(String email) throws NotFoundException {
+        Account user = authenticationRepository.findAccountByEmail(email);
+        if (user == null) {
+            throw new NotFoundException("Không tìm thấy tài khoản với email: " + email);
+        }
+
+        Wallet wallet = walletRepository.findWalletByAccount(user);
+        if (wallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản với ID: " + user.getId());
+        }
+
+        return WalletResponse.builder()
+                .walletId(wallet.getWalletId())
+                .balance(wallet.getBalance())
+                .build();
+    }
+
     // Find Wallet By AccountId(just input AccountID of User - find the Wallet)
     public WalletResponse getWalletById(Long accountId) throws NotFoundException {
         Account user = authenticationRepository.findAccountById(accountId);
