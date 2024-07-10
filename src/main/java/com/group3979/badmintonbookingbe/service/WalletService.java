@@ -1,13 +1,11 @@
 package com.group3979.badmintonbookingbe.service;
 
+import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.TransactionType;
-import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.entity.Transaction;
+import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
 import com.group3979.badmintonbookingbe.model.request.TransferRequest;
-import com.group3979.badmintonbookingbe.repository.IClubRepository;
-import com.group3979.badmintonbookingbe.repository.ITransactionRepository;
+import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +23,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import com.group3979.badmintonbookingbe.entity.Wallet;
 import com.group3979.badmintonbookingbe.model.response.WalletResponse;
-import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
-import com.group3979.badmintonbookingbe.repository.IWalletRepository;
 import javassist.NotFoundException;
 
 
@@ -36,10 +31,8 @@ import javassist.NotFoundException;
 public class WalletService {
     @Autowired
     AccountUtils accountUtils;
-
     @Autowired
     IAuthenticationRepository authenticationRepository;
-
     @Autowired
     IWalletRepository walletRepository;
     @Autowired
@@ -48,6 +41,8 @@ public class WalletService {
     ITransactionRepository transactionRepository;
     @Autowired
     IClubRepository clubRepository;
+    @Autowired
+    IBookingRepository bookingRepository;
 
     @Value("${fee.default.percent}")
     private double feePercentOfPlatform;
@@ -337,7 +332,7 @@ public class WalletService {
         clubOwnerWallet.setBalance(clubOwnerBalance);
         platformWallet.setBalance(platformBalance);
 
-        // Create & Save Transaction  cho Sender
+        // Create & Save Transaction cho Sender
         transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
                 senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
         // Create & Save Transaction  cho Platform and ClubOwner
@@ -349,6 +344,14 @@ public class WalletService {
         walletRepository.save(senderWallet);
         walletRepository.save(clubOwnerWallet);
         walletRepository.save(platformWallet);
+
+        // after success payment - set BookingStatus(PENDING -> CONFIRMED)
+        Booking bookingNeedToUpdate = bookingRepository.findByBookingId(transferRequest.getBookingId());
+        if (bookingNeedToUpdate == null) {
+            throw new NotFoundException("Không tìm thấy đơn đặt lịch với ID: " + transferRequest.getBookingId());
+        }
+        bookingNeedToUpdate.setBookingStatus(BookingStatus.CONFIRMED);
+        bookingRepository.save(bookingNeedToUpdate);
     }
 
     //  Chuyen tien tu mot vi den vi khac (Transfer)
