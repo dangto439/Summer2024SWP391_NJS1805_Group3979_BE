@@ -69,6 +69,7 @@ public class BookingService {
             booking.setBookingDate(localDateTime);
             booking.setBookingType(BookingType.DAILYBOOKING);
             booking.setClub(club);
+            booking.setBookingStatus(BookingStatus.PENDING);
             booking = bookingRepository.save(booking);
             return bookingDetailService.createDailyBookingDetail(booking, dailyBookingRequest);
         }
@@ -104,6 +105,7 @@ public class BookingService {
                 flexibleBooking.setClub(club);
                 flexibleBooking.setExpirationStatus(ExpirationStatus.UNEXPIRED);
                 flexibleBooking.setBookingType(BookingType.FLEXIBLEBOOKING);
+                flexibleBooking.setBookingStatus(BookingStatus.PENDING);
                 double totalPrice;
                 double discountPrice = temporaryPrice *
                         (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent() / 100);
@@ -135,6 +137,7 @@ public class BookingService {
             fixedBooking.setBookingType(BookingType.FIXEDBOOKING);
             LocalDateTime localDateTime = LocalDateTime.now();
             fixedBooking.setBookingDate(localDateTime);
+            fixedBooking.setBookingStatus(BookingStatus.PENDING);
             fixedBooking = bookingRepository.save(fixedBooking);
             return bookingDetailService.createFixedBookingDetail(fixedBooking, fixedBookingRequest);
         } else {
