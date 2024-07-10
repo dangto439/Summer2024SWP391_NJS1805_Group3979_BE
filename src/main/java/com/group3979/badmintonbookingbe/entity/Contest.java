@@ -35,6 +35,7 @@ public class Contest {
     private String urlBanner;
 
     private LocalDate startDate;
+    private LocalDate endDate;
     @Enumerated(EnumType.STRING)
     private ContestStatus contestStatus;
 
