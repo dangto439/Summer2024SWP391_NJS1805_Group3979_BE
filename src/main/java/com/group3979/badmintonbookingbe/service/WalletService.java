@@ -344,6 +344,14 @@ public class WalletService {
         walletRepository.save(senderWallet);
         walletRepository.save(clubOwnerWallet);
         walletRepository.save(platformWallet);
+
+        // after success payment - set BookingStatus(PENDING -> CONFIRMED)
+        Booking bookingNeedToUpdate = bookingRepository.findByBookingId(transferRequest.getBookingId());
+        if (bookingNeedToUpdate == null) {
+            throw new NotFoundException("Không tìm thấy đơn đặt lịch với ID: " + transferRequest.getBookingId());
+        }
+        bookingNeedToUpdate.setBookingStatus(BookingStatus.CONFIRMED);
+        bookingRepository.save(bookingNeedToUpdate);
     }
 
     //  Chuyen tien tu mot vi den vi khac (Transfer)
@@ -373,13 +381,5 @@ public class WalletService {
 
         senderWallet = walletRepository.save(senderWallet);
         receiverWallet = walletRepository.save(receiverWallet);
-
-        // after success payment - set BookingStatus(PENDING -> CONFIRMED)
-        Booking bookingNeedToUpdate = bookingRepository.findByBookingId(transferRequest.getBookingId());
-        if (bookingNeedToUpdate == null) {
-            throw new NotFoundException("Không tìm thấy đơn đặt lịch với ID: " + transferRequest.getBookingId());
-        }
-        bookingNeedToUpdate.setBookingStatus(BookingStatus.CONFIRMED);
-        bookingRepository.save(bookingNeedToUpdate);
     }
 }
