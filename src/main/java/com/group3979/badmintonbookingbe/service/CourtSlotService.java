@@ -27,11 +27,6 @@ public class CourtSlotService {
     IClubRepository clubRepository;
     @Autowired
     ISlotRepository slotRepository;
-    @Autowired
-    private GameService gameService;
-    @Autowired
-    private IGameRepository gameRepository;
-
 
     public void createEachCourtSlot(Club club, Court newCourt) {
         Court court = courtRepository.findByClub(club).get(0);
@@ -173,7 +168,6 @@ public class CourtSlotService {
             throw new CustomException("Sân không tồn tại");
         }
     }
-
 
     public CourtSlotResponse getCourtSlotResponse(CourtSlot courtSlot) {
         Court court = courtSlot.getCourt();
