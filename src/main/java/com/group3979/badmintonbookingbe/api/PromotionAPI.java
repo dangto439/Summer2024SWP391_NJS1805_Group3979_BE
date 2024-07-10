@@ -5,6 +5,7 @@ import com.group3979.badmintonbookingbe.model.response.PromotionResponse;
 import com.group3979.badmintonbookingbe.service.PromotionService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,20 +22,26 @@ public class PromotionAPI {
     PromotionService promotionService;
 
     @PostMapping("/promotion/{clubId}")
-    public ResponseEntity createPromotion(@PathVariable Long clubId, @RequestBody PromotionRequest promotionRequest) {
+    public ResponseEntity<PromotionResponse> createPromotion(@PathVariable Long clubId, @RequestBody PromotionRequest promotionRequest) {
         PromotionResponse promotion = promotionService.createPromotion(clubId, promotionRequest);
         return  ResponseEntity.ok(promotion);
     }
 
     @GetMapping("/promotion/{clubId}")
-    public ResponseEntity getPromotion(@PathVariable Long clubId) {
+    public ResponseEntity<List<PromotionResponse>> getPromotion(@PathVariable Long clubId) throws NotFoundException {
         List<PromotionResponse> promotionResponseList = promotionService.getAllPromotions(clubId);
         return  ResponseEntity.ok(promotionResponseList);
     }
 
     @PutMapping("/promotion/{promotionId}")
-    public ResponseEntity updatePromotion(@PathVariable Long promotionId, @RequestBody PromotionRequest promotionRequest) {
+    public ResponseEntity<PromotionResponse> updatePromotion(@PathVariable Long promotionId, @RequestBody PromotionRequest promotionRequest) throws NotFoundException {
         PromotionResponse promotion = promotionService.updatePromotion(promotionId, promotionRequest);
         return  ResponseEntity.ok(promotion);
+    }
+
+    @DeleteMapping("/promotion/{promotionId}")
+    public ResponseEntity<String> deletePromotion(@PathVariable Long promotionId) throws NotFoundException {
+        promotionService.deletePromotion(promotionId);
+        return ResponseEntity.ok("Đã xóa thành công");
     }
 }

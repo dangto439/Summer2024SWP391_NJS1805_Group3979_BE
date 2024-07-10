@@ -29,7 +29,7 @@ public class WalletAPI {
         return ResponseEntity.ok(wallet).getBody();
     }
 
-    @GetMapping("/wallet/{email}")
+    @GetMapping("/wallet-email/{email}")
     public WalletResponse getWalletByEmail(@PathVariable("email") String email) throws NotFoundException {
         WalletResponse wallet = walletService.getWalletByEmail(email);
         return ResponseEntity.ok(wallet).getBody();
