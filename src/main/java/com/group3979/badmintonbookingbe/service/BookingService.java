@@ -350,8 +350,12 @@ public class BookingService {
         }
     }
 
-    public List<RevenueResponse> getMonthlyBookings(Long clubId) {
-        return bookingRepository.findMonthlyBookingsByClubId(clubId);
+    public List<RevenueResponse> getMonthlyBookingsByClubId(Long id) {
+        return bookingRepository.findMonthlyBookingsByClubId(id);
+    }
+
+    public List<RevenueResponse> getMonthlyBookingByAccountId(long accountId) {
+        return bookingRepository.findMonthlyBookingsByAccountId(accountId);
     }
 }
 

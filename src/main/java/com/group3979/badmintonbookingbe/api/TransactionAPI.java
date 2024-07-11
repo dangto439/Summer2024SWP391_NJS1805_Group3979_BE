@@ -57,9 +57,15 @@ public class TransactionAPI {
 
     @GetMapping("/dashboard-club-area-chart")
     public List<RevenueResponse> getMonthlyRevenue(
-            @RequestParam Long walletId,
-            @RequestParam Long clubId,
+            @RequestParam long walletId,
             @RequestParam int year) {
-        return transactionService.getMonthlyRevenue(walletId, clubId, year);
+        return transactionService.getMonthlyRevenue(walletId, year);
+    }
+
+    @GetMapping("/dashboard-club-area-chart-refund")
+    public List<RevenueResponse> getMonthlyRefundRevenue(
+            @RequestParam long walletId,
+            @RequestParam int year) {
+        return transactionService.getMonthlyRefundRevenue(walletId, year);
     }
 }

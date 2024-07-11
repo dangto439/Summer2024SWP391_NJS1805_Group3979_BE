@@ -109,6 +109,10 @@ public class BookingAPI {
     }
     @GetMapping("/dashboard-club-chart/{clubId}")
     public List<RevenueResponse> getMonthlyBookingsByClubs(@PathVariable long clubId) {
-        return bookingService.getMonthlyBookings(clubId);
+        return bookingService.getMonthlyBookingsByClubId(clubId);
+    }
+    @GetMapping("/dashboard-club-chart-account/{accountId}")
+    public List<RevenueResponse> getMonthlyBookingsByAccount(@PathVariable long accountId){
+        return bookingService.getMonthlyBookingByAccountId(accountId);
     }
 }
