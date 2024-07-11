@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -154,9 +155,15 @@ public class BookingService {
     }
 
     public BookingResponse getBookingResponse(Booking booking, double temporaryPrice, double discountPrice) {
+        List<BookingDetailResponse> bookingDetailResponseList = new ArrayList<>();
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(booking.getBookingId());
+        for(BookingDetail bookingDetail:bookingDetails){
+            bookingDetailResponseList.add(bookingDetailService.getBookingDetailResponse(bookingDetail));
+        }
         BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
                 .bookingDate(booking.getBookingDate())
                 .bookingId(booking.getBookingId())
+                .bookingDetailResponseList(bookingDetailResponseList)
                 .amountTime(booking.getAmountTime())
                 .totalPrice(booking.getTotalPrice())
                 .temporaryPrice(temporaryPrice)
@@ -328,6 +335,7 @@ public class BookingService {
     @Transactional
     public void refundBooking(Booking booking, List<BookingDetail> bookingDetails) throws NotFoundException {
         Club club = booking.getClub();
+        bookingDetails.sort(Comparator.comparing(BookingDetail::getPlayingDate));
         Account clubOwner = club.getAccount();
         Account customer = booking.getAccount();
         Wallet walletOfCustomer = customer.getWallet();

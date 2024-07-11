@@ -4,7 +4,7 @@ import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.request.ImageClubRequest;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.ImageClubResponse;
-import com.group3979.badmintonbookingbe.model.response.NameClubOwnerAndCapacityClubResponse;
+import com.group3979.badmintonbookingbe.model.response.OwnerAndCapacityClubResponse;
 import com.group3979.badmintonbookingbe.service.ClubService;
 import com.group3979.badmintonbookingbe.service.CourtService;
 import com.group3979.badmintonbookingbe.service.ImageClubService;
@@ -122,7 +122,7 @@ public class ClubAPI {
     }
     @GetMapping("/club/name-club-owner/{id}")
     public  ResponseEntity getNameClubOwner(@PathVariable Long id) {
-        NameClubOwnerAndCapacityClubResponse NameClubOwnerAndCapacityClubResponse = clubService.GetNameClubOwner(id);
+        OwnerAndCapacityClubResponse NameClubOwnerAndCapacityClubResponse = clubService.GetNameClubOwner(id);
         return ResponseEntity.ok(NameClubOwnerAndCapacityClubResponse);
     }
     @GetMapping("/clubs/10")
