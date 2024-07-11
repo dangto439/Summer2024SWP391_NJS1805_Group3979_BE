@@ -29,6 +29,19 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
             "ORDER BY WEEK(t.timestamp)")
     List<RevenueResponse> findWeeklyRevenueByMonthAndYear(@Param("year") int year, @Param("month") int month);
 
+    // revenue for Club
+    @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(t.timestamp), SUM(t.amount)) " +
+            "FROM Transaction t " +
+            "JOIN t.booking b " +
+            "JOIN b.club c " +
+            "WHERE t.type = 'RECEIVE' AND t.receiverWallet.walletId = :walletId AND c.clubId = :clubId AND YEAR(t.timestamp) = :year " +
+            "GROUP BY MONTH(t.timestamp) " +
+            "ORDER BY MONTH(t.timestamp)")
+    List<RevenueResponse> findMonthlyRevenueByClubIdAndWalletIdAndYear(
+            @Param("walletId") Long walletId,
+            @Param("clubId") Long clubId,
+            @Param("year") int year);
+
 
 }
 

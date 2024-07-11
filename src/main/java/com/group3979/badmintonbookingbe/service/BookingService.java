@@ -10,17 +10,21 @@ import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FlexibleBookingRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
+import com.group3979.badmintonbookingbe.model.request.TransferRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,9 +55,13 @@ public class BookingService {
     @Autowired
     IDiscountRuleRepository discountRuleRepository;
 
-
     @Autowired
     private IBookingDetailRepository bookingDetailRepository;
+
+    @Value("${percent.cancel.booking}")
+    private double percentCancelBooking;
+    @Autowired
+    private WalletService walletService;
 
     public BookingResponse createDailyBooking(DailyBookingRequest dailyBookingRequest) {
         CourtSlot courtSlot = courtSlotRepository.findCourtSlotByCourtSlotId(dailyBookingRequest.getBookingDetailRequests().get(0).getCourtSlotId());
@@ -146,14 +154,8 @@ public class BookingService {
     }
 
     public BookingResponse getBookingResponse(Booking booking, double temporaryPrice, double discountPrice) {
-        List<BookingDetailResponse> bookingDetailResponseList = new ArrayList<>();
-        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking_BookingId(booking.getBookingId());
-        for(BookingDetail bookingDetail:bookingDetails){
-            bookingDetailResponseList.add(bookingDetailService.getBookingDetailResponse(bookingDetail));
-        }
         BookingResponse bookingResponse = BookingResponse.builder().bookingType(booking.getBookingType())
                 .bookingDate(booking.getBookingDate())
-                .bookingDetailResponseList(bookingDetailResponseList)
                 .bookingId(booking.getBookingId())
                 .amountTime(booking.getAmountTime())
                 .totalPrice(booking.getTotalPrice())
@@ -298,7 +300,8 @@ public class BookingService {
         return bookingResponses;
     }
 
-    public BookingResponse cancelBookingClubId(long bookingId) {
+    @Transactional
+    public BookingResponse cancelBookingClubId(long bookingId) throws NotFoundException {
         Booking booking = bookingRepository.findByBookingId(bookingId);
         if (booking != null) {
             booking.setBookingStatus(BookingStatus.CANCEL);
@@ -309,10 +312,46 @@ public class BookingService {
                 bookingDetail.setStatus(BookingDetailStatus.CANCEL);
             }
             bookingDetailRepository.saveAll(bookingDetails);
+            // refund
+            try {
+                refundBooking(booking, bookingDetails);
+            } catch (Exception e) {
+                throw new CustomException("Đã xảy ra lỗi trong quá trình hoàn tiền: " + e.getMessage());
+            }
             return this.getBookingResponse(booking);
         } else {
-            throw new CustomException("Booking không tồn tại");
+            throw new CustomException("Đơn đặt lịch không tồn tại");
         }
+    }
+
+    // refund on Booking (huy toan bo bookingdetail trong Booking)
+    @Transactional
+    public void refundBooking(Booking booking, List<BookingDetail> bookingDetails) throws NotFoundException {
+        Club club = booking.getClub();
+        Account clubOwner = club.getAccount();
+        Account customer = booking.getAccount();
+        Wallet walletOfCustomer = customer.getWallet();
+        Wallet walletOfClubOwner = clubOwner.getWallet();
+        //check status
+        if (booking.getBookingStatus() == BookingStatus.CANCEL) {
+            long daysUntilPlayingDate = ChronoUnit.DAYS.between(LocalDate.now(),bookingDetails.get(0).getPlayingDate());
+            if(daysUntilPlayingDate >= 7){
+                double refundAmount = booking.getTotalPrice() * percentCancelBooking;
+                // config param
+                TransferRequest transferRequest = new TransferRequest();
+                transferRequest.setBookingId(booking.getBookingId());
+                transferRequest.setAmount(refundAmount);
+                transferRequest.setSenderWalletId(walletOfClubOwner.getWalletId());
+                transferRequest.setReceiverWalletId(walletOfCustomer.getWalletId());
+                walletService.refund(transferRequest);
+            }
+        }else {
+            throw new IllegalArgumentException("Đơn đặt lịch này không ở trạng thái HỦY");
+        }
+    }
+
+    public List<RevenueResponse> getMonthlyBookings(Long clubId) {
+        return bookingRepository.findMonthlyBookingsByClubId(clubId);
     }
 }
 

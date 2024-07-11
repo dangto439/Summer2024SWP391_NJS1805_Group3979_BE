@@ -10,6 +10,7 @@ import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
 import com.group3979.badmintonbookingbe.service.BookingDetailService;
 import com.group3979.badmintonbookingbe.service.BookingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,8 +50,8 @@ public class BookingAPI {
         List<BookingResponse> responses = bookingService.getBookingResponseCurrentAccount();
         return ResponseEntity.ok().body(responses);
     }
-    @DeleteMapping("/booking/{bookingId}")
-    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable long bookingId){
+    @PutMapping("/booking/{bookingId}")
+    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable long bookingId) throws NotFoundException {
         BookingResponse bookingResponse = bookingService.cancelBookingClubId(bookingId);
         return ResponseEntity.ok(bookingResponse);
     }
@@ -72,7 +73,7 @@ public class BookingAPI {
         return ResponseEntity.ok().body(fixedBooking);
     }
     @DeleteMapping("/booking/booking-detail/{bookingDetailId}")
-    public ResponseEntity<BookingDetailResponse> cancelBookingDetail(@PathVariable long bookingDetailId){
+    public ResponseEntity<BookingDetailResponse> cancelBookingDetail(@PathVariable long bookingDetailId) throws NotFoundException {
         BookingDetailResponse bookingDetailResponse = bookingDetailService.cancelBookingDetail(bookingDetailId);
         return ResponseEntity.ok().body(bookingDetailResponse);
     }
@@ -105,5 +106,9 @@ public class BookingAPI {
     @GetMapping("/dashboard-admin-bar-chart/{year}")
     public List<RevenueResponse> getRevenueResponse(@PathVariable int year) {
         return bookingService.getRevenueBookingResponse(year);
+    }
+    @GetMapping("/dashboard-club-chart/{clubId}")
+    public List<RevenueResponse> getMonthlyBookingsByClubs(@PathVariable long clubId) {
+        return bookingService.getMonthlyBookings(clubId);
     }
 }

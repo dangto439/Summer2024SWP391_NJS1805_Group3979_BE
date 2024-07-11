@@ -376,10 +376,52 @@ public class WalletService {
         double newSenderBalance = senderBalance - transferRequest.getAmount();
         double receiverBalance = receiverWallet.getBalance() + transferRequest.getAmount();
 
+        // set balance
         senderWallet.setBalance(newSenderBalance);
         receiverWallet.setBalance(receiverBalance);
 
         senderWallet = walletRepository.save(senderWallet);
         receiverWallet = walletRepository.save(receiverWallet);
+
+        // transaction for sender & receiver
+        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+                senderWallet.getWalletId(), receiverWallet.getWalletId(), TransactionType.TRANSFER);
+        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+                senderWallet.getWalletId(), receiverWallet.getWalletId(), TransactionType.RECEIVE);
+    }
+
+    //  Refund tien tu mot vi den vi khac (Refund)
+    public void refund(TransferRequest transferRequest) throws NotFoundException,
+            InsufficientBalanceException {
+        Wallet senderWallet = walletRepository.findWalletByWalletId(transferRequest.getSenderWalletId());
+        if (senderWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + transferRequest.getSenderWalletId());
+        }
+
+        Wallet receiverWallet = walletRepository.findWalletByWalletId(transferRequest.getReceiverWalletId());
+        if (receiverWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + transferRequest.getReceiverWalletId());
+        }
+
+        // Kiem tra so du co du de chuyen khong
+        double senderBalance = senderWallet.getBalance();
+        if (senderBalance < transferRequest.getAmount()) {
+            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch chuyển tiền");
+        }
+
+        double newSenderBalance = senderBalance - transferRequest.getAmount();
+        double receiverBalance = receiverWallet.getBalance() + transferRequest.getAmount();
+
+        // set balance
+        senderWallet.setBalance(newSenderBalance);
+        receiverWallet.setBalance(receiverBalance);
+
+        senderWallet = walletRepository.save(senderWallet);
+        receiverWallet = walletRepository.save(receiverWallet);
+
+        // transaction for refund
+        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+                senderWallet.getWalletId(), receiverWallet.getWalletId(), TransactionType.REFUND);
+
     }
 }
