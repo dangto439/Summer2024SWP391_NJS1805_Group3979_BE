@@ -33,4 +33,13 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
     List<RevenueResponse> findMonthlyBookingsByClubId(@Param("clubId") Long clubId);
 
 
+    @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(b.bookingDate), COUNT(b.bookingId)) " +
+            "FROM Booking b " +
+            "JOIN b.club c " +
+            "JOIN c.account a " +
+            "WHERE a.id = :accountId " +
+            "GROUP BY MONTH(b.bookingDate) " +
+            "ORDER BY MONTH(b.bookingDate)")
+    List<RevenueResponse> findMonthlyBookingsByAccountId(@Param("accountId") Long accountId);
+
 }

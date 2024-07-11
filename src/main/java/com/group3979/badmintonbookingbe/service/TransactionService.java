@@ -209,7 +209,15 @@ public class TransactionService {
     }
 
     // thong ke cua club
-    public List<RevenueResponse> getMonthlyRevenue(long walletId, long clubId, int year){
-        return transactionRepository.findMonthlyRevenueByClubIdAndWalletIdAndYear(walletId, clubId, year);
+    //income
+    public List<RevenueResponse> getMonthlyRevenue(long walletId, int year){
+        return transactionRepository.findMonthlyRevenueByClubIdAndWalletIdAndYear(walletId, year);
     }
+
+    //out
+    public List<RevenueResponse> getMonthlyRefundRevenue(long walletId, int year){
+        return transactionRepository.findMonthlyRefundByWalletIdAndYear(walletId, year);
+    }
+
+
 }
