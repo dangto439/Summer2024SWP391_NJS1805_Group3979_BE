@@ -6,16 +6,21 @@ import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.BookingDetailRequest;
 import com.group3979.badmintonbookingbe.model.request.DailyBookingRequest;
 import com.group3979.badmintonbookingbe.model.request.FixedBookingRequest;
+import com.group3979.badmintonbookingbe.model.request.TransferRequest;
 import com.group3979.badmintonbookingbe.model.response.BookingDetailResponse;
 import com.group3979.badmintonbookingbe.model.response.BookingResponse;
 import com.group3979.badmintonbookingbe.model.response.CheckedBookingDetailResponse;
 import com.group3979.badmintonbookingbe.repository.*;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -45,6 +50,11 @@ public class BookingDetailService {
 
     @Autowired
     IDiscountRuleRepository discountRuleRepository;
+
+    @Value("${percent.cancel.booking}")
+    private double percentCancelBooking;
+    @Autowired
+    private WalletService walletService;
 
     //dat lich ngay ch dat lich linh hoat
     public BookingResponse createDailyBookingDetail(Booking booking, DailyBookingRequest dailyBookingRequest) {
@@ -214,16 +224,59 @@ public class BookingDetailService {
         }
     }
 
-    public BookingDetailResponse cancelBookingDetail(long bookingDetailId) {
+    @Transactional
+    public BookingDetailResponse cancelBookingDetail(long bookingDetailId) throws NotFoundException {
         BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByBookingDetailId(bookingDetailId);
-        if (bookingDetail != null) {
+        if (bookingDetail != null && bookingDetail.getStatus() != BookingDetailStatus.CANCEL) {
             bookingDetail.setStatus(BookingDetailStatus.CANCEL);
             bookingDetail = bookingDetailRepository.save(bookingDetail);
+            // refund
+            try {
+                refundBookingDetail(bookingDetail);
+            } catch (Exception e) {
+                // handle loi trong refund
+                throw new CustomException("Đã xảy ra lỗi trong quá trình hoàn tiền: " + e.getMessage());
+            }
             return this.getBookingDetailResponse(bookingDetail);
         } else {
-            throw new CustomException("không tồn tại đơn đặt sân này");
+            throw new CustomException("Không tồn tại đơn đặt sân này hoặc đơn đặt lịch này đã bị hủy trước đó");
         }
+    }
 
+    // methods refund tren tung bookingDetail cu the
+    @Transactional
+    public void refundBookingDetail(BookingDetail bookingDetail) throws NotFoundException {
+        Booking booking = bookingDetail.getBooking();
+        List<BookingDetail> bookingDetailList = bookingDetailRepository.
+                findBookingDetailByBooking_BookingId(booking.getBookingId());
+        Club club = booking.getClub();
+        Account clubOwner = club.getAccount();
+        Account customer = booking.getAccount();
+        Wallet walletOfCustomer = customer.getWallet();
+        Wallet walletOfClubOwner = clubOwner.getWallet();
+        //check status
+        if (bookingDetail.getStatus() == BookingDetailStatus.CANCEL) {
+            long daysUntilPlayingDate = ChronoUnit.DAYS.between(LocalDate.now(), bookingDetail.getPlayingDate());
+            if(daysUntilPlayingDate >= 7){
+                double refundAmount = bookingDetail.getPrice() * percentCancelBooking;
+                if(booking.getPromotion() != null){
+                    // priceMinusOfPromotion = so tien duoc giam tren moi bookingDetail khi su dung promotion(discount)
+                    double priceMinusOfPromotion = booking.getPromotion().getDiscount() / bookingDetailList.size();
+                    refundAmount -= priceMinusOfPromotion;
+                }
+                // config param
+                TransferRequest transferRequest = new TransferRequest();
+                transferRequest.setBookingId(booking.getBookingId());
+                transferRequest.setAmount(refundAmount);
+                transferRequest.setSenderWalletId(walletOfClubOwner.getWalletId());
+                transferRequest.setReceiverWalletId(walletOfCustomer.getWalletId());
+                walletService.refund(transferRequest);
+            }else{
+                throw new CustomException("Đơn đặt lịch của bạn không được hoàn tiền vì đã vượt quá số ngày cho phép trong quy định");
+            }
+        }else {
+            throw new IllegalArgumentException("Đơn đặt lịch này không ở trạng thái HỦY");
+        }
     }
 
     public BookingDetailResponse getBookingDetailResponse(BookingDetail bookingDetail) {
