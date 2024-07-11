@@ -207,4 +207,9 @@ public class TransactionService {
     public List<RevenueResponse> getRevenueResponse(int year, int month) {
         return transactionRepository.findWeeklyRevenueByMonthAndYear(year, month);
     }
+
+    // thong ke cua club
+    public List<RevenueResponse> getMonthlyRevenue(long walletId, long clubId, int year){
+        return transactionRepository.findMonthlyRevenueByClubIdAndWalletIdAndYear(walletId, clubId, year);
+    }
 }
