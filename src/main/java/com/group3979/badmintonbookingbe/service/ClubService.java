@@ -9,7 +9,7 @@ import com.group3979.badmintonbookingbe.model.request.ClubRequest;
 import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
-import com.group3979.badmintonbookingbe.model.response.NameClubOwnerAndCapacityClubResponse;
+import com.group3979.badmintonbookingbe.model.response.OwnerAndCapacityClubResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.IImageClubRespository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
@@ -175,8 +175,8 @@ public class ClubService {
     }
 
     //Lấy tên chủ sân và tổng số lượng aân
-    public NameClubOwnerAndCapacityClubResponse GetNameClubOwner(Long id) {
-        NameClubOwnerAndCapacityClubResponse nameClubOwnerAndCapacityClubResponse = new NameClubOwnerAndCapacityClubResponse();
+    public OwnerAndCapacityClubResponse GetNameClubOwner(Long id) {
+        OwnerAndCapacityClubResponse nameClubOwnerAndCapacityClubResponse = new OwnerAndCapacityClubResponse();
         Club club = clubRepository.findByClubId(id);
         Account account = club.getAccount();
         nameClubOwnerAndCapacityClubResponse.setNameOwner(account.getName());

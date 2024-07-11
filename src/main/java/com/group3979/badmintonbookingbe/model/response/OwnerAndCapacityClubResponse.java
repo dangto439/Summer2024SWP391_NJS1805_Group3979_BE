@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NameClubOwnerAndCapacityClubResponse {
+public class OwnerAndCapacityClubResponse {
     private String nameOwner;
     private int capacity;
 }
