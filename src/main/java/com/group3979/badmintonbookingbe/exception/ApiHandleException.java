@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 
 @RestControllerAdvice
 public class ApiHandleException {
@@ -36,8 +37,8 @@ public class ApiHandleException {
         return new ResponseEntity<>("Email này chưa đăng ký tài khoản!", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(ParseException.class)
-    public ResponseEntity<Object> handleParseDateException(ParseException ex) {
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<Object> handleParseDateException(DateTimeParseException ex) {
         return new ResponseEntity<>("Định dạng ngày không hợp lệ. Vui lòng sử dụng định dạng yyyy-MM-dd.", HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(NullPointerException.class)

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,9 +116,19 @@ public class CourtSlotService {
                 }
                 courtSlot = courtSlotRepository.save(courtSlot);
 
-                CourtResponse courtResponse = CourtResponse.builder().courtId(court.getCourtId()).courtStatus(court.getCourtStatus()).courtName(court.getCourtName()).build();
+                CourtResponse courtResponse = CourtResponse.builder()
+                        .courtId(court.getCourtId())
+                        .courtStatus(court.getCourtStatus())
+                        .courtName(court.getCourtName())
+                        .build();
 
-                CourtSlotResponse courtSlotResponse = CourtSlotResponse.builder().courtSlotId(courtSlot.getCourtSlotId()).price(courtSlot.getPrice()).courtResponse(courtResponse).clubId(clubId).slotId(courtSlot.getSlot().getSlotId()).build();
+                CourtSlotResponse courtSlotResponse = CourtSlotResponse.builder()
+                        .courtSlotId(courtSlot.getCourtSlotId())
+                        .price(courtSlot.getPrice())
+                        .courtResponse(courtResponse)
+                        .clubId(clubId)
+                        .slotId(courtSlot.getSlot().getSlotId())
+                        .build();
 
                 courtSlotResponses.add(courtSlotResponse);
             }
@@ -148,7 +159,6 @@ public class CourtSlotService {
 
             List<CourtSlot> courtSlotsExisted = courtSlotRepository.findCourtSlotByPlayingDateInBookingDetail(playingDate, court);
             courtSlotsExisted.addAll(courtSlotRepository.findCourtSlotByPlayingDateInGame(playingDate, court));
-
             List<CourtSlot> courtSlots = courtSlotRepository.findByCourt(court);
             courtSlots.removeIf(courtSlot -> (courtSlot.getSlot().getTime() < court.getClub().getOpenTime()) || (courtSlot.getSlot().getTime() >= court.getClub().getCloseTime()));
             for (CourtSlot courtSlot : courtSlots) {
@@ -156,6 +166,10 @@ public class CourtSlotService {
                 courtSlotStatusResponse.setCourtSlotId(courtSlot.getCourtSlotId());
                 courtSlotStatusResponse.setPrice(courtSlot.getPrice());
                 courtSlotStatusResponse.setSlotId(courtSlot.getSlot().getSlotId());
+                LocalDateTime localDateTime = LocalDateTime.now();
+                if(playingDate.isEqual(LocalDate.now()) && localDateTime.getHour() >= courtSlot.getSlot().getTime()){
+                    courtSlotsExisted.add(courtSlot);
+                }
                 if (courtSlotsExisted.contains(courtSlot)) {
                     courtSlotStatusResponse.setCourtSlotStatus(CourtSlotStatus.INACTIVE);
                 } else {
