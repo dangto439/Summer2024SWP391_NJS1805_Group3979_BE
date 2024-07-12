@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface ITransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findTransactionsBySenderWallet(Wallet wallet);
+    List<Transaction> findTransactionsBySenderWalletOrReceiverWallet(Wallet senderWallet, Wallet receiverWallet);
     Transaction findTransactionByTransactionId(long id);
 
     //JPQL

@@ -156,7 +156,7 @@ public class TransactionService {
             throw new NotFoundException("Không tìm thấy ví cho tài khoản có ID: " + accountId);
         }
         // Get all transaction of account
-        List<Transaction> transactions = transactionRepository.findTransactionsBySenderWallet(wallet);
+        List<Transaction> transactions = transactionRepository.findTransactionsBySenderWalletOrReceiverWallet(wallet, wallet);
         // init
         List<TransactionResponse> transactionResponses = new ArrayList<>();
         for (Transaction transaction : transactions) {
