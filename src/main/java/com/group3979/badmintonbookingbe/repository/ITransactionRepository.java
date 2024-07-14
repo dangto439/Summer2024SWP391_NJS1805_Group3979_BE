@@ -51,5 +51,20 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
             @Param("walletId") Long walletId,
             @Param("year") int year);
 
+    // PRICE IN for Account
+    @Query("SELECT SUM(t.amount) " +
+            "FROM Transaction t " +
+            "JOIN t.receiverWallet w " +
+            "JOIN w.account a " +
+            "WHERE (t.type = 'DEPOSIT' OR t.type = 'RECEIVE') AND a.id = :accountId")
+    Double findTotalInAmountByAccountId(@Param("accountId") Long accountId);
+    // PRICE OUT for Account
+    @Query("SELECT SUM(t.amount) " +
+            "FROM Transaction t " +
+            "JOIN t.senderWallet w " +
+            "JOIN w.account a " +
+            "WHERE (t.type = 'TRANSFER' OR t.type = 'REFUND') AND a.id = :accountId")
+    Double findTotalOutAmountByAccountId(
+            @Param("accountId") Long accountId);
 }
 

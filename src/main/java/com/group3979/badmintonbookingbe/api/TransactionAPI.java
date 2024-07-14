@@ -36,7 +36,7 @@ public class TransactionAPI {
         return ResponseEntity.ok(transactionService.updateTransactionType(transactionRequest, transactionId, transactionType));
     }
 
-    @GetMapping("transaction/{transactionId}")
+    @GetMapping("/transaction/{transactionId}")
     public ResponseEntity getTransactionById(@PathVariable long transactionId) throws NotFoundException {
         return ResponseEntity.ok(transactionService.getTransactionById(transactionId));
     }
@@ -68,4 +68,15 @@ public class TransactionAPI {
             @RequestParam int year) {
         return transactionService.getMonthlyRefundRevenue(walletId, year);
     }
+
+    @GetMapping("/transactions/amount-in")
+    public Double getTotalInAmount(@RequestParam Long accountId) {
+        return transactionService.getTotalInAmountByAccountId(accountId);
+    }
+
+    @GetMapping("/transactions/amount-out")
+    public Double getTotalOutAmount(@RequestParam Long accountId) {
+        return transactionService.getTotalOutAmountByAccountId(accountId);
+    }
+
 }

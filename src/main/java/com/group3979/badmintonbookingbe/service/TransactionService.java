@@ -219,5 +219,15 @@ public class TransactionService {
         return transactionRepository.findMonthlyRefundByWalletIdAndYear(walletId, year);
     }
 
+    // thong ke account
+    // income
+    public Double getTotalInAmountByAccountId(Long accountId) {
+        return transactionRepository.findTotalInAmountByAccountId(accountId);
+    }
+    //out
+    public Double getTotalOutAmountByAccountId(Long accountId) {
+        return transactionRepository.findTotalOutAmountByAccountId(accountId);
+    }
+
 
 }
