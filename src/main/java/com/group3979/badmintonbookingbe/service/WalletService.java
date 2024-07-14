@@ -71,7 +71,7 @@ public class WalletService {
 
         transaction.setAmount(Double.parseDouble(amount));
         transaction.setType(TransactionType.PENDING);
-        transaction.setSenderWallet(wallet);
+        transaction.setReceiverWallet(wallet);
         transaction.setTimestamp(createDate);
         transaction.setDescription(TransactionType.PENDING.getDescription());
         transaction = transactionRepository.save(transaction);
