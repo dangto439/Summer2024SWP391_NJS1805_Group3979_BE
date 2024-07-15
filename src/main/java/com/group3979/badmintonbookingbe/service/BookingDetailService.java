@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingDetailStatus;
+import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.BookingDetailRequest;
@@ -108,6 +109,7 @@ public class BookingDetailService {
         }
         if (amountTime <= 0) {
             flexibleBooking.setAmountTime(0);
+            flexibleBooking.setExpirationStatus(ExpirationStatus.EXPIRED);
         } else {
             flexibleBooking.setAmountTime(amountTime);
         }

@@ -127,7 +127,12 @@ public class ClubAPI {
     }
     @GetMapping("/clubs/10")
     public  ResponseEntity<List<ClubResponse>> getTenNewestClub() {
-       List<ClubResponse> clubResponses = clubService.getTenNewestClub();
+       List<ClubResponse> clubResponses = clubService.getTenNewestClubs();
+        return ResponseEntity.ok(clubResponses);
+    }
+    @GetMapping("/clubs/outstanding")
+    public ResponseEntity<List<ClubResponse>> getTenOutstandingClubs(){
+        List<ClubResponse> clubResponses = clubService.getTenOutstandingClubs();
         return ResponseEntity.ok(clubResponses);
     }
 

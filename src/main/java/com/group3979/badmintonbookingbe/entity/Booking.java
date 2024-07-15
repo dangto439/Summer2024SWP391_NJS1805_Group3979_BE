@@ -51,7 +51,7 @@ public class Booking {
     Club club;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "booking")
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     List<BookingDetail> bookingDetails;
 
     @ManyToOne
