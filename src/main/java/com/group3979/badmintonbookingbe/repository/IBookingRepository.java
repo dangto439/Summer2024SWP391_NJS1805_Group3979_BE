@@ -41,5 +41,15 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
             "GROUP BY MONTH(b.bookingDate) " +
             "ORDER BY MONTH(b.bookingDate)")
     List<RevenueResponse> findMonthlyBookingsByAccountId(@Param("accountId") Long accountId);
+    @Query("SELECT b " +
+            "FROM Booking  b " +
+            "WHERE b.expirationStatus =' UNEXPIRED' AND b.bookingType = 'FLEXIBLEBOOKING' ")
+    List<Booking> getFlexibleBookingByYear();
 
+    @Query("SELECT  b.club\n" +
+            "    FROM Booking b\n" +
+            "    GROUP BY b.club\n" +
+            "    ORDER BY COUNT(b.club) DESC\n" +
+            "    LIMIT 10 ")
+    List<Club> getTenOutstandingClubs();
 }
