@@ -1,8 +1,10 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.ClubStatus;
+import com.group3979.badmintonbookingbe.eNum.CourtStatus;
 import com.group3979.badmintonbookingbe.entity.Account;
 import com.group3979.badmintonbookingbe.entity.Club;
+import com.group3979.badmintonbookingbe.entity.Court;
 import com.group3979.badmintonbookingbe.entity.ImageClub;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.ClubRequest;
@@ -10,7 +12,9 @@ import com.group3979.badmintonbookingbe.model.response.AuthenticationResponse;
 import com.group3979.badmintonbookingbe.model.response.ClubResponse;
 import com.group3979.badmintonbookingbe.model.response.CourtResponse;
 import com.group3979.badmintonbookingbe.model.response.OwnerAndCapacityClubResponse;
+import com.group3979.badmintonbookingbe.repository.IBookingRepository;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
+import com.group3979.badmintonbookingbe.repository.ICourtRepository;
 import com.group3979.badmintonbookingbe.repository.IImageClubRespository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import javassist.NotFoundException;
@@ -33,10 +37,16 @@ public class ClubService {
     private AccountUtils accountUtils;
 
     @Autowired
+    private IBookingRepository bookingRepository;
+
+    @Autowired
     private IClubRepository clubRepository;
 
     @Autowired
     private CourtService courtService;
+
+    @Autowired
+    private ICourtRepository courtRepository;
 
     @Autowired
     private ImageClubService imageClubService;
@@ -145,10 +155,15 @@ public class ClubService {
         if (club != null) {
             club.setClubStatus(ClubStatus.DELETED);
             clubRepository.save(club);
+            for(Court court: club.getCourts()){
+                court.setCourtStatus(CourtStatus.INACTIVE);
+                courtRepository.save(court);
+            }
             return true;
         }
         return false;
     }
+
     public List<ClubResponse> searchClubByName(String name){
         List<Club> clubs = clubRepository.findByClubNameContainingIgnoreCase(name);
         if(!clubs.isEmpty()){
@@ -185,7 +200,7 @@ public class ClubService {
         nameClubOwnerAndCapacityClubResponse.setCapacity(capacity);
         return nameClubOwnerAndCapacityClubResponse;
     }
-    public List<ClubResponse> getTenNewestClub(){
+    public List<ClubResponse> getTenNewestClubs(){
         Pageable pageable = PageRequest.of(0,10);
         List<Club> clubs =  clubRepository.findClubsByOrderByClubIdDesc(pageable);
         List<ClubResponse> clubResponses = new ArrayList<>();
@@ -194,6 +209,14 @@ public class ClubService {
         }
         if(clubResponses.isEmpty()){
             throw new CustomException("Chưa có sân nào");
+        }
+        return clubResponses;
+    }
+    public List<ClubResponse> getTenOutstandingClubs(){
+        List<ClubResponse> clubResponses = new ArrayList<>();
+        List<Club> clubs = bookingRepository.getTenOutstandingClubs();
+        for(Club club:clubs){
+            clubResponses.add(this.getClubResponseById(club.getClubId()));
         }
         return clubResponses;
     }
