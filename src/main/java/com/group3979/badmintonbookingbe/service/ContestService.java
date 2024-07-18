@@ -31,23 +31,36 @@ public class ContestService {
     public ContestResponse createContest(ContestRequest contestRequest) {
         Club club = clubRepository.findByClubId(contestRequest.getClubId());
         if (club != null) {
-            Contest contest = new Contest();
-            contest.setCapacity(contestRequest.getCapacity());
-            contest.setClub(club);
-            contest.setFirstPrize(contestRequest.getFirstPrize());
-            contest.setSecondPrize(contestRequest.getSecondPrize());
-            contest.setUrlBanner(contestRequest.getUrlBanner());
-            contest.setParticipationPrice(contestRequest.getParticipationPrice());
-            contest.setStartDate(contestRequest.getStartDate());
-            contest.setEndDate(contestRequest.getEndDate());
-            contest.setContestStatus(ContestStatus.ACTIVE);
-            contest.setName(contestRequest.getName());
-            contest = contestRepository.save(contest);
-            gameService.createMatchesContest(contest.getCapacity(), contest);
-            return this.buildContestResponse(contest);
+            if(isLog2(contestRequest.getCapacity())){
+                Contest contest = new Contest();
+                contest.setCapacity(contestRequest.getCapacity());
+                contest.setClub(club);
+                contest.setFirstPrize(contestRequest.getFirstPrize());
+                contest.setSecondPrize(contestRequest.getSecondPrize());
+                contest.setUrlBanner(contestRequest.getUrlBanner());
+                contest.setParticipationPrice(contestRequest.getParticipationPrice());
+                contest.setStartDate(contestRequest.getStartDate());
+                contest.setEndDate(contestRequest.getEndDate());
+                contest.setContestStatus(ContestStatus.ACTIVE);
+                contest.setName(contestRequest.getName());
+                contest = contestRepository.save(contest);
+                gameService.createMatchesContest(contest.getCapacity(), contest);
+                return this.buildContestResponse(contest);
+            }else {
+                throw new CustomException("Số đã cung cấp không phải là lũy thừa của 2.");
+            }
         } else {
             throw new CustomException("Câu lạc bộ không tồn tại");
         }
+    }
+
+    public boolean isLog2(int n) {
+        if (n < 2 ) {
+            return false;
+        }
+
+        double log2 = Math.log(n) / Math.log(2);
+        return Math.ceil(log2) == Math.floor(log2);
     }
 
     public ContestResponse updateContest(UpdateContestRequest updateContestRequest) {
@@ -62,6 +75,7 @@ public class ContestService {
                 contest.setUrlBanner(updateContestRequest.getUrlBanner());
                 contest.setParticipationPrice(updateContestRequest.getParticipationPrice());
                 contest.setStartDate(updateContestRequest.getStartDate());
+                contest.setEndDate(updateContestRequest.getEndDate());
                 contest.setContestStatus(ContestStatus.ACTIVE);
                 contest.setName(updateContestRequest.getName());
                 contest = contestRepository.save(contest);
