@@ -39,6 +39,7 @@ public class ContestService {
             contest.setUrlBanner(contestRequest.getUrlBanner());
             contest.setParticipationPrice(contestRequest.getParticipationPrice());
             contest.setStartDate(contestRequest.getStartDate());
+            contest.setEndDate(contestRequest.getEndDate());
             contest.setContestStatus(ContestStatus.ACTIVE);
             contest.setName(contestRequest.getName());
             contest = contestRepository.save(contest);
