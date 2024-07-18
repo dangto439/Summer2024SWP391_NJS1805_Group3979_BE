@@ -43,8 +43,8 @@ public class Filter extends OncePerRequestFilter{
             "/api/clubs",
             "/api/club/name",
             "/api/club/location",
-            "/api/clubs",
-            "/api/clubs/10"
+            "/clubs/outstanding",
+            "/clubs/10"
 
 
     );
