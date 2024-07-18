@@ -156,7 +156,7 @@ public class TransactionService {
             throw new NotFoundException("Không tìm thấy ví cho tài khoản có ID: " + accountId);
         }
         // Get all transaction of account
-        List<Transaction> transactions = transactionRepository.findTransactionsBySenderWallet(wallet);
+        List<Transaction> transactions = transactionRepository.findTransactionsBySenderWalletOrReceiverWallet(wallet, wallet);
         // init
         List<TransactionResponse> transactionResponses = new ArrayList<>();
         for (Transaction transaction : transactions) {
@@ -217,6 +217,16 @@ public class TransactionService {
     //out
     public List<RevenueResponse> getMonthlyRefundRevenue(long walletId, int year){
         return transactionRepository.findMonthlyRefundByWalletIdAndYear(walletId, year);
+    }
+
+    // thong ke account
+    // income
+    public Double getTotalInAmountByAccountId(Long accountId) {
+        return transactionRepository.findTotalInAmountByAccountId(accountId);
+    }
+    //out
+    public Double getTotalOutAmountByAccountId(Long accountId) {
+        return transactionRepository.findTotalOutAmountByAccountId(accountId);
     }
 
 

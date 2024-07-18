@@ -45,6 +45,8 @@ public class Filter extends OncePerRequestFilter{
             "/api/club/location",
             "/clubs/outstanding",
             "/clubs/10"
+
+
     );
     private boolean isPermitted(String uri) {
         AntPathMatcher matcher = new AntPathMatcher();
