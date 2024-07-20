@@ -35,4 +35,10 @@ public class RegistrationAPI {
         Registration registrationUpdate = registrationService.updateRegistration(id, registrationRequest);
         return ResponseEntity.ok(registrationUpdate);
     }
+
+    @GetMapping("/registration-count/{contestId}")
+    public int getRegistrationCount(@PathVariable long contestId) {
+        return registrationService.countRegister(contestId);
+    }
+
 }

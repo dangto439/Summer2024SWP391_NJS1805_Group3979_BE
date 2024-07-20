@@ -62,6 +62,11 @@ public class RegistrationService {
         return buildRegistrationResponse(registration);
     }
 
+    public int countRegister(long contestId){
+        Contest contest = contestRepository.findByContestId(contestId);
+        return registrationRepository.countByContest(contest);
+    }
+
     // khi contest du so ng tham gia thi tu sap xep lich thi dau
     public void arrangePlayers(Contest contest){
         int checkQuantity = registrationRepository.countByContest(contest);
