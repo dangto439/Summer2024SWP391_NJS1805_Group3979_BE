@@ -118,11 +118,19 @@ public class GameService {
     return this.buildGameResponse(game);
     }
     public GameResponse buildGameResponse(Game game){
+        long firstPlayerId = 0;
+        long secondPlayerId = 0;
+        if(game.getFirstPlayer() != null ){
+            firstPlayerId = game.getFirstPlayer().getId();
+        }
+        if(game.getSecondPlayer() != null ){
+            secondPlayerId = game.getSecondPlayer().getId();
+        }
         return GameResponse.builder()
                 .playingDate(game.getPlayingDate())
                 .contestId(game.getContest().getContestId())
-                .firstPlayerId(game.getFirstPlayer().getId())
-                .secondPlayerId(game.getSecondPlayer().getId())
+                .firstPlayerId(firstPlayerId)
+                .secondPlayerId(secondPlayerId)
                 .gameId(game.getGameId())
                 .round(game.getRound())
                 .scoreFirstPlayer(game.getScoreFirstPlayer())
