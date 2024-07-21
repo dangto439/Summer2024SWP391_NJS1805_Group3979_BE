@@ -7,6 +7,7 @@ import com.group3979.badmintonbookingbe.model.response.ContestResponse;
 import com.group3979.badmintonbookingbe.model.response.GameResponse;
 import com.group3979.badmintonbookingbe.service.ContestService;
 import com.group3979.badmintonbookingbe.service.GameService;
+import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import java.util.List;
 @SecurityRequirement(name = "api")
 @CrossOrigin("*")
 public class ContestAPI {
+    @Autowired
+    AccountUtils accountUtils;
     @Autowired
     ContestService contestService;
     @Autowired
@@ -45,10 +48,10 @@ public class ContestAPI {
         ContestResponse contestResponse = contestService.getContestById(id);
         return ResponseEntity.ok(contestResponse);
     }
-    @GetMapping("/contest/current-account/{id}")
-    public ResponseEntity<List<ContestResponse>> getContestsCurrentAccount(@PathVariable Long id){
-//        List<ContestResponse> contestResponses = contestService.getContestsCurrentAccount();
-        return ResponseEntity.ok(contestService.getContestsCurrentAccount(id));
+    @GetMapping("/contests/current-account")
+    public ResponseEntity<List<ContestResponse>> getContestsCurrentAccount(){
+        List<ContestResponse> contestResponses = contestService.getContestsCurrentAccount();
+        return ResponseEntity.ok(contestResponses);
     }
     @PutMapping("/contest/game/{gameId}")
     public ResponseEntity<GameResponse> updateGameTimeAndCourtSlot(@PathVariable long gameId,

@@ -46,7 +46,6 @@ public class Filter extends OncePerRequestFilter{
             "/api/clubs/outstanding",
             "/api/clubs/10",
             "/api/contests",
-            "/api/contests",
             "/api/contest/{id}",
             "/api/contest/game/{gameId}",
             "/api/contest/games/{contestId}",
