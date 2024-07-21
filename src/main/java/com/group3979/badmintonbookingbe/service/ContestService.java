@@ -47,7 +47,7 @@ public class ContestService {
                 gameService.createMatchesContest(contest.getCapacity(), contest);
                 return this.buildContestResponse(contest);
             }else {
-                throw new CustomException("Số đã cung cấp không phải là lũy thừa của 2.");
+                throw new CustomException("Vui lòng nhập số là lũy thừa của 2 cho số người tham gia.");
             }
         } else {
             throw new CustomException("Câu lạc bộ không tồn tại");
