@@ -2,6 +2,7 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.TransactionType;
+import com.group3979.badmintonbookingbe.eNum.TransferContestRequest;
 import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
 import com.group3979.badmintonbookingbe.model.request.TransferRequest;
@@ -353,6 +354,58 @@ public class WalletService {
         }
         bookingNeedToUpdate.setBookingStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(bookingNeedToUpdate);
+    }
+
+    // chuyen tien Contest (khac: bookingId = 0 so vs transferBooking)
+    public void transferOnContest(TransferContestRequest transferContestRequest) throws NotFoundException,
+            InsufficientBalanceException {
+        Wallet senderWallet = walletRepository.findWalletByWalletId(transferContestRequest.getSenderWalletId());
+        if (senderWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + transferContestRequest.getSenderWalletId());
+        }
+
+        Wallet clubOwnerWallet = walletRepository.findWalletByWalletId(transferContestRequest.getReceiverWalletId());
+        if (clubOwnerWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + transferContestRequest.getReceiverWalletId());
+        }
+
+        Wallet platformWallet = walletRepository.findWalletByWalletId(platformWalletId);
+        if (platformWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví của Platform");
+        }
+
+        // Kiem tra so du co du de chuyen khong
+        double senderBalance = senderWallet.getBalance();
+        if (senderBalance < transferContestRequest.getAmount()) {
+            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch chuyển tiền");
+        }
+
+        // Thuc hien chuyen tien
+        // amount = 200, amountReceivedOfOwner = 190, amountReceivedOfPlatform = 10;
+        double amountReceivedOfOwner = transferContestRequest.getAmount() - (transferContestRequest.getAmount() * feePercentOfPlatform / 100); // 190
+        double amountReceivedOfPlatform = transferContestRequest.getAmount() - amountReceivedOfOwner; // 10
+
+        double newSenderBalance = senderWallet.getBalance() - transferContestRequest.getAmount(); // currentBalanceOfSender - amount
+        double platformBalance = platformWallet.getBalance() + amountReceivedOfPlatform;
+        double clubOwnerBalance = clubOwnerWallet.getBalance() + amountReceivedOfOwner;
+
+        senderWallet.setBalance(newSenderBalance);
+        clubOwnerWallet.setBalance(clubOwnerBalance);
+        platformWallet.setBalance(platformBalance);
+
+//         Create & Save Transaction cho Sender
+//        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+//                senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
+
+        // Create & Save Transaction  cho Platform and ClubOwner
+        transactionService.createTransactionV2(0, amountReceivedOfOwner,
+                senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
+        transactionService.createTransactionV2(0, amountReceivedOfPlatform,
+                senderWallet.getWalletId(), platformWallet.getWalletId(), TransactionType.TRANSFER);
+        // Save Wallet
+        walletRepository.save(senderWallet);
+        walletRepository.save(clubOwnerWallet);
+        walletRepository.save(platformWallet);
     }
 
     //  Chuyen tien tu mot vi den vi khac (Transfer)

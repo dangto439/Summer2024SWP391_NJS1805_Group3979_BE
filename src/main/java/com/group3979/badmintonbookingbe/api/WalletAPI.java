@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.api;
 
+import com.group3979.badmintonbookingbe.eNum.TransferContestRequest;
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
 import com.group3979.badmintonbookingbe.model.request.TransferRequest;
 import com.group3979.badmintonbookingbe.model.response.WalletResponse;
@@ -60,7 +61,7 @@ public class WalletAPI {
         return ResponseEntity.ok("Chuyển tiền thành công");
     }
 
-    @PostMapping("wallet/transfer-booking")
+    @PostMapping("/wallet/transfer-booking")
     public ResponseEntity transferBooking(@RequestBody TransferRequest transferRequest) throws NotFoundException {
         walletService.transferOnBooking(transferRequest);
         return ResponseEntity.ok("Chuyển tiền thành công");
@@ -70,5 +71,11 @@ public class WalletAPI {
     public ResponseEntity ownerWallet(@PathVariable Long clubId) throws NotFoundException {
         WalletResponse wallet = walletService.getWalletOfClubOwner(clubId);
         return ResponseEntity.ok(wallet);
+    }
+
+    @PostMapping("/wallet/transfer-contest")
+    public ResponseEntity transferContest(@RequestBody TransferContestRequest transferContestRequest) throws NotFoundException {
+        walletService.transferOnContest(transferContestRequest);
+        return ResponseEntity.ok("Chuyển tiền thành công");
     }
 }
