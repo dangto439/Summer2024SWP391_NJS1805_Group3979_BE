@@ -45,10 +45,10 @@ public class ContestAPI {
         ContestResponse contestResponse = contestService.getContestById(id);
         return ResponseEntity.ok(contestResponse);
     }
-    @GetMapping("/contest/current-account")
-    public ResponseEntity<List<ContestResponse>> getContestsCurrentAccount(){
-        List<ContestResponse> contestResponses = contestService.getContestsCurrentAccount();
-        return ResponseEntity.ok(contestResponses);
+    @GetMapping("/contest/current-account/{id}")
+    public ResponseEntity<List<ContestResponse>> getContestsCurrentAccount(@PathVariable Long id){
+//        List<ContestResponse> contestResponses = contestService.getContestsCurrentAccount();
+        return ResponseEntity.ok(contestService.getContestsCurrentAccount(id));
     }
     @PutMapping("/contest/game/{gameId}")
     public ResponseEntity<GameResponse> updateGameTimeAndCourtSlot(@PathVariable long gameId,

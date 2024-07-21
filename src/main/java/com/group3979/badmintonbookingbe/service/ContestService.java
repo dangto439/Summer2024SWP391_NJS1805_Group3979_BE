@@ -27,6 +27,8 @@ public class ContestService {
     GameService gameService;
     @Autowired
     AccountUtils accountUtils;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     public ContestResponse createContest(ContestRequest contestRequest) {
         Club club = clubRepository.findByClubId(contestRequest.getClubId());
@@ -107,8 +109,8 @@ public class ContestService {
                 .build();
     }
 
-    public List<ContestResponse> getContestsCurrentAccount() {
-        Account account = accountUtils.getCurrentAccount();
+    public List<ContestResponse> getContestsCurrentAccount(Long id) {
+        Account account = authenticationService.getAccountById(id);
         List<Contest> contests = contestRepository.findContestsByClub_Account(account);
         List<ContestResponse> contestResponses = new ArrayList<>();
         for(Contest contest:contests){
