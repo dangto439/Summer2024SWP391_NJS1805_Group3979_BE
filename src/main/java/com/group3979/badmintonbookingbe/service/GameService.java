@@ -120,14 +120,34 @@ public class GameService {
     public GameResponse buildGameResponse(Game game){
         long firstPlayerId = 0;
         long secondPlayerId = 0;
+        String name1 = null;
+        String name2 = null;
+        long courtSlotId = 0 ;
+        String courtName = null;
+        long courtId = 0;
+        int timeSlot = 0;
         if(game.getFirstPlayer() != null ){
             firstPlayerId = game.getFirstPlayer().getId();
+            name1 = game.getFirstPlayer().getName();
         }
         if(game.getSecondPlayer() != null ){
             secondPlayerId = game.getSecondPlayer().getId();
+            name2 = game.getSecondPlayer().getName();
+        }
+        if(game.getCourtSlot() != null){
+            courtSlotId = game.getCourtSlot().getCourtSlotId() ;
+            courtName = game.getCourtSlot().getCourt().getCourtName();
+            courtId =game.getCourtSlot().getCourt().getCourtId();
+            timeSlot = game.getCourtSlot().getSlot().getTime();
         }
         return GameResponse.builder()
                 .playingDate(game.getPlayingDate())
+                .firstPlayerName(name1)
+                .timeSlot(timeSlot)
+                .courtId(courtId)
+                .courtName(courtName)
+                .courtSlotId(courtSlotId)
+                .secondPlayerName(name2)
                 .contestId(game.getContest().getContestId())
                 .firstPlayerId(firstPlayerId)
                 .secondPlayerId(secondPlayerId)
