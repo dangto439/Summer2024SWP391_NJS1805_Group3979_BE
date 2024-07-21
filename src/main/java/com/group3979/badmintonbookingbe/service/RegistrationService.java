@@ -58,6 +58,7 @@ public class RegistrationService {
         registration.setRegistrationDate(LocalDate.now());
 
         registration = registrationRepository.saveAndFlush(registration);
+        // check du so luong ng tham gia thi tu sap xep lich thi dau
         arrangePlayers(contest);
         return buildRegistrationResponse(registration);
     }
