@@ -1,7 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.ContestStatus;
-import com.group3979.badmintonbookingbe.eNum.TransferContestRequest;
+import com.group3979.badmintonbookingbe.model.request.TransferContestRequest;
 import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.ContestRequest;
@@ -40,20 +40,23 @@ public class ContestService {
         Club club = clubRepository.findByClubId(contestRequest.getClubId());
         if (club != null) {
             if(isLog2(contestRequest.getCapacity())){
-                Contest contest = new Contest();
-                contest.setCapacity(contestRequest.getCapacity());
-                contest.setClub(club);
-                contest.setFirstPrize(contestRequest.getFirstPrize());
-                contest.setSecondPrize(contestRequest.getSecondPrize());
-                contest.setUrlBanner(contestRequest.getUrlBanner());
-                contest.setParticipationPrice(contestRequest.getParticipationPrice());
-                contest.setStartDate(contestRequest.getStartDate());
-                contest.setEndDate(contestRequest.getEndDate());
-                contest.setContestStatus(ContestStatus.ACTIVE);
-                contest.setName(contestRequest.getName());
-                contest = contestRepository.save(contest);
-                gameService.createMatchesContest(contest.getCapacity(), contest);
-                return this.buildContestResponse(contest);
+                if(checkPercentPrice(contestRequest,club)){
+                    Contest contest = new Contest();
+                    contest.setCapacity(contestRequest.getCapacity());
+                    contest.setClub(club);
+                    contest.setFirstPrize(contestRequest.getFirstPrize());
+                    contest.setSecondPrize(contestRequest.getSecondPrize());
+                    contest.setUrlBanner(contestRequest.getUrlBanner());
+                    contest.setParticipationPrice(contestRequest.getParticipationPrice());
+                    contest.setStartDate(contestRequest.getStartDate());
+                    contest.setEndDate(contestRequest.getEndDate());
+                    contest.setName(contestRequest.getName());
+                    contest = contestRepository.save(contest);
+                    gameService.createMatchesContest(contest.getCapacity(), contest);
+                    return this.buildContestResponse(contest);
+                }else {
+                    throw new CustomException("Số dư không đủ để tạo giải đấu.");
+                }
             }else {
                 throw new CustomException("Vui lòng nhập số là lũy thừa của 2 cho số người tham gia.");
             }
@@ -62,6 +65,11 @@ public class ContestService {
         }
     }
 
+    public boolean checkPercentPrice(ContestRequest contestRequest, Club club) {
+        double balanceClubOwner = walletRepository.findWalletByAccount(club.getAccount()).getBalance();
+        double fivePercentPrice = contestRequest.getParticipationPrice()*contestRequest.getCapacity()*0.05;
+        return balanceClubOwner > fivePercentPrice;
+    }
     public boolean isLog2(int n) {
         if (n < 2 ) {
             return false;
@@ -84,6 +92,7 @@ public class ContestService {
                 contest.setParticipationPrice(updateContestRequest.getParticipationPrice());
                 contest.setStartDate(updateContestRequest.getStartDate());
                 contest.setEndDate(updateContestRequest.getEndDate());
+                contest.setContestStatus(ContestStatus.ACTIVE);
                 contest.setName(updateContestRequest.getName());
                 contest = contestRepository.save(contest);
                 return this.buildContestResponse(contest);
