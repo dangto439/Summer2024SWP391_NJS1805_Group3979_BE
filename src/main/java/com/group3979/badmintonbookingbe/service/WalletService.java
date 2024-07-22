@@ -205,6 +205,7 @@ public class WalletService {
                 .build();
     }
 
+    // Get Wallet of ClubOwner
     public WalletResponse getWalletOfClubOwner(Long clubId) throws NotFoundException {
         Club clubOfOwner = clubRepository.findByClubId(clubId);
 
@@ -228,6 +229,29 @@ public class WalletService {
                 .walletId(wallet.getWalletId())
                 .balance(wallet.getBalance())
                 .build();
+    }
+
+    //
+    public Wallet getWalletForClubOwner(Long clubId) throws NotFoundException {
+        Club clubOfOwner = clubRepository.findByClubId(clubId);
+
+        if (clubOfOwner == null) {
+            throw new NotFoundException("Không tìm thấy câu lạc bộ có ID: " + clubId);
+        }
+
+        Account clubOwner = clubOfOwner.getAccount();
+
+        if (clubOwner == null) {
+            throw new NotFoundException("Không tìm thấy tài khoản chủ câu lạc bộ có ID: " + clubId);
+        }
+
+        Wallet wallet = walletRepository.findWalletByAccount(clubOwner);
+
+        if (wallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản có ID: " + clubOwner.getId());
+        }
+
+        return wallet;
     }
 
 
@@ -338,9 +362,9 @@ public class WalletService {
 //                senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
 
         // Create & Save Transaction  cho Platform and ClubOwner
-        transactionService.createTransactionV2(transferRequest.getBookingId(), amountReceivedOfOwner,
+        transactionService.createTransactionV2(0, transferRequest.getBookingId(), amountReceivedOfOwner,
                 senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
-        transactionService.createTransactionV2(transferRequest.getBookingId(), amountReceivedOfPlatform,
+        transactionService.createTransactionV2(0, transferRequest.getBookingId(), amountReceivedOfPlatform,
                 senderWallet.getWalletId(), platformWallet.getWalletId(), TransactionType.TRANSFER);
         // Save Wallet
         walletRepository.save(senderWallet);
@@ -398,9 +422,9 @@ public class WalletService {
 //                senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
 
         // Create & Save Transaction  cho Platform and ClubOwner
-        transactionService.createTransactionV2(0, amountReceivedOfOwner,
+        transactionService.createTransactionV2(transferContestRequest.getContestId(),0, amountReceivedOfOwner,
                 senderWallet.getWalletId(), clubOwnerWallet.getWalletId(), TransactionType.TRANSFER);
-        transactionService.createTransactionV2(0, amountReceivedOfPlatform,
+        transactionService.createTransactionV2(transferContestRequest.getContestId(), 0, amountReceivedOfPlatform,
                 senderWallet.getWalletId(), platformWallet.getWalletId(), TransactionType.TRANSFER);
         // Save Wallet
         walletRepository.save(senderWallet);
@@ -438,12 +462,12 @@ public class WalletService {
         receiverWallet = walletRepository.save(receiverWallet);
 
         // transaction for sender & receiver
-        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+        transactionService.createTransactionV2(0, transferRequest.getBookingId(), transferRequest.getAmount(),
                 senderWallet.getWalletId(), receiverWallet.getWalletId(), TransactionType.TRANSFER);
     }
 
     //  Refund tien tu mot vi den vi khac (Refund)
-    public void refund(TransferRequest transferRequest) throws NotFoundException,
+    public void refundOnBooking(TransferRequest transferRequest) throws NotFoundException,
             InsufficientBalanceException {
         Wallet senderWallet = walletRepository.findWalletByWalletId(transferRequest.getSenderWalletId());
         if (senderWallet == null) {
@@ -472,8 +496,40 @@ public class WalletService {
         receiverWallet = walletRepository.save(receiverWallet);
 
         // transaction for refund
-        transactionService.createTransactionV2(transferRequest.getBookingId(), transferRequest.getAmount(),
+        transactionService.createTransactionV2(0, transferRequest.getBookingId(), transferRequest.getAmount(),
                 senderWallet.getWalletId(), receiverWallet.getWalletId(), TransactionType.REFUND);
+    }
 
+    public void refundOnContest(TransferContestRequest transferContestRequest) throws NotFoundException,
+            InsufficientBalanceException {
+        Wallet senderWallet = walletRepository.findWalletByWalletId(transferContestRequest.getSenderWalletId());
+        if (senderWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + transferContestRequest.getSenderWalletId());
+        }
+
+        Wallet receiverWallet = walletRepository.findWalletByWalletId(transferContestRequest.getReceiverWalletId());
+        if (receiverWallet == null) {
+            throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + transferContestRequest.getReceiverWalletId());
+        }
+
+        // Kiem tra so du co du de chuyen khong
+        double senderBalance = senderWallet.getBalance();
+        if (senderBalance < transferContestRequest.getAmount()) {
+            throw new InsufficientBalanceException("Số dư không đủ để thực hiện giao dịch chuyển tiền");
+        }
+
+        double newSenderBalance = senderBalance - transferContestRequest.getAmount();
+        double receiverBalance = receiverWallet.getBalance() + transferContestRequest.getAmount();
+
+        // set balance
+        senderWallet.setBalance(newSenderBalance);
+        receiverWallet.setBalance(receiverBalance);
+
+        senderWallet = walletRepository.save(senderWallet);
+        receiverWallet = walletRepository.save(receiverWallet);
+
+        // transaction for refund
+        transactionService.createTransactionV2(transferContestRequest.getContestId(), 0, transferContestRequest.getAmount(),
+                senderWallet.getWalletId(), receiverWallet.getWalletId(), TransactionType.REFUND);
     }
 }

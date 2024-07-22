@@ -227,7 +227,7 @@ public class AuthenticationService implements UserDetailsService {
         staff.setSupervisorID(supervisor.getId());
         staff.setAvatar(avatatDefault);
         staff.setSignupDate(LocalDate.now());
-        walletService.createWallet(staffRegisterRequest.getEmail());
+
         Club club = clubRepository.findByClubId(staffRegisterRequest.getClubId());
         if (club == null) {
             throw new BadRequestException("Không tìm thấy câu lạc bộ!");
@@ -235,6 +235,7 @@ public class AuthenticationService implements UserDetailsService {
         staff.setClub(club);
 
         staff = authenticationRepository.save(staff);
+        walletService.createWallet(staffRegisterRequest.getEmail());
 
         return StaffResponse.builder()
                 .staffId(staff.getId())

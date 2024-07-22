@@ -354,7 +354,7 @@ public class BookingService {
                 transferRequest.setAmount(refundAmount);
                 transferRequest.setSenderWalletId(walletOfClubOwner.getWalletId());
                 transferRequest.setReceiverWalletId(walletOfCustomer.getWalletId());
-                walletService.refund(transferRequest);
+                walletService.refundOnBooking(transferRequest);
             }
         }else {
             throw new IllegalArgumentException("Đơn đặt lịch này không ở trạng thái HỦY");
