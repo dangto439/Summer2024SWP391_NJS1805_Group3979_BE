@@ -4,6 +4,7 @@ package com.group3979.badmintonbookingbe.service;
 import com.group3979.badmintonbookingbe.eNum.PromotionStatus;
 import com.group3979.badmintonbookingbe.entity.Club;
 import com.group3979.badmintonbookingbe.entity.Promotion;
+import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.PromotionRequest;
 import com.group3979.badmintonbookingbe.model.response.PromotionResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
@@ -59,7 +60,7 @@ public class PromotionService {
 
     public List<PromotionResponse> getAllPromotions(Long clubId) throws NotFoundException {
         Club club = clubRepository.findByClubId(clubId);
-        if(club == null){
+        if (club == null) {
             throw new NotFoundException("Không tìm thấy câu lạc bộ có ID: " + clubId);
         }
         List<Promotion> promotionList = promotionRepository.findByClub(club);
@@ -96,7 +97,7 @@ public class PromotionService {
             promotion.setPromotionStatus(promotionRequest.getStatus());
 
             promotion = promotionRepository.save(promotion);
-        }else{
+        } else {
             throw new NotFoundException("Không tìm thấy khuyến mãi có ID: " + promotionId);
         }
         PromotionResponse promotionResponse = PromotionResponse.builder()
@@ -116,17 +117,34 @@ public class PromotionService {
         if (promotion != null) {
             promotion.setPromotionStatus(PromotionStatus.EXPIRED);
             promotionRepository.save(promotion);
-        }else{
+        } else {
             throw new NotFoundException("Không tìm thấy khuyến mãi có ID: " + promotionId);
         }
     }
 
-    public Promotion checkValidPromotion(long clubId, String promotionCode){
+    public Promotion checkValidPromotion(long clubId, String promotionCode) {
         Promotion promotion = promotionRepository.findPromotionByPromotionCode(promotionCode);
-        if(promotion != null && clubId == promotion.getClub().getClubId()
-                && promotion.getPromotionStatus().equals(PromotionStatus.ACTIVE)){
+        if (promotion != null && clubId == promotion.getClub().getClubId()
+                && promotion.getPromotionStatus().equals(PromotionStatus.ACTIVE)) {
             return promotion;
         }
         return null;
+    }
+
+    public PromotionResponse checkPromotion(long clubId, String promotionCode) {
+        Promotion promotion = this.checkValidPromotion(clubId, promotionCode);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (promotion != null) {
+            return PromotionResponse.builder()
+                    .promotionId(promotion.getPromotionId())
+                    .promotionCode(promotion.getPromotionCode())
+                    .discount(promotion.getDiscount())
+                    .startDate(formatter.format(promotion.getStartDate()))
+                    .endDate(formatter.format(promotion.getEndDate()))
+                    .promotionStatus(promotion.getPromotionStatus())
+                    .build();
+        } else {
+            throw new CustomException("Mã giảm giá không hợp lệ");
+        }
     }
 }
