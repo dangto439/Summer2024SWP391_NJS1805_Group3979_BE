@@ -341,6 +341,8 @@ public class WalletService {
             throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + transferRequest.getReceiverWalletId());
         }
 
+
+
         Wallet platformWallet = walletRepository.findWalletByWalletId(platformWalletId);
         if (platformWallet == null) {
             throw new NotFoundException("Không tìm thấy ví của Platform");
