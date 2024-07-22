@@ -1,7 +1,7 @@
 package com.group3979.badmintonbookingbe.api;
 
-import com.group3979.badmintonbookingbe.eNum.TransferContestRequest;
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
+import com.group3979.badmintonbookingbe.model.request.TransferContestRequest;
 import com.group3979.badmintonbookingbe.model.request.TransferRequest;
 import com.group3979.badmintonbookingbe.model.response.WalletResponse;
 import com.group3979.badmintonbookingbe.service.WalletService;
