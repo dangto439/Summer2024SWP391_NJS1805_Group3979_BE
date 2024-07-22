@@ -50,4 +50,8 @@ public class Contest {
     @JsonIgnore
     @OneToMany(mappedBy = "contest")
     List<Game> games;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "contest")
+    List<Transaction> transactions;
 }
