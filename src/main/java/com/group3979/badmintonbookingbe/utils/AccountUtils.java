@@ -8,6 +8,5 @@ import org.springframework.stereotype.Component;
 public class AccountUtils {
     public Account getCurrentAccount() {
         return (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
     }
 }
