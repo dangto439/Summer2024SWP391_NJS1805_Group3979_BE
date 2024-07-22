@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingDetailStatus;
+import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.ExpirationStatus;
 import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.CustomException;
@@ -78,6 +79,7 @@ public class BookingDetailService {
         double totalPrice;
         double discountPrice = 0;
         if (promotion != null) {
+            booking.setPromotion(promotion);
             discountPrice = promotion.getDiscount();
             totalPrice = temporaryPrice - discountPrice;
         } else {
@@ -136,6 +138,7 @@ public class BookingDetailService {
         double discountPrice = (temporaryPrice *
                 (discountRuleRepository.findDiscountRuleByClub(fixedBooking.getClub()).getFixedPercent() / 100));
         if (promotion != null) {
+            fixedBooking.setPromotion(promotion);
             discountPrice += promotion.getDiscount();
             totalPrice = temporaryPrice - discountPrice;
         } else {
@@ -227,19 +230,23 @@ public class BookingDetailService {
     }
 
     @Transactional
-    public BookingDetailResponse cancelBookingDetail(long bookingDetailId) throws NotFoundException {
+    public BookingDetailResponse cancelBookingDetail(long bookingDetailId)  {
         BookingDetail bookingDetail = bookingDetailRepository.findBookingDetailByBookingDetailId(bookingDetailId);
-        if (bookingDetail != null && bookingDetail.getStatus() != BookingDetailStatus.CANCEL) {
-            bookingDetail.setStatus(BookingDetailStatus.CANCEL);
-            bookingDetail = bookingDetailRepository.save(bookingDetail);
-            // refund
-            try {
-                refundBookingDetail(bookingDetail);
-            } catch (Exception e) {
-                // handle loi trong refund
-                throw new CustomException("Đã xảy ra lỗi trong quá trình hoàn tiền: " + e.getMessage());
+        if (bookingDetail != null && (bookingDetail.getStatus() == BookingDetailStatus.UNFINISHED)) {
+            if(bookingDetail.getBooking().getBookingType().equals(BookingType.DAILYBOOKING)){
+                bookingDetail.setStatus(BookingDetailStatus.CANCEL);
+                bookingDetail = bookingDetailRepository.save(bookingDetail);
+                // refund
+                try {
+                    refundBookingDetail(bookingDetail);
+                } catch (Exception e) {
+                    // handle loi trong refund
+                    throw new CustomException("Đã xảy ra lỗi trong quá trình hoàn tiền: " + e.getMessage());
+                }
+                return this.getBookingDetailResponse(bookingDetail);
+            }else {
+                throw new CustomException("Chỉ được hoàn tiền trên đặt lich ngày.");
             }
-            return this.getBookingDetailResponse(bookingDetail);
         } else {
             throw new CustomException("Không tồn tại đơn đặt sân này hoặc đơn đặt lịch này đã bị hủy trước đó");
         }
