@@ -116,6 +116,7 @@ public class ContestService {
                 .firstPrize(contest.getFirstPrize())
                 .secondPrize(contest.getSecondPrize())
                 .startDate(contest.getStartDate())
+                .status(contest.getContestStatus())
                 .urlBanner(contest.getUrlBanner())
                 .capacity(contest.getCapacity())
                 .participationPrice(contest.getParticipationPrice())
