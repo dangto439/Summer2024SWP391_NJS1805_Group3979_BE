@@ -56,6 +56,7 @@ public class ScheduledTasks {
             Duration duration = Duration.between(transaction.getTimestamp(), dateTime);
             if(duration.toMinutes() >= 15){
                 transaction.setType(TransactionType.CANCEL);
+                transaction.setDescription(TransactionType.CANCEL.getDescription());
                 transactionRepository.save(transaction);
             }
         }

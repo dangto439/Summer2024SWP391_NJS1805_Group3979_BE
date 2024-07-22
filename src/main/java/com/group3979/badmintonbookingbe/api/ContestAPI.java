@@ -9,6 +9,7 @@ import com.group3979.badmintonbookingbe.service.ContestService;
 import com.group3979.badmintonbookingbe.service.GameService;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +59,12 @@ public class ContestAPI {
                                                                    @RequestBody GameTimeRequest gameTimeRequest){
         GameResponse gameResponse = gameService.updateGameCourtSlotAndPlayingDate(gameId, gameTimeRequest);
         return ResponseEntity.ok(gameResponse);
+    }
+
+    @DeleteMapping("/contest/{contestId}")
+    public ResponseEntity<String> deleteContest(@PathVariable Long contestId) throws NotFoundException {
+        contestService.cancelContest(contestId);
+        return ResponseEntity.ok("Hủy giải đấu thành công");
     }
 
     @GetMapping("/contest/game/{gameId}")

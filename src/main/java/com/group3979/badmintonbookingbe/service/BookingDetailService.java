@@ -272,7 +272,7 @@ public class BookingDetailService {
                 transferRequest.setAmount(refundAmount);
                 transferRequest.setSenderWalletId(walletOfClubOwner.getWalletId());
                 transferRequest.setReceiverWalletId(walletOfCustomer.getWalletId());
-                walletService.refund(transferRequest);
+                walletService.refundOnBooking(transferRequest);
             }else{
                 throw new CustomException("Đơn đặt lịch của bạn không được hoàn tiền vì đã vượt quá số ngày cho phép trong quy định");
             }
