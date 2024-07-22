@@ -121,6 +121,7 @@ public class BookingService {
                 double discountPrice = temporaryPrice *
                         (discountRuleRepository.findDiscountRuleByClub(flexibleBooking.getClub()).getFixedPercent() / 100);
                 if (promotion != null) {
+                    flexibleBooking.setPromotion(promotion);
                     discountPrice += promotion.getDiscount();
                     totalPrice = temporaryPrice - discountPrice;
                 } else {
@@ -143,6 +144,7 @@ public class BookingService {
         Club club = clubRepository.findByClubId(fixedBookingRequest.getClubId());
         Booking fixedBooking = new Booking();
         if (club != null) {
+
             fixedBooking.setAccount(accountUtils.getCurrentAccount());
             fixedBooking.setClub(club);
             fixedBooking.setBookingType(BookingType.FIXEDBOOKING);
@@ -290,6 +292,7 @@ public class BookingService {
         double discountPrice = (temporaryPrice *
                 (discountRuleRepository.findDiscountRuleByClub_ClubId(fixedBookingRequest.getClubId()).getFixedPercent() / 100));
         if (promotion != null) {
+
             discountPrice += promotion.getDiscount();
             return temporaryPrice - discountPrice;
         } else {
