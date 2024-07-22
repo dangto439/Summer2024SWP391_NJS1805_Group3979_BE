@@ -1,4 +1,4 @@
-package com.group3979.badmintonbookingbe.eNum;
+package com.group3979.badmintonbookingbe.model.request;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,5 +1,6 @@
 package com.group3979.badmintonbookingbe.repository;
 
+import com.group3979.badmintonbookingbe.eNum.BookingDetailStatus;
 import com.group3979.badmintonbookingbe.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,5 @@ public interface IBookingDetailRepository extends JpaRepository<BookingDetail, L
     BookingDetail findBookingDetailByBookingDetailId(long bookingDetailId);
     List<BookingDetail> findBookingDetailByBooking_BookingId(long booking_bookingId);
     BookingDetail findBookingDetailByCheckInCode(String checkInCode);
+    List<BookingDetail> findBookingDetailByStatus(BookingDetailStatus status);
 }
