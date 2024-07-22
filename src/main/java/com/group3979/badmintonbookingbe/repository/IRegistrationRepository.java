@@ -13,4 +13,5 @@ public interface IRegistrationRepository extends JpaRepository<Registration,Long
     List<Registration> findRegistrationsByContest(Contest contest);
     Registration findRegistrationByAccountAndContest(Account account, Contest contest);
     int countByContest(Contest contest);
+    Registration findRegistrationByAccount(Account account);
 }
