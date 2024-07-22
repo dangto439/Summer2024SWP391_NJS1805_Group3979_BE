@@ -161,8 +161,8 @@ public class AuthenticationService implements UserDetailsService {
                 account.setAvatar(avatatDefault);
                 account.setGender(Gender.MALE); // default set khi create by login gg: MALE
                 account.setSignupDate(LocalDate.now());
-                walletService.createWallet(email);
                 account = authenticationRepository.save(account);
+                walletService.createWallet(email);
             }
             accountResponse.setId(account.getId());
             accountResponse.setPhone(account.getPhone());
