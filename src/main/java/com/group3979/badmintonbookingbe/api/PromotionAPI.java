@@ -27,6 +27,7 @@ public class PromotionAPI {
         return  ResponseEntity.ok(promotion);
     }
 
+
     @GetMapping("/promotion/{clubId}")
     public ResponseEntity<List<PromotionResponse>> getPromotion(@PathVariable Long clubId) throws NotFoundException {
         List<PromotionResponse> promotionResponseList = promotionService.getAllPromotions(clubId);
@@ -43,5 +44,9 @@ public class PromotionAPI {
     public ResponseEntity<String> deletePromotion(@PathVariable Long promotionId) throws NotFoundException {
         promotionService.deletePromotion(promotionId);
         return ResponseEntity.ok("Đã xóa thành công");
+    }
+    @GetMapping("/promotion/check")
+    public ResponseEntity<PromotionResponse> checkValidPromotion(@RequestParam long clubId, @RequestParam String promotionCode){
+        return ResponseEntity.ok(promotionService.checkPromotion(clubId,promotionCode));
     }
 }
