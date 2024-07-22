@@ -1,6 +1,7 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingStatus;
+import com.group3979.badmintonbookingbe.eNum.BookingType;
 import com.group3979.badmintonbookingbe.eNum.TransactionType;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.TransferContestRequest;
@@ -324,6 +325,12 @@ public class WalletService {
     // Chuyen tien trong khi dat lich (chuyen cho clubOwner va chiet 5% cua booking cho Platform)
     public void transferOnBooking(TransferRequest transferRequest) throws NotFoundException,
             InsufficientBalanceException {
+        // kiem tra xem neu la book lich ngay = bookingFlex thi khong tao ra Transaction - return tai day)
+        if(transferRequest.getAmount() == 0 &&
+                bookingRepository.findByBookingId(transferRequest.getBookingId()).getBookingType().equals(BookingType.FLEXIBLEBOOKING)){
+            return;
+        }
+
         Wallet senderWallet = walletRepository.findWalletByWalletId(transferRequest.getSenderWalletId());
         if (senderWallet == null) {
             throw new NotFoundException("Không tìm thấy ví cho tài khoản nguồn với ID: " + transferRequest.getSenderWalletId());
