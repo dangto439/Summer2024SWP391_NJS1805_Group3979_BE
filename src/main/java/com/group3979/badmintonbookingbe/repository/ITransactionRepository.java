@@ -35,7 +35,8 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
     @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(t.timestamp), SUM(t.amount)) " +
             "FROM Transaction t " +
             "JOIN t.booking b " +
-            "WHERE t.type = 'RECEIVE' AND t.receiverWallet.walletId = :walletId AND YEAR(t.timestamp) = :year " +
+            "WHERE t.type NOT IN (com.group3979.badmintonbookingbe.eNum.TransactionType.CANCEL, com.group3979.badmintonbookingbe.eNum.TransactionType.PENDING) " +
+            "AND t.receiverWallet.walletId = :walletId AND YEAR(t.timestamp) = :year " +
             "GROUP BY MONTH(t.timestamp) " +
             "ORDER BY MONTH(t.timestamp)")
     List<RevenueResponse> findMonthlyRevenueByClubIdAndWalletIdAndYear(
@@ -45,7 +46,8 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
     @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(t.timestamp), SUM(t.amount)) " +
             "FROM Transaction t " +
             "JOIN t.booking b " +
-            "WHERE t.type = 'REFUND' AND t.receiverWallet.walletId = :walletId AND YEAR(t.timestamp) = :year " +
+            "WHERE t.type NOT IN(com.group3979.badmintonbookingbe.eNum.TransactionType.CANCEL, com.group3979.badmintonbookingbe.eNum.TransactionType.PENDING, com.group3979.badmintonbookingbe.eNum.TransactionType.DEPOSIT) " +
+            "AND t.senderWallet.walletId = :walletId AND YEAR(t.timestamp) = :year " +
             "GROUP BY MONTH(t.timestamp) " +
             "ORDER BY MONTH(t.timestamp)")
     List<RevenueResponse> findMonthlyRefundByWalletIdAndYear(
