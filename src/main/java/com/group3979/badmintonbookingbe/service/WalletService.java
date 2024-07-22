@@ -2,6 +2,7 @@ package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.BookingStatus;
 import com.group3979.badmintonbookingbe.eNum.TransactionType;
+import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.TransferContestRequest;
 import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.InsufficientBalanceException;
@@ -443,6 +444,10 @@ public class WalletService {
         Wallet receiverWallet = walletRepository.findWalletByWalletId(transferRequest.getReceiverWalletId());
         if (receiverWallet == null) {
             throw new NotFoundException("Không tìm thấy ví cho tài khoản đích với ID: " + transferRequest.getReceiverWalletId());
+        }
+
+        if(senderWallet == receiverWallet) {
+            throw new CustomException("Bạn không thể tự chuyển tiền cho chính mình");
         }
 
         // Kiem tra so du co du de chuyen khong
