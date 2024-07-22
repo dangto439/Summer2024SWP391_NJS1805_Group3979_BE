@@ -9,4 +9,5 @@ public class TransferContestRequest {
     private long senderWalletId;
     private long receiverWalletId;
     private double amount;
+    private long contestId;
 }

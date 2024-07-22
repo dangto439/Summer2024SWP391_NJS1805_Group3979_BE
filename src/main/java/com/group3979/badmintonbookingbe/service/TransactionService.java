@@ -8,10 +8,7 @@ import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.TransactionRequest;
 import com.group3979.badmintonbookingbe.model.response.TransactionResponse;
 import com.group3979.badmintonbookingbe.model.response.RevenueResponse;
-import com.group3979.badmintonbookingbe.repository.IAuthenticationRepository;
-import com.group3979.badmintonbookingbe.repository.IBookingRepository;
-import com.group3979.badmintonbookingbe.repository.ITransactionRepository;
-import com.group3979.badmintonbookingbe.repository.IWalletRepository;
+import com.group3979.badmintonbookingbe.repository.*;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +34,9 @@ public class TransactionService {
 
     @Autowired
     IAuthenticationRepository authenticationRepository;
+
+    @Autowired
+    IContestRepository contestRepository;
 
     @Autowired
     ITransactionRepository transactionRepository;
@@ -68,7 +68,7 @@ public class TransactionService {
     }
 
     // create transaction
-    public void createTransactionV2(long bookingId, double amount, long senderWalletId, long receiverWalletId, TransactionType transactionType){
+    public void createTransactionV2(long contestId, long bookingId, double amount, long senderWalletId, long receiverWalletId, TransactionType transactionType){
         Wallet senderWallet = walletRepository.findWalletByWalletId(senderWalletId);
         Wallet receiverWallet = walletRepository.findWalletByWalletId(receiverWalletId);
         if (receiverWallet == null) {
@@ -87,6 +87,7 @@ public class TransactionService {
         transaction.setReceiverWallet(receiverWallet);
         transaction.setDescription(transactionType.getDescription());
         transaction.setBooking(bookingRepository.findByBookingId(bookingId));
+        transaction.setContest(contestRepository.findByContestId(contestId));
 
         transactionRepository.save(transaction);
     }

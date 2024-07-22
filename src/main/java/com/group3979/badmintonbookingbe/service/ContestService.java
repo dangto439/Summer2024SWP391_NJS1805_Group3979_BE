@@ -1,16 +1,18 @@
 package com.group3979.badmintonbookingbe.service;
 
 import com.group3979.badmintonbookingbe.eNum.ContestStatus;
-import com.group3979.badmintonbookingbe.entity.Account;
-import com.group3979.badmintonbookingbe.entity.Club;
-import com.group3979.badmintonbookingbe.entity.Contest;
+import com.group3979.badmintonbookingbe.eNum.TransferContestRequest;
+import com.group3979.badmintonbookingbe.entity.*;
 import com.group3979.badmintonbookingbe.exception.CustomException;
 import com.group3979.badmintonbookingbe.model.request.ContestRequest;
 import com.group3979.badmintonbookingbe.model.request.UpdateContestRequest;
 import com.group3979.badmintonbookingbe.model.response.ContestResponse;
 import com.group3979.badmintonbookingbe.repository.IClubRepository;
 import com.group3979.badmintonbookingbe.repository.IContestRepository;
+import com.group3979.badmintonbookingbe.repository.IRegistrationRepository;
+import com.group3979.badmintonbookingbe.repository.IWalletRepository;
 import com.group3979.badmintonbookingbe.utils.AccountUtils;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,12 @@ public class ContestService {
     GameService gameService;
     @Autowired
     AccountUtils accountUtils;
+    @Autowired
+    WalletService walletService;
+    @Autowired
+    IRegistrationRepository registrationRepository;
+    @Autowired
+    IWalletRepository walletRepository;
 
     public ContestResponse createContest(ContestRequest contestRequest) {
         Club club = clubRepository.findByClubId(contestRequest.getClubId());
@@ -76,7 +84,6 @@ public class ContestService {
                 contest.setParticipationPrice(updateContestRequest.getParticipationPrice());
                 contest.setStartDate(updateContestRequest.getStartDate());
                 contest.setEndDate(updateContestRequest.getEndDate());
-                contest.setContestStatus(ContestStatus.ACTIVE);
                 contest.setName(updateContestRequest.getName());
                 contest = contestRepository.save(contest);
                 return this.buildContestResponse(contest);
@@ -117,6 +124,25 @@ public class ContestService {
                     contestResponses.add(this.buildContestResponse(contest));
                 }
                 return contestResponses;
+    }
+
+    // cancel Contest
+    public void cancelContest(long contestId) throws NotFoundException {
+        Contest contest = contestRepository.findByContestId(contestId);
+        contest.setContestStatus(ContestStatus.INACTIVE);
+        Wallet clubOwnerWallet = walletService.getWalletForClubOwner(contest.getClub().getClubId());
+
+        if(contest.getContestStatus().equals(ContestStatus.INACTIVE)){
+            List<Registration> registrationList = registrationRepository.findRegistrationsByContest(contest);
+            for (Registration registration : registrationList){
+                TransferContestRequest transferContestRequest = new TransferContestRequest();
+                transferContestRequest.setContestId(contestId);
+                transferContestRequest.setReceiverWalletId(walletRepository.findWalletIdByAccount(registration.getAccount()));
+                transferContestRequest.setSenderWalletId(clubOwnerWallet.getWalletId());
+                transferContestRequest.setAmount(contest.getParticipationPrice());
+                walletService.refundOnContest(transferContestRequest);
+            }
+        }
     }
 
     public List<ContestResponse> getAllContest(){
