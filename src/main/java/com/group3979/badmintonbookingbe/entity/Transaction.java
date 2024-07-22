@@ -34,4 +34,9 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "booking_id")
     private Booking booking;
+
+    @ManyToOne
+    @JoinColumn(name = "contest_id")
+    private Contest contest;
+
 }
