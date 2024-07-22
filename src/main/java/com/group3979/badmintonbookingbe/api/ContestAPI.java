@@ -67,6 +67,11 @@ public class ContestAPI {
         return ResponseEntity.ok("Hủy giải đấu thành công");
     }
 
+    @GetMapping("/contests/outstanding")
+    public ResponseEntity<List<ContestResponse>> findOutstandingContest(){
+        return ResponseEntity.ok(contestService.getHotContest());
+    }
+
     @GetMapping("/contest/game/{gameId}")
     public ResponseEntity<GameResponse> getGameById(@PathVariable long gameId){
         return ResponseEntity.ok(gameService.getGameById(gameId));
