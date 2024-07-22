@@ -30,6 +30,10 @@ public class ScheduledTasks {
     IContestRepository contestRepository;
     @Autowired
     ContestService contestService;
+    @Autowired
+    IRegistrationRepository registrationRepository;
+    @Autowired
+    IWalletRepository walletRepository;
 
     @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
     @Transactional
@@ -49,17 +53,39 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "0 0/4 * * * ?")
     @Transactional
-    public void removeTransactionPending(){
-        LocalDateTime dateTime = LocalDateTime.now();
-        List<Transaction> transactionList = transactionRepository.findAll();
-        transactionList.removeIf(transaction -> !(transaction.getType().equals(TransactionType.PENDING)));
-        for(Transaction transaction : transactionList){
-            Duration duration = Duration.between(transaction.getTimestamp(), dateTime);
-            if(duration.toMinutes() >= 15){
-                transaction.setType(TransactionType.CANCEL);
-                transaction.setDescription(TransactionType.CANCEL.getDescription());
-                transactionRepository.save(transaction);
+    public void removeRegistrationPending() {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(15);
+
+        // Lấy các giao dịch PENDING đã quá thời hạn 15 phút
+        List<Transaction> transactionList = transactionRepository.findPendingTransactionsOlderThan(cutoffTime);
+
+        for (Transaction transaction : transactionList) {
+            transaction.setType(TransactionType.CANCEL);
+            transaction.setDescription(TransactionType.CANCEL.getDescription());
+            transactionRepository.save(transaction);
+
+            // Xoa' registration cua nguoi choi dang ky nhung khong thanh toan
+            Account playerNeedToDelete = transaction.getReceiverWallet().getAccount();
+            Registration registrationNeedToDelete = registrationRepository.findRegistrationByAccount(playerNeedToDelete);
+
+            if (registrationNeedToDelete != null) {
+                registrationRepository.delete(registrationNeedToDelete);
             }
+        }
+    }
+
+    @Scheduled(cron = "0 0/4 * * * ?")
+    @Transactional
+    public void removeTransactionPending() {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(15);
+
+        // Lấy các giao dịch PENDING đã quá thời hạn 15 phút
+        List<Transaction> transactionList = transactionRepository.findPendingTransactionsOlderThan(cutoffTime);
+
+        for (Transaction transaction : transactionList) {
+            transaction.setType(TransactionType.CANCEL);
+            transaction.setDescription(TransactionType.CANCEL.getDescription());
+            transactionRepository.save(transaction);
         }
     }
 

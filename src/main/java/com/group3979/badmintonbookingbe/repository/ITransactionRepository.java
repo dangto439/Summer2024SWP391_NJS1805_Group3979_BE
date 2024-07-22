@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -15,7 +16,7 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
     List<Transaction> findTransactionsBySenderWalletOrReceiverWallet(Wallet senderWallet, Wallet receiverWallet);
     Transaction findTransactionByTransactionId(long id);
 
-    //JPQL
+    //JPQL for revenue Admin
     @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(t.timestamp), SUM(t.amount)) " +
             "FROM Transaction t WHERE t.type = 'DEPOSIT' AND YEAR(t.timestamp) = :year " +
             "GROUP BY MONTH(t.timestamp) ORDER BY MONTH(t.timestamp)")
@@ -66,5 +67,8 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
             "WHERE t.type NOT IN(com.group3979.badmintonbookingbe.eNum.TransactionType.CANCEL, com.group3979.badmintonbookingbe.eNum.TransactionType.PENDING, com.group3979.badmintonbookingbe.eNum.TransactionType.DEPOSIT) AND a.id = :accountId")
     Double findTotalOutAmountByAccountId(
             @Param("accountId") Long accountId);
+
+    @Query("SELECT t FROM Transaction t WHERE t.type = 'PENDING' AND t.timestamp <= :cutoffTime")
+    List<Transaction> findPendingTransactionsOlderThan(@Param("cutoffTime") LocalDateTime cutoffTime);
 }
 
