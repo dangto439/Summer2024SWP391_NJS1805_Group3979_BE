@@ -34,8 +34,9 @@ public interface ITransactionRepository extends JpaRepository<Transaction, Long>
     // RECEIVE (income)
     @Query("SELECT new com.group3979.badmintonbookingbe.model.response.RevenueResponse(MONTH(t.timestamp), SUM(t.amount)) " +
             "FROM Transaction t " +
+            "JOIN t.booking b " +
             "WHERE t.type NOT IN (com.group3979.badmintonbookingbe.eNum.TransactionType.CANCEL, com.group3979.badmintonbookingbe.eNum.TransactionType.PENDING) " +
-            "AND t.senderWallet.walletId = :walletId AND YEAR(t.timestamp) = :year " +
+            "AND t.receiverWallet.walletId = :walletId AND YEAR(t.timestamp) = :year " +
             "GROUP BY MONTH(t.timestamp) " +
             "ORDER BY MONTH(t.timestamp)")
     List<RevenueResponse> findMonthlyRevenueByClubIdAndWalletIdAndYear(
