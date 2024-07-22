@@ -124,6 +124,15 @@ public class ContestService {
                 .build();
     }
 
+    public List<ContestResponse> getHotContest() {
+        List<ContestResponse> contestResponses = new ArrayList<>();
+        List<Contest> contests = contestRepository.findHotContest();
+        for(Contest contest: contests){
+            contestResponses.add(this.buildContestResponse(contest));
+        }
+        return contestResponses;
+    }
+
     public List<ContestResponse> getContestsCurrentAccount() {
 
             Account account = accountUtils.getCurrentAccount();
