@@ -93,7 +93,6 @@ public class ContestService {
                 contest.setParticipationPrice(updateContestRequest.getParticipationPrice());
                 contest.setStartDate(updateContestRequest.getStartDate());
                 contest.setEndDate(updateContestRequest.getEndDate());
-                contest.setContestStatus(ContestStatus.ACTIVE);
                 contest.setName(updateContestRequest.getName());
                 contest = contestRepository.save(contest);
                 return this.buildContestResponse(contest);
