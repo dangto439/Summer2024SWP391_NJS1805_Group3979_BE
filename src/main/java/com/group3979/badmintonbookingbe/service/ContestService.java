@@ -44,6 +44,7 @@ public class ContestService {
                     Contest contest = new Contest();
                     contest.setCapacity(contestRequest.getCapacity());
                     contest.setClub(club);
+                    contest.setContestStatus(ContestStatus.ACTIVE);
                     contest.setFirstPrize(contestRequest.getFirstPrize());
                     contest.setSecondPrize(contestRequest.getSecondPrize());
                     contest.setUrlBanner(contestRequest.getUrlBanner());
